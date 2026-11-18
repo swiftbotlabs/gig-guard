@@ -1,0 +1,61 @@
+[
+  {
+    "id": "bounty-1",
+    "gate": "scout",
+    "url": "https://example.org/bounty",
+    "sponsor": "Example Sponsor",
+    "label": "Sponsor E",
+    "prizeUsd": 225
+  },
+  {
+    "id": "deliverable-1",
+    "gate": "ship",
+    "file": "samples/Vault.sol"
+  },
+  {
+    "id": "deliverable-2",
+    "gate": "ship",
+    "file": "samples/SafeVault.sol"
+  },
+  {
+    "id": "prize-a",
+    "gate": "claim",
+    "wallet": "0x000000000000000000000000000000000000dEaD",
+    "chain": "ethereum",
+    "token": "USDT",
+    "sponsor": "Example Sponsor",
+    "label": "Prize A",
+    "prizeUsd": 400,
+    "dueDate": "2026-11-15"
+  },
+  {
+    "id": "prize-a-declined",
+    "gate": "claim",
+    "wallet": "0x000000000000000000000000000000000000dEaD",
+    "chain": "ethereum",
+    "token": "USDT",
+    "sponsor": "Example Sponsor",
+    "label": "Prize A",
+    "prizeUsd": 400,
+    "approved": false
+  },
+  {
+    "id": "prize-x",
+    "gate": "claim",
+    "wallet": "0x000000000000000000000000000000000000dEaD",
+    "chain": "tron",
+    "token": "USDT",
+    "sponsor": "Example Sponsor",
+    "label": "Prize X",
+    "prizeUsd": 50
+  },
+  {
+    "id": "bad-input",
+    "gate": "claim",
+    "wallet": "not-a-wallet",
+    "chain": "ethereum",
+    "token": "USDT",
+    "sponsor": "Example Sponsor",
+    "prizeUsd": 50
+  }
+]

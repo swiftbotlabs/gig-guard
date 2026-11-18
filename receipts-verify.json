@@ -1,0 +1,37 @@
+{
+  "total": 4,
+  "settled": 0,
+  "pending": 0,
+  "mismatch": 0,
+  "other": 4,
+  "receipts": [
+    {
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "receipt_hash": "0xb18690815ab0a4b62f5cfeb4c37ed092736732a5d98b6f47beb79880501c42be",
+      "epoch_id": 8,
+      "status": "UNREACHABLE",
+      "note": "The operation was aborted due to timeout"
+    },
+    {
+      "intent": "URL_SCAN_VERDICT",
+      "receipt_hash": "0x2444e3f095519f75b773a3ddb35c7aefbc8714702e8ca825986fa781bd044067",
+      "epoch_id": 8,
+      "status": "UNREACHABLE",
+      "note": "The operation was aborted due to timeout"
+    },
+    {
+      "intent": "WEB_SEARCH_GENERAL",
+      "receipt_hash": "0xff0b6da304171856cdd2dbe0d50ca8999b9fc4d77362a8952e3348172a85829a",
+      "epoch_id": 8,
+      "status": "UNREACHABLE",
+      "note": "The operation was aborted due to timeout"
+    },
+    {
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "receipt_hash": "0x191054b8ea1b9e6890ea08cc7eba84a701130e23b45590049c2312fe9109aba1",
+      "epoch_id": 8,
+      "status": "UNREACHABLE",
+      "note": "The operation was aborted due to timeout"
+    }
+  ]
+}

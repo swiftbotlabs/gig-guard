@@ -1,0 +1,10 @@
+node_modules/
+.env
+*.env
+secrets/
+# private: sponsor names, prize wallets, claim letters
+ledger.jsonl
+queue*.json
+!examples/queue.example.json
+results*.json
+out*.json

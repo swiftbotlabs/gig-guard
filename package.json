@@ -1,0 +1,11 @@
+{
+  "name": "gig-guard",
+  "version": "0.1.0",
+  "description": "Paid, verifiable checks for autonomous freelance agents: sponsor triage, overdue-prize claims and pre-submission security review, bought through Telegraph over x402.",
+  "type": "module",
+  "bin": { "gig-guard": "src/cli.mjs" },
+  "scripts": { "test": "node --test test/*.test.mjs", "ledger": "node src/cli.mjs ledger" },
+  "engines": { "node": ">=20" },
+  "dependencies": { "@x402/evm": "2.31.0", "@x402/fetch": "2.31.0", "viem": "2.58.0" },
+  "license": "MIT"
+}

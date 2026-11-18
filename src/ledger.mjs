@@ -1,0 +1,14 @@
+import fs from "node:fs";
+import { config } from "./config.mjs";
+export function readLedger() {
+  if (!fs.existsSync(config.ledgerPath)) return [];
+  return fs.readFileSync(config.ledgerPath, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
+}
+export function append(entry) {
+  fs.appendFileSync(config.ledgerPath, JSON.stringify({ ts: new Date().toISOString(), ...entry }) + "\n");
+}
+export function spentToday() {
+  const day = new Date().toISOString().slice(0, 10);
+  return readLedger().filter((e) => e.kind === "purchase" && e.ts.startsWith(day))
+    .reduce((s, e) => s + (e.amount_uusdc || 0), 0);
+}
