@@ -8,7 +8,7 @@ import path from "node:path";
 const WALLET = "0x3333333333333333333333333333333333333333";
 const answers = {
   URL_SCAN_VERDICT: (p) => ({ verdict: p.url.includes("evil") ? "Malicious" : "Safe" }),
-  WEB_SEARCH_GENERAL: (p) => ({ brief: /shadyco/i.test(p.query) ? "Several winners report ShadyCo never paid prizes." : `${p.query.split(" ")[0]} winners report prizes paid within two weeks.`, sources: ["x"] }),
+  WEB_SEARCH_GENERAL: (p) => ({ brief: /shadyco/i.test(p.query) ? "Several winners report ShadyCo never paid prizes." : `${p.query.split(" ")[0]} winners report prizes paid within two weeks.`, sources: [`https://news.example/${p.query.split(" ")[0].toLowerCase()}-winners-paid`] }),
   NEWS_SEARCH_GENERAL: () => ({ brief: "fallback answer", sources: ["n"] }),
   // live shape: on bsc a token SYMBOL gets an all-null answer, a token CONTRACT gets the balance
   WALLET_BALANCE_CHECK_GENERAL: (p) => p.chain === "bsc" && !p.token.startsWith("0x") ? { address: null, chain: null, balance: null, token_symbol: p.token, as_of: null }
@@ -21,6 +21,7 @@ const answers = {
   CODE_REVIEW_GENERAL: () => ({ verdict: "Approve", summary: "ok" }),
 };
 let failNext = new Set(), emptyNext = new Set(), unrelated = false;
+let agentSlow = false, agentAsks = [], agentDone = {};
 let rpcUsdt = 400n * 10n ** 6n, staleNext = false;
 const srv = http.createServer((req, res) => {
   let b = "";
@@ -30,6 +31,15 @@ const srv = http.createServer((req, res) => {
       const { params } = JSON.parse(b); const sel = params[0]?.data?.slice(0, 10);
       res.writeHead(200, { "content-type": "application/json" });
       return res.end(JSON.stringify({ jsonrpc: "2.0", id: 1, result: "0x" + (sel === "0x313ce567" ? 6n : rpcUsdt).toString(16) }));
+    }
+    if (req.url.startsWith("/agent/")) { // fake Anjoman agent (API key): a delegated task, sometimes slow (202 + poll)
+      res.setHeader("content-type", "application/json");
+      if (req.headers.authorization !== "Bearer anjoman_test") { res.writeHead(401); return res.end('{"error":"This API key is not recognised."}'); }
+      if (req.url.startsWith("/agent/jobs/")) return res.end(JSON.stringify(agentDone));
+      const m = JSON.parse(b);
+      agentAsks.push(m);
+      if (agentSlow) { res.writeHead(202); return res.end(JSON.stringify({ status: "running", jobId: "job1", conversationId: "c1" })); }
+      return res.end(JSON.stringify(agentDone));
     }
     if (req.url.startsWith("/v1/blocks/")) { // fake settled block: epoch 8 recorded, 9 not yet
       const [, , , ep, , h] = req.url.split("/");
@@ -60,6 +70,8 @@ process.env.GG_LEDGER = path.join(os.tmpdir(), `gg-${Date.now()}.jsonl`);
 process.env.GG_RAIL = "x402";  // the fake node speaks the x402 exact challenge
 process.env.GG_NO_RPC = "1";  // tests that want the chain cross-check turn it on and point it at the fake RPC
 process.env.GG_REUSE = "0";   // likewise for answer reuse
+process.env.ANJOMAN_URL = process.env.TELEGRAPH_NODE;
+process.env.GG_DELEGATE_POLL_MS = "10";
 const g = await import("../src/guards.mjs");
 test.after(() => srv.close());
 
@@ -204,4 +216,30 @@ test("verify: receipts are checked against the node's epoch blocks", async () =>
   assert.equal((await verifyReceipt({ receipt_hash: "0xaa", epoch_id: 8, intent: "WALLET_BALANCE_CHECK_GENERAL", amount_uusdc: 10000 })).status, "SETTLED");
   assert.equal((await verifyReceipt({ receipt_hash: "0xbad", epoch_id: 8, intent: "WALLET_BALANCE_CHECK_GENERAL", amount_uusdc: 10000 })).status, "MISMATCH");
   assert.equal((await verifyReceipt({ receipt_hash: "0xaa", epoch_id: 9 })).status, "PENDING");
+});
+
+test("scout: a delegated sponsor investigation (API key) adds sourced evidence, is capped, and only counts with sources", async () => {
+  process.env.ANJOMAN_API_KEY = "anjoman_test";
+  try {
+    unrelated = true; // the paid search finds nothing about the sponsor
+    agentDone = { status: "complete", jobId: "job1", conversationId: "c1", costUsd: 0.03, answer: "QuietCo paid its 2025 hackathon winners within three weeks.",
+      sources: [{ url: "https://blog.quietco.example/winners-paid" }], steps: [{ receipt: { receipt_hash: "0x" + "ab".repeat(32) } }] };
+    agentSlow = true; // first reply is 202, then the job is polled
+    const d = await g.scoutBounty({ url: "https://bounties.example/x", sponsor: "QuietCo" });
+    assert.equal(d.verdict, "GO", JSON.stringify(d.reasons));
+    assert.equal(agentAsks.at(-1).maxSpendUsd, 0.05);
+    assert.ok(Math.abs(d.cost_usd - 0.05) < 1e-9, `cost ${d.cost_usd}`); // 2 x $0.01 + $0.03 delegated
+    const inv = d.evidence.find((e) => e.intent === "ANJOMAN_AGENT_TASK");
+    assert.equal(inv.job_id, "job1");
+    agentSlow = false;
+    agentDone = { status: "complete", jobId: "job2", costUsd: 0.02, answer: "QuietCo is well known for paying winners.", sources: [] }; // no sources
+    assert.equal((await g.scoutBounty({ url: "https://bounties.example/x", sponsor: "QuietCo" })).verdict, "CAUTION");
+    agentDone = { status: "failed", jobId: "job3", costUsd: 0, answer: "Insufficient balance." };
+    const f = await g.scoutBounty({ url: "https://bounties.example/x", sponsor: "QuietCo" });
+    assert.equal(f.verdict, "CAUTION");
+    assert.match(f.reasons.join(" "), /delegated sponsor investigation unavailable \(delegated task failed\)/);
+    process.env.ANJOMAN_API_KEY = "anjoman_wrong";
+    const w = await g.scoutBounty({ url: "https://bounties.example/x", sponsor: "QuietCo" });
+    assert.match(w.reasons.join(" "), /HTTP 401/);
+  } finally { delete process.env.ANJOMAN_API_KEY; unrelated = false; agentSlow = false; }
 });

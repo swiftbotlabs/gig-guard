@@ -95,6 +95,7 @@ Exit codes: 0 = go (GO/PAID/SHIP), 10 = stop and look, 1 = error. That makes eac
 
 - `GG_RAIL=escrow` (default): prepaid test-USDC balance on the Telegraph Diamond (Ethereum Sepolia). One EIP-191 signature per request; receipts settle per 3-hour epoch.
 - `GG_RAIL=x402`: x402 `exact` on Base Sepolia with Circle test USDC, gasless for the payer. On 2026-11-18 the public facilitator listed no EVM testnet signer and every settlement timed out (nothing was charged), so live runs use escrow.
+- Optional, `ANJOMAN_API_KEY` set: the scout gate also delegates one sponsor investigation ("is this sponsor real, and has it paid its winners?") to the Anjoman agent through an API key. The account's prepaid balance pays the miner calls the agent makes; each task is capped by `GG_DELEGATE_MAX_USD` (default $0.05, sent as `maxSpendUsd`) and counted against the daily cap. The task's status, cost, job id and any step receipt hashes go into the ledger as `ANJOMAN_AGENT_TASK`. Its answer counts like a search answer: it still needs sources that name the sponsor, and it can stand in when the search miners return nothing. A failed task only adds a reason to the verdict. Off when the key is unset.
 
 ## Gaps found while building
 

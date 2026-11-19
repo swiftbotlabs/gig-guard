@@ -7,6 +7,7 @@ import { ask } from "./telegraph.mjs";
 import { append, readLedger } from "./ledger.mjs";
 import { chainBalance } from "./chain.mjs";
 import { balanceQueries, normChain } from "./tokens.mjs";
+import { delegate, delegateEnabled } from "./delegate.mjs";
 
 // Fresh answers are reused instead of paying twice for the same fact (cost per useful outcome).
 // TTL per Intent, in minutes; GG_REUSE=0 turns reuse off.
@@ -54,13 +55,13 @@ function decide(gate, input, verdict, reasons, evidence, extra = {}) {
     cost_usd: evidence.reduce((s, e) => s + (e.ok ? Number(e.cost_usd || 0) : 0) + (e.tried || []).reduce((t, x) => t + Number(x.cost_usd || 0), 0), 0),
     wasted_receipts: evidence.flatMap((e) => (e.tried || []).map((x) => x.receipt).filter(Boolean)),
     ms: evidence.reduce((s, e) => s + (e.ms || 0), 0),
-    evidence: evidence.map((e) => ({ intent: e.intent, ok: e.ok, result: e.result, error: e.error, tried: e.tried, miner_id: e.miner_id, cost_usd: e.cost_usd, reused: e.reused, source: e.source })),
+    evidence: evidence.map((e) => ({ intent: e.intent, ok: e.ok, result: e.result, error: e.error, tried: e.tried, miner_id: e.miner_id, cost_usd: e.cost_usd, reused: e.reused, source: e.source, job_id: e.job_id })),
     ...extra };
   append(d);
   return d;
 }
 const lc = (s) => String(s ?? "").toLowerCase();
-export const POLICY = "v5"; // decisions record the policy version that made them
+export const POLICY = "v6"; // decisions record the policy version that made them
 
 /** Mission 09: triage a bounty found by the agent's heartbeat. */
 export async function scoutBounty({ url, sponsor, prizeUsd, label }) {
@@ -71,20 +72,34 @@ export async function scoutBounty({ url, sponsor, prizeUsd, label }) {
     await buy(["URL_SCAN_VERDICT", "URL_SAFE_GENERAL"], { url: u.href }, "scout"),
     await buy([["WEB_SEARCH_GENERAL", { query: q }], ["NEWS_SEARCH_GENERAL", { query: q }]], {}, "scout"),
   ];
+  // Optional: delegate a sponsor investigation to the Anjoman agent (API key, capped). It only adds evidence:
+  // its answer counts like a search answer, and still needs sources that name the sponsor.
+  let inv = null;
+  if (delegateEnabled()) {
+    try {
+      const d = await delegate(`Investigate "${sponsor}" as a bounty or hackathon sponsor. Is it a real organisation, and is there public evidence that it has paid, or failed to pay, its winners? Cite sources. Answer in under 120 words.`, { purpose: "scout" });
+      inv = { intent: "ANJOMAN_AGENT_TASK", ok: d.ok, result: { status: d.status, brief: d.answer, sources: d.sources }, cost_usd: d.cost_usd, ms: d.ms, job_id: d.job_id,
+        ...(d.ok ? {} : { error: `delegated task ${d.status}`, tried: [{ intent: "ANJOMAN_AGENT_TASK", error: `delegated task ${d.status}`, cost_usd: d.cost_usd }] }) };
+    } catch (e) { if (e.name === "BudgetError") throw e; inv = { intent: "ANJOMAN_AGENT_TASK", ok: false, error: String(e.message || e).slice(0, 200), tried: [] }; }
+    ev.push(inv);
+  }
   const [link, rep] = ev; const reasons = [];
   let verdict = "GO";
   const lv = lc(link.result?.verdict ?? link.result?.safe ?? link.result?.answer);
   if (!link.ok) { verdict = "CAUTION"; reasons.push("link reputation unavailable"); }
   else if (/malicious|phish|unsafe|false/.test(lv)) { verdict = "SKIP"; reasons.push(`link flagged: ${lv}`); }
   else if (/suspicious|unknown/.test(lv)) { verdict = "CAUTION"; reasons.push(`link ${lv}`); }
-  const text = lc(`${rep.result?.brief ?? ""} ${rep.result?.answer ?? ""}`);
-  if (!rep.ok) { if (verdict === "GO") verdict = "CAUTION"; reasons.push("sponsor payout history unavailable"); }
+  const text = lc(`${rep.result?.brief ?? ""} ${rep.result?.answer ?? ""} ${inv?.ok ? inv.result.brief ?? "" : ""}`);
+  if (inv && !inv.ok) reasons.push(`delegated sponsor investigation unavailable (${inv.error})`);
+  const repOk = rep.ok || !!inv?.ok;
+  if (!repOk) { if (verdict === "GO") verdict = "CAUTION"; reasons.push("sponsor payout history unavailable"); }
   else {
-    const srcs = (rep.result?.sources || []).map(String);
+    const srcs = [...(rep.ok ? rep.result?.sources || [] : []), ...(inv?.ok ? inv.result.sources || [] : [])].map(String);
     const key = lc(sponsor).split(/\s+/)[0];
-    const relevant = srcs.filter((s) => lc(s).includes(key)).length + (text.includes(key) ? 1 : 0);
+    // Only sources count: an answer that names the sponsor with no source naming it is not a record (it can be made up).
+    const relevant = srcs.filter((s) => lc(s).includes(key)).length;
     if (/(unpaid|never paid|not (been |yet )?paid|not (yet )?(received|been received)|still waiting|didn'?t pay|did not pay|no payout|scam|rug ?pull|withheld)/.test(text)) { if (verdict === "GO") verdict = "CAUTION"; reasons.push(`payout red flag${srcs.length ? "" : " (unsourced)"}: ${(rep.result?.brief || text).slice(0, 160)}`); }
-    else if (!relevant) { if (verdict === "GO") verdict = "CAUTION"; reasons.push(`no independent record of ${sponsor} paying winners (${srcs.length} sources, none mention it)`); }
+    else if (!relevant) { if (verdict === "GO") verdict = "CAUTION"; reasons.push(`no independent record of ${sponsor} paying winners (${srcs.length} sources, none name it)`); }
     else reasons.push(`${relevant} of ${srcs.length} sources mention ${sponsor}; no unpaid-prize reports: ${(rep.result?.brief || text).slice(0, 140)}`);
   }
   if (u.protocol !== "https:") { if (verdict === "GO") verdict = "CAUTION"; reasons.push("not HTTPS"); }
