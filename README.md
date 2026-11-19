@@ -48,13 +48,29 @@ Receipt check right after (`gig-guard verify`): 21 receipts, 13 SETTLED in epoch
 - The ledger page reports spend, reuse, median latency and **cost per useful decision** (spend divided by decisions the agent could act on), all computed from the ledger.
 - Hard caps, checked before signing: `GG_MAX_PER_CALL` (default $0.03) and `GG_MAX_PER_DAY` (default $1.00).
 
+## Cost per verified correct answer (Mission 10)
+
+`gig-guard report report.md report.json` grades every paid answer in the ledger with a check that does not trust the miner, then prices each Intent and miner by what a *correct* answer actually cost.
+
+| Grade | Meaning |
+|---|---|
+| correct | An independent check agrees: the free public-RPC balance read for balances, the deterministic local rules for Solidity reviews (a flag the rules back, or a pass where no rule fires). |
+| incorrect | An independent check contradicts it: a balance the chain disagrees with, or a review that passes code where a local rule fires. |
+| empty | Paid, but the needed fields came back empty or stale (partial or unanswerable). |
+| unconfirmed | The miner flagged something no local rule backs: not proven right or wrong. |
+| unknown | No independent check exists for this Intent yet (link scans, web search). Never counted as correct. |
+
+Cost per verified correct answer = paid spend ÷ correct answers, per Intent and miner and in total (also over checkable spend only). Wasted answers from skipped suppliers are included; reused answers and free chain reads are not. The output names miners and Intents only, no wallets.
+
+Limits: the local rules are a short list, so "passed, and no rule fires" is agreement with a weak check, not proof of safety. Link scans and web searches stay "unknown" until there is a truth source for them.
+
 ## Run it
 
 Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow balance on Ethereum Sepolia (see [`docs/TUTORIAL.md`](docs/TUTORIAL.md), step 2: mint test USDC, approve, `depositUSDC`).
 
 ```bash
 npm install
-npm test                                   # 19 tests against a fake node: no network, no funds
+npm test                                   # 22 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
@@ -66,6 +82,7 @@ node src/cli.mjs heartbeat examples/queue.example.json results.json   # what the
 node src/cli.mjs verify verify.json                     # check every receipt against settled epoch blocks
 node src/cli.mjs ledger ledger.html verify.json         # public page (redacted)
 node src/cli.mjs export ledger.public.jsonl             # public copy of the ledger (redacted)
+node src/cli.mjs report report.md report.json           # Mission 10: cost per verified correct answer
 ```
 
 Exit codes: 0 = go (GO/PAID/SHIP), 10 = stop and look, 1 = error. That makes each gate a one-line guard in any shell loop: `node src/cli.mjs ship out/C.sol && submit || echo held`.
@@ -93,7 +110,7 @@ Written up as found, with the workaround in the code:
 
 ## Tests
 
-`npm test` runs 19 policy tests against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 22 tests (19 policy + 3 report) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Limits
 

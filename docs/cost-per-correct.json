@@ -1,0 +1,213 @@
+{
+  "method": "Each paid answer is graded by a check that does not trust the miner: a free public-RPC read for balances, deterministic local rules for Solidity reviews. Answers with no such check are 'unknown', never counted as correct.",
+  "totals": {
+    "paid": 12,
+    "spend_usd": 0.12,
+    "correct": 5,
+    "incorrect": 0,
+    "empty": 1,
+    "unconfirmed": 0,
+    "unknown": 6,
+    "cost_per_verified_correct_usd": 0.024,
+    "checkable_spend_usd": 0.06,
+    "cost_per_verified_correct_checkable_usd": 0.012
+  },
+  "by_intent_miner": [
+    {
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "miner": "731001",
+      "paid": 2,
+      "spend_usd": 0.02,
+      "correct": 2,
+      "incorrect": 0,
+      "empty": 0,
+      "unconfirmed": 0,
+      "unknown": 0,
+      "checked": 2,
+      "cost_per_verified_correct_usd": 0.01,
+      "accuracy_when_checked": 1
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "miner": "20260828",
+      "paid": 2,
+      "spend_usd": 0.02,
+      "correct": 2,
+      "incorrect": 0,
+      "empty": 0,
+      "unconfirmed": 0,
+      "unknown": 0,
+      "checked": 2,
+      "cost_per_verified_correct_usd": 0.01,
+      "accuracy_when_checked": 1
+    },
+    {
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "miner": "20260828",
+      "paid": 3,
+      "spend_usd": 0.03,
+      "correct": 1,
+      "incorrect": 0,
+      "empty": 0,
+      "unconfirmed": 0,
+      "unknown": 2,
+      "checked": 1,
+      "cost_per_verified_correct_usd": 0.03,
+      "accuracy_when_checked": 1
+    },
+    {
+      "intent": "WEB_SEARCH_GENERAL",
+      "miner": "303",
+      "paid": 2,
+      "spend_usd": 0.02,
+      "correct": 0,
+      "incorrect": 0,
+      "empty": 0,
+      "unconfirmed": 0,
+      "unknown": 2,
+      "checked": 0,
+      "cost_per_verified_correct_usd": null,
+      "accuracy_when_checked": null
+    },
+    {
+      "intent": "URL_SCAN_VERDICT",
+      "miner": "731006",
+      "paid": 1,
+      "spend_usd": 0.01,
+      "correct": 0,
+      "incorrect": 0,
+      "empty": 0,
+      "unconfirmed": 0,
+      "unknown": 1,
+      "checked": 0,
+      "cost_per_verified_correct_usd": null,
+      "accuracy_when_checked": null
+    },
+    {
+      "intent": "URL_SAFE_GENERAL",
+      "miner": "20260828",
+      "paid": 1,
+      "spend_usd": 0.01,
+      "correct": 0,
+      "incorrect": 0,
+      "empty": 0,
+      "unconfirmed": 0,
+      "unknown": 1,
+      "checked": 0,
+      "cost_per_verified_correct_usd": null,
+      "accuracy_when_checked": null
+    },
+    {
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "miner": "?",
+      "paid": 1,
+      "spend_usd": 0.01,
+      "correct": 0,
+      "incorrect": 0,
+      "empty": 1,
+      "unconfirmed": 0,
+      "unknown": 0,
+      "checked": 1,
+      "cost_per_verified_correct_usd": null,
+      "accuracy_when_checked": 0
+    }
+  ],
+  "answers": [
+    {
+      "gate": "claim",
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "miner": "20260828",
+      "grade": "unknown",
+      "why": "no free chain read for this chain/token",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "scout",
+      "intent": "URL_SCAN_VERDICT",
+      "miner": "731006",
+      "grade": "unknown",
+      "why": "no independent check for this Intent yet",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "scout",
+      "intent": "WEB_SEARCH_GENERAL",
+      "miner": "303",
+      "grade": "unknown",
+      "why": "no independent check for this Intent yet",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "claim",
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "miner": "20260828",
+      "grade": "unknown",
+      "why": "no free chain read for this chain/token",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "scout",
+      "intent": "URL_SAFE_GENERAL",
+      "miner": "20260828",
+      "grade": "unknown",
+      "why": "no independent check for this Intent yet",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "scout",
+      "intent": "WEB_SEARCH_GENERAL",
+      "miner": "303",
+      "grade": "unknown",
+      "why": "no independent check for this Intent yet",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "ship",
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "miner": "731001",
+      "grade": "correct",
+      "why": "flagged, and local rules agree: tx.origin used for auth (SWC-115)",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "ship",
+      "intent": "CODE_REVIEW_GENERAL",
+      "miner": "20260828",
+      "grade": "correct",
+      "why": "flagged, and local rules agree: tx.origin used for auth (SWC-115)",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "ship",
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "miner": "731001",
+      "grade": "correct",
+      "why": "passed, and no local rule fires",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "ship",
+      "intent": "CODE_REVIEW_GENERAL",
+      "miner": "20260828",
+      "grade": "correct",
+      "why": "passed, and no local rule fires",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "claim",
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "miner": "20260828",
+      "grade": "correct",
+      "why": "matches the chain (0)",
+      "cost_usd": 0.01
+    },
+    {
+      "gate": "claim",
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "miner": "?",
+      "grade": "empty",
+      "why": "empty answer",
+      "cost_usd": 0.01
+    }
+  ]
+}
