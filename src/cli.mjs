@@ -7,18 +7,20 @@ import { publicLedger } from "./redact.mjs";
 import { readLedger } from "./ledger.mjs";
 import { verifyLedger } from "./verify.mjs";
 import { costReport, reportMarkdown } from "./report.mjs";
+import { compare, compareMarkdown } from "./compare.mjs";
 const [cmd, ...a] = process.argv.slice(2);
-const usage = `gig-guard scout <url> <sponsor> [prizeUsd]          Mission 09: triage a bounty
-gig-guard claim <json>                                 Mission 15: overdue prize -> proof + claim draft
+const usage = `gig-guard scout <url> <sponsor> [prizeUsd]          Mission 09: triage a job lead (sponsor = the client)
+gig-guard claim <json>                                 Mission 15: overdue payment -> proof + claim draft
      json: {"wallet","chain","token","txHash?","sponsor","prizeUsd","termsFile?","dueDate?","contact?","label?","approved?"}
      approved: true|false|absent. A CLAIM is never sent by Gig Guard; without approved:true it waits for the user.
 gig-guard ship <file>                                  Mission 14: review a deliverable before submitting
 gig-guard heartbeat <queue.json> [out.json]            run every pending item in a queue (agent loop)
 gig-guard ledger [out.html] [verify.json]              render the public ledger page (redacted)
-gig-guard report [out.md] [out.json]                   Mission 10: cost per verified correct answer, by Intent and miner
 gig-guard export [out.jsonl]                           redacted copy of the ledger, safe to publish
 gig-guard verify [out.json]                            check every receipt against the node's settled epoch blocks
-  Public output replaces sponsor names (or a queue item's "label"), prize wallets, tx hashes and links.
+gig-guard compare [out.md] [out.json]                  same decisions with vs without Telegraph (free checks only), from the ledger
+gig-guard report [out.md] [out.json]                   Mission 10: cost per verified correct answer, by Intent and miner
+  Public output replaces client names (or a queue item's "label"), payout wallets, tx hashes and links.
   ledger.jsonl itself is PRIVATE: never publish it.`;
 const GO = ["GO", "PAID", "SHIP"];
 async function runItem(it) {
@@ -51,6 +53,7 @@ try {
   }
   else if (cmd === "export") { const out = a[0] || "ledger.public.jsonl"; fs.writeFileSync(out, publicLedger(readLedger()).map((e) => JSON.stringify(e)).join("\n") + "\n"); console.log(out); process.exit(0); }
   else if (cmd === "verify") { const v = await verifyLedger(); if (a[0]) fs.writeFileSync(a[0], JSON.stringify(v, null, 2)); const { receipts, ...sum } = v; console.log(JSON.stringify(sum)); process.exit(v.mismatch ? 10 : 0); }
+  else if (cmd === "compare") { const c = compare(); if (a[0]) fs.writeFileSync(a[0], compareMarkdown(c)); if (a[1]) fs.writeFileSync(a[1], JSON.stringify(c, null, 2)); console.log(JSON.stringify(c.totals)); process.exit(0); }
   else if (cmd === "report") { const r = costReport(); if (a[0]) fs.writeFileSync(a[0], reportMarkdown(r)); if (a[1]) fs.writeFileSync(a[1], JSON.stringify(r, null, 2)); console.log(JSON.stringify({ totals: r.totals, by_intent_miner: r.by_intent_miner }, null, 2)); process.exit(0); }
   else if (cmd === "ledger") { console.log(writeLedgerPage(a[0], { verifyFile: a[1] })); process.exit(0); }
   else { console.log(usage); process.exit(cmd ? 2 : 0); }

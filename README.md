@@ -1,6 +1,6 @@
 # Gig Guard
 
-**A paid safety gate for an autonomous freelance agent.** An agent that earns crypto from bounties and hackathons loses money in three places: it chases bounties from sponsors who never pay, it submits code with holes in it, and it lets owed prizes go unclaimed. Gig Guard puts a paid, verifiable check in front of each of those moves. The agent buys ranked intelligence from the Telegraph network, pays for it itself, checks it against a free independent source where one exists, and a written policy decides. Every decision keeps its receipts, and anyone can check those receipts against Telegraph's settled epoch blocks.
+**A paid safety gate for an autonomous freelance agent.** An agent that earns crypto from paid jobs loses money in three places: it takes on work from clients who never pay, it submits code with holes in it, and it lets overdue payments go unchased. Gig Guard puts a paid, verifiable check in front of each of those moves. The agent buys ranked intelligence from the Telegraph network, pays for it itself, checks it against a free independent source where one exists, and a written policy decides. Every decision keeps its receipts, and anyone can check those receipts against Telegraph's settled epoch blocks.
 
 **Testnet only.** Ethereum Sepolia escrow, Telegraph test USDC. No real money moves, and nothing here is production usage.
 
@@ -8,25 +8,25 @@ Demo video (2 min 44 s, a real run, long waits sped up and labelled): [`docs/gig
 
 | Gate | Mission | What it buys from Telegraph | Free cross-check | Decisions |
 |---|---|---|---|---|
-| `scout`: a new bounty shows up in the agent's heartbeat | 09 Personal Agent | `URL_SCAN_VERDICT` (fallback `URL_SAFE_GENERAL`), `WEB_SEARCH_GENERAL` (fallback `NEWS_SEARCH_GENERAL`) on the sponsor's payout record | sources must actually mention the sponsor | GO / CAUTION / SKIP |
+| `scout`: a new job lead shows up in the agent's heartbeat | 09 Personal Agent | `URL_SCAN_VERDICT` (fallback `URL_SAFE_GENERAL`), `WEB_SEARCH_GENERAL` (fallback `NEWS_SEARCH_GENERAL`) on the client's payment record | sources must name the client | GO / CAUTION / SKIP |
 | `ship`: a contract or code deliverable is about to be submitted | 14 Web3 Native & DeFi (whitehat) | `SECURITY_REVIEW_GENERAL`, `CODE_REVIEW_GENERAL` | local Solidity rules (SWC-104/106/107/112/115/120) | SHIP / FIX / HOLD |
-| `claim`: an awarded prize is overdue | 15 Consumer Automation | `WALLET_BALANCE_CHECK_GENERAL` (or `ONCHAIN_TX_LOOKUP_GENERAL` for a tx), `CONTRACT_OBLIGATION_AUDIT_GENERAL` on the terms | public RPC `balanceOf` | PAID / CLAIM (letter drafted, waits for the user's yes) / PENDING |
+| `claim`: an agreed payment is overdue | 15 Consumer Automation | `WALLET_BALANCE_CHECK_GENERAL` (or `ONCHAIN_TX_LOOKUP_GENERAL` for a tx), `CONTRACT_OBLIGATION_AUDIT_GENERAL` on the terms | public RPC `balanceOf` | PAID / CLAIM (letter drafted, waits for the user's yes) / PENDING |
 
 ## What a run looks like
 
 Live, 2026-11-18 08:41 UTC, one heartbeat over a queue of 7 items (output trimmed; full log in [`docs/demo-run.txt`](docs/demo-run.txt)):
 
 ```
-bounty-1: CAUTION  ($0.02, 2 receipts, 19.4 s)
-  - no independent record of Sponsor T paying winners (5 sources, none mention it)
+job-1: CAUTION  ($0.02, 2 receipts, 19.4 s)
+  - no independent record of Client T paying (5 sources, none name it)
 deliverable-1: FIX  ($0.02, 2 receipts, 66.4 s)
   - security: null (2) CWE-863, CWE-841
   - confirmed by local rules: tx.origin used for auth (SWC-115); state written after external call (SWC-107 reentrancy)
 deliverable-2: SHIP  ($0.02, 2 receipts, 121.3 s)
-prize-a: CLAIM  ($0.01, 1 receipt, 10.3 s)  next: awaiting user approval
-  - chain read agrees (0); wallet holds 0 USDT on ethereum: prize of $400 not received
-prize-a-declined: CLAIM  ($0.00, reused answer, 0.1 s)  next: declined by user: not sent
-prize-x: PENDING  (0 usable receipts, 17.7 s)
+payment-a: CLAIM  ($0.01, 1 receipt, 10.3 s)  next: awaiting user approval
+  - chain read agrees (0); wallet holds 0 USDT on ethereum: payment of $400 not received
+payment-a-declined: CLAIM  ($0.00, reused answer, 0.1 s)  next: declined by user: not sent
+payment-x: PENDING  (0 usable receipts, 17.7 s)
   - no miner returned a USDT balance on tron: chain or token likely unsupported, not claiming without proof
 bad-input: refused before paying: wallet must be a 0x address
 ```
@@ -70,14 +70,14 @@ Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow b
 
 ```bash
 npm install
-npm test                                   # 22 tests against a fake node: no network, no funds
+npm test                                   # 23 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
-node src/cli.mjs scout https://example.org/bounty "Example Sponsor" 500
+node src/cli.mjs scout https://example.org/job "Example Client" 500
 node src/cli.mjs ship samples/Vault.sol                 # FIX
 node src/cli.mjs ship samples/SafeVault.sol             # SHIP
-node src/cli.mjs claim '{"wallet":"0x...","chain":"ethereum","token":"USDT","sponsor":"Example Sponsor","label":"Prize A","prizeUsd":400,"dueDate":"2026-11-15"}'
+node src/cli.mjs claim '{"wallet":"0x...","chain":"ethereum","token":"USDT","sponsor":"Example Client","label":"Payment A","prizeUsd":400,"dueDate":"2026-11-15"}'
 node src/cli.mjs heartbeat examples/queue.example.json results.json   # what the agent runs every cycle
 node src/cli.mjs verify verify.json                     # check every receipt against settled epoch blocks
 node src/cli.mjs ledger ledger.html verify.json         # public page (redacted)
@@ -89,13 +89,13 @@ Exit codes: 0 = go (GO/PAID/SHIP), 10 = stop and look, 1 = error. That makes eac
 
 ## Privacy
 
-`ledger.jsonl` is private: it holds sponsor names, prize wallets and claim letters because the agent needs them. It is git-ignored and never published. The public page and `export` replace sponsor names with neutral labels (a queue item's `label`, else "Sponsor A", "Sponsor B"), shorten wallets and tx hashes, replace every link with `[link]`, and drop raw answers and claim letters. Receipt hashes stay, so every decision remains checkable.
+`ledger.jsonl` is private: it holds client names, payout wallets and claim letters because the agent needs them. It is git-ignored and never published. The public page and `export` replace client names with neutral labels (a queue item's `label`, else "Client A", "Client B"), shorten wallets and tx hashes, replace every link with `[link]`, and drop raw answers and claim letters. Receipt hashes stay, so every decision remains checkable.
 
 ## Payment rails
 
 - `GG_RAIL=escrow` (default): prepaid test-USDC balance on the Telegraph Diamond (Ethereum Sepolia). One EIP-191 signature per request; receipts settle per 3-hour epoch.
 - `GG_RAIL=x402`: x402 `exact` on Base Sepolia with Circle test USDC, gasless for the payer. On 2026-11-18 the public facilitator listed no EVM testnet signer and every settlement timed out (nothing was charged), so live runs use escrow.
-- Optional, `ANJOMAN_API_KEY` set: the scout gate also delegates one sponsor investigation ("is this sponsor real, and has it paid its winners?") to the Anjoman agent through an API key. The account's prepaid balance pays the miner calls the agent makes; each task is capped by `GG_DELEGATE_MAX_USD` (default $0.05, sent as `maxSpendUsd`) and counted against the daily cap. The task's status, cost, job id and any step receipt hashes go into the ledger as `ANJOMAN_AGENT_TASK`. Its answer counts like a search answer: it still needs sources that name the sponsor, and it can stand in when the search miners return nothing. A failed task only adds a reason to the verdict. Off when the key is unset.
+- Optional, scout gate only: `ANJOMAN_API_KEY` (an Anjoman account key, testnet) delegates a whole **client investigation** to the Anjoman agent (`POST /agent/chat`). The account's escrow balance pays the miner calls it makes. Each task is capped by `GG_DELEGATE_MAX_USD` (default $0.05, sent as `maxSpendUsd`) and by the daily cap. Its answer is just more evidence: it counts only when its sources name the client, and a failed or partial task is logged as unavailable, never as a clean record. The ledger keeps the job id and cost. Off when the key is unset.
 
 ## Gaps found while building
 
@@ -111,12 +111,12 @@ Written up as found, with the workaround in the code:
 
 ## Tests
 
-`npm test` runs 22 tests (19 policy + 3 report) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 23 tests (20 policy + 3 report) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Limits
 
-- The sponsor check reads web sources through miners: it flags risk, it doesn't prove fraud.
-- A balance can't tell a prize from other deposits; pass the sponsor's announced tx hash when there is one.
+- The client check reads web sources through miners: it flags risk, it doesn't prove fraud.
+- A balance can't tell one payment from other deposits; pass the client's announced tx hash when there is one.
 - Reviews read the first 12 KB of a deliverable. The local rules are a short list, not an auditor.
 - Verdicts are only as good as the ranked miners behind each Intent; the ledger keeps the miner id so a bad answer can be traced.
 - No independent users yet: every run so far is our own agent's.

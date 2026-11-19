@@ -66,7 +66,7 @@ Each receipt is looked up at `GET /v1/blocks/{epoch_id}/deliveries/{receipt_hash
 
 ## 7. Keep the private ledger private
 
-`ledger.jsonl` holds sponsor names, wallets and claim letters. Publish only `ledger.html` or `node src/cli.mjs export ledger.public.jsonl`; both use neutral labels.
+`ledger.jsonl` holds client names, wallets and claim letters. Publish only `ledger.html` or `node src/cli.mjs export ledger.public.jsonl`; both use neutral labels.
 
 ## Troubleshooting
 

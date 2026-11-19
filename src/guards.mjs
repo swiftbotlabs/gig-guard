@@ -1,7 +1,7 @@
 // The three gates of an autonomous freelance agent. Each buys intelligence through Telegraph,
 // applies a written policy, and returns a decision with the receipts attached.
-//   scout  (Mission 09 Personal Agent): should the heartbeat loop spend effort on this bounty?
-//   claim  (Mission 15 Consumer Automation): a promised prize is overdue: prove it and file the claim.
+//   scout  (Mission 09 Personal Agent): should the heartbeat loop spend effort on this job lead?
+//   claim  (Mission 15 Consumer Automation): an agreed payment is overdue: prove it and draft the claim.
 //   ship   (Mission 14 Web3 Native & DeFi, whitehat): is this contract/code deliverable safe to submit?
 import { ask } from "./telegraph.mjs";
 import { append, readLedger } from "./ledger.mjs";
@@ -63,7 +63,7 @@ function decide(gate, input, verdict, reasons, evidence, extra = {}) {
 const lc = (s) => String(s ?? "").toLowerCase();
 export const POLICY = "v6"; // decisions record the policy version that made them
 
-/** Mission 09: triage a bounty found by the agent's heartbeat. */
+/** Mission 09: triage a job lead found by the agent's heartbeat. */
 export async function scoutBounty({ url, sponsor, prizeUsd, label }) {
   const u = new URL(url); // invalid input costs nothing
   if (!sponsor) throw new Error("sponsor name required");
@@ -83,7 +83,15 @@ export async function scoutBounty({ url, sponsor, prizeUsd, label }) {
     } catch (e) { if (e.name === "BudgetError") throw e; inv = { intent: "ANJOMAN_AGENT_TASK", ok: false, error: String(e.message || e).slice(0, 200), tried: [] }; }
     ev.push(inv);
   }
-  const [link, rep] = ev; const reasons = [];
+  const { verdict, reasons } = scoutVerdict({ url: u.href, sponsor }, ev);
+  return decide("scout", { url: u.href, sponsor, prizeUsd, label }, verdict, reasons, ev);
+}
+
+/** The scout policy as a pure function of the evidence, so a recorded decision can be replayed under today's policy. */
+export function scoutVerdict({ url, sponsor }, ev) {
+  const u = new URL(url);
+  const [link, rep] = ev; const inv = ev.find((e) => e.intent === "ANJOMAN_AGENT_TASK") || null;
+  const reasons = [];
   let verdict = "GO";
   const lv = lc(link.result?.verdict ?? link.result?.safe ?? link.result?.answer);
   if (!link.ok) { verdict = "CAUTION"; reasons.push("link reputation unavailable"); }
@@ -92,21 +100,21 @@ export async function scoutBounty({ url, sponsor, prizeUsd, label }) {
   const text = lc(`${rep.result?.brief ?? ""} ${rep.result?.answer ?? ""} ${inv?.ok ? inv.result.brief ?? "" : ""}`);
   if (inv && !inv.ok) reasons.push(`delegated sponsor investigation unavailable (${inv.error})`);
   const repOk = rep.ok || !!inv?.ok;
-  if (!repOk) { if (verdict === "GO") verdict = "CAUTION"; reasons.push("sponsor payout history unavailable"); }
+  if (!repOk) { if (verdict === "GO") verdict = "CAUTION"; reasons.push("client payment history unavailable"); }
   else {
     const srcs = [...(rep.ok ? rep.result?.sources || [] : []), ...(inv?.ok ? inv.result.sources || [] : [])].map(String);
     const key = lc(sponsor).split(/\s+/)[0];
     // Only sources count: an answer that names the sponsor with no source naming it is not a record (it can be made up).
     const relevant = srcs.filter((s) => lc(s).includes(key)).length;
     if (/(unpaid|never paid|not (been |yet )?paid|not (yet )?(received|been received)|still waiting|didn'?t pay|did not pay|no payout|scam|rug ?pull|withheld)/.test(text)) { if (verdict === "GO") verdict = "CAUTION"; reasons.push(`payout red flag${srcs.length ? "" : " (unsourced)"}: ${(rep.result?.brief || text).slice(0, 160)}`); }
-    else if (!relevant) { if (verdict === "GO") verdict = "CAUTION"; reasons.push(`no independent record of ${sponsor} paying winners (${srcs.length} sources, none name it)`); }
-    else reasons.push(`${relevant} of ${srcs.length} sources mention ${sponsor}; no unpaid-prize reports: ${(rep.result?.brief || text).slice(0, 140)}`);
+    else if (!relevant) { if (verdict === "GO") verdict = "CAUTION"; reasons.push(`no independent record of ${sponsor} paying (${srcs.length} sources, none name it)`); }
+    else reasons.push(`${relevant} of ${srcs.length} sources mention ${sponsor}; no non-payment reports: ${(rep.result?.brief || text).slice(0, 140)}`);
   }
   if (u.protocol !== "https:") { if (verdict === "GO") verdict = "CAUTION"; reasons.push("not HTTPS"); }
-  return decide("scout", { url: u.href, sponsor, prizeUsd, label }, verdict, reasons, ev);
+  return { verdict, reasons };
 }
 
-/** Mission 15: an awarded prize has not arrived. Verify on-chain, read the terms, and draft the claim. */
+/** Mission 15: an agreed payment has not arrived. Verify on-chain, read the terms, and draft the claim. */
 export async function claimPayout({ wallet, chain, token, txHash, sponsor, prizeUsd, termsText, dueDate, contact, label, approved }) {
   if (!/^0x[0-9a-fA-F]{40}$/.test(wallet || "")) throw new Error("wallet must be a 0x address");
   if (txHash && !/^0x[0-9a-fA-F]{64}$/.test(txHash)) throw new Error("tx hash must be 0x + 64 hex chars");
@@ -144,7 +152,7 @@ export async function claimPayout({ wallet, chain, token, txHash, sponsor, prize
       bal = onchain.balance;
     } else if (chk.ok) uncertainty.push("single source: no free chain read for this chain/token");
     if (Number.isFinite(bal) && prizeUsd && bal >= prizeUsd) { verdict = "PAID"; reasons.push(`wallet holds ${bal} ${token || r.token_symbol || ""}, covers the prize`); }
-    else { verdict = "CLAIM"; reasons.push(`wallet holds ${Number.isFinite(bal) ? bal : "?"} ${token || r.token_symbol || ""} on ${normChain(chain)} as of ${r.as_of || "now"}: prize of $${prizeUsd} not received`); }
+    else { verdict = "CLAIM"; reasons.push(`wallet holds ${Number.isFinite(bal) ? bal : "?"} ${token || r.token_symbol || ""} on ${normChain(chain)} as of ${r.as_of || "now"}: payment of $${prizeUsd} not received`); }
   }
   const terms = ev.find((e) => e.intent === "CONTRACT_OBLIGATION_AUDIT_GENERAL");
   if (verdict === "CLAIM" && /\? /.test(reasons.join(" "))) uncertainty.push("balance unknown");

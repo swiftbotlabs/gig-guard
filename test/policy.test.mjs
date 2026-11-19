@@ -75,7 +75,7 @@ process.env.GG_DELEGATE_POLL_MS = "10";
 const g = await import("../src/guards.mjs");
 test.after(() => srv.close());
 
-test("scout: reputable sponsor GO, sponsor with unpaid-prize reports CAUTION, malicious link SKIP", async () => {
+test("scout: reputable client GO, client with non-payment reports CAUTION, malicious link SKIP", async () => {
   assert.equal((await g.scoutBounty({ url: "https://bounties.example/hackathon/x", sponsor: "GoodDAO", prizeUsd: 225 })).verdict, "GO");
   assert.equal((await g.scoutBounty({ url: "https://shadyco.io/bounty", sponsor: "ShadyCo", prizeUsd: 1000 })).verdict, "CAUTION");
   assert.equal((await g.scoutBounty({ url: "https://evil.example/claim", sponsor: "GoodDAO" })).verdict, "SKIP");
@@ -160,7 +160,7 @@ test("public page and export never show sponsor names, prize wallets or sponsor 
   writeLedgerPage(out);
   const pub = JSON.stringify(publicLedger()) + fs.readFileSync(out, "utf8");
   for (const bad of [/zeta/i, /acme/i, /2222222222222222222222222222222222222222/i, /Winners are paid/, /To: /]) assert.doesNotMatch(pub, bad);
-  assert.match(pub, /Sponsor [A-Z]|Prize A/);
+  assert.match(pub, /Client [A-Z]|Prize A|Payment A/);
   assert.match(pub, /receipt_hash|receipt <code>0x/); // receipts stay verifiable
 });
 

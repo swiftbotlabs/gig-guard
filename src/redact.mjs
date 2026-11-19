@@ -1,6 +1,6 @@
 // Public output never carries real sponsor names, prize wallets, tx hashes or link targets.
 // The private ledger.jsonl keeps them (the agent needs them); the page and `export` go through here.
-// A queue item may set `label` ("Prize A"); otherwise sponsors become "Sponsor A", "Sponsor B", ... by first appearance.
+// A queue item may set `label` ("Payment A"); otherwise clients become "Client A", "Client B", ... by first appearance.
 import { readLedger } from "./ledger.mjs";
 
 const PAYER = (process.env.GG_PAYER_PUBLIC || "").toLowerCase(); // our own payer address may stay visible
@@ -19,7 +19,7 @@ export function makeRedactor(entries = readLedger()) {
   }
   for (const e of entries) {
     const s = e.kind === "decision" && e.input?.sponsor;
-    if (s && !NEUTRAL.test(s.trim()) && s.trim().length >= 2 && !labels.has(s.toLowerCase())) labels.set(s.toLowerCase(), e.input.label || `Sponsor ${String.fromCharCode(65 + labels.size)}`);
+    if (s && !NEUTRAL.test(s.trim()) && s.trim().length >= 2 && !labels.has(s.toLowerCase())) labels.set(s.toLowerCase(), e.input.label || `Client ${String.fromCharCode(65 + labels.size)}`);
   }
   // Full names first, then distinctive single words (>= 4 letters) of each name.
   const rules = [];

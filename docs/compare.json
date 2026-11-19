@@ -1,0 +1,323 @@
+{
+  "method": "Each row is one real decision from the ledger. 'Without' replays the same policy on the free checks recorded in that decision; nothing is re-run.",
+  "totals": {
+    "decisions": 10,
+    "changed": 2,
+    "same": 8,
+    "cost_usd": 0.12,
+    "cost_per_changed_decision_usd": 0.06,
+    "changed_now": 2,
+    "cost_per_changed_now_usd": 0.06,
+    "overturned": 0,
+    "policy_now": "v6",
+    "paid_answers": 11,
+    "failures": 3
+  },
+  "rows": [
+    {
+      "ts": "2026-11-18T07:19:45.153Z",
+      "gate": "claim",
+      "policy": "before v5",
+      "older_policy": true,
+      "label": "payment A",
+      "without": {
+        "verdict": "PENDING",
+        "why": "no free chain read for this chain/token: no proof either way"
+      },
+      "with": {
+        "verdict": "CLAIM",
+        "why": "wallet holds 0 USDT as of 2026-11-18T07:19:40.842Z: payment of $400 not received"
+      },
+      "changed": true,
+      "now": {
+        "verdict": "CLAIM",
+        "why": "wallet holds 0 USDT as of 2026-11-18T07:19:40.842Z: payment of $400 not received"
+      },
+      "changed_now": true,
+      "overturned": false,
+      "paid_answers": 1,
+      "reused": 0,
+      "sources_with": 1,
+      "sources_without": 0,
+      "cost_usd": 0.01,
+      "ms": 9975,
+      "failures": [],
+      "action": null
+    },
+    {
+      "ts": "2026-11-18T07:19:45.658Z",
+      "gate": "claim",
+      "policy": "before v5",
+      "older_policy": true,
+      "label": "payment B",
+      "without": {
+        "verdict": "PENDING",
+        "why": "no free chain read for this chain/token: no proof either way"
+      },
+      "with": {
+        "verdict": "PENDING",
+        "why": "on-chain check unavailable: not claiming without proof"
+      },
+      "changed": false,
+      "now": {
+        "verdict": "PENDING",
+        "why": "on-chain check unavailable: not claiming without proof"
+      },
+      "changed_now": false,
+      "overturned": false,
+      "paid_answers": 0,
+      "reused": 0,
+      "sources_with": 0,
+      "sources_without": 0,
+      "cost_usd": 0,
+      "ms": 0,
+      "failures": [
+        "WALLET_BALANCE_CHECK_GENERAL: no supplier delivered"
+      ],
+      "action": null
+    },
+    {
+      "ts": "2026-11-18T07:20:05.787Z",
+      "gate": "scout",
+      "policy": "before v5",
+      "older_policy": true,
+      "label": "job lead 1",
+      "without": {
+        "verdict": "CAUTION",
+        "why": "no link reputation and no payment record: nothing to go on but the job post itself"
+      },
+      "with": {
+        "verdict": "CAUTION",
+        "why": "no independent record of Client T paying (5 sources, none mention it)"
+      },
+      "changed": false,
+      "now": {
+        "verdict": "CAUTION",
+        "why": "no independent record of Client T paying (5 sources, none name it)"
+      },
+      "changed_now": false,
+      "overturned": false,
+      "paid_answers": 2,
+      "reused": 0,
+      "sources_with": 2,
+      "sources_without": 0,
+      "cost_usd": 0.02,
+      "ms": 20121,
+      "failures": [],
+      "action": null
+    },
+    {
+      "ts": "2026-11-18T07:29:35.292Z",
+      "gate": "claim",
+      "policy": "before v5",
+      "older_policy": true,
+      "label": "payment C",
+      "without": {
+        "verdict": "PENDING",
+        "why": "no free chain read for this chain/token: no proof either way"
+      },
+      "with": {
+        "verdict": "CLAIM",
+        "why": "wallet holds 0 USDT on bsc as of 2026-11-18T07:29:32.102Z: payment of $400 not received"
+      },
+      "changed": true,
+      "now": {
+        "verdict": "CLAIM",
+        "why": "wallet holds 0 USDT on bsc as of 2026-11-18T07:29:32.102Z: payment of $400 not received"
+      },
+      "changed_now": true,
+      "overturned": false,
+      "paid_answers": 1,
+      "reused": 0,
+      "sources_with": 1,
+      "sources_without": 0,
+      "cost_usd": 0.01,
+      "ms": 10497,
+      "failures": [],
+      "action": null
+    },
+    {
+      "ts": "2026-11-18T10:22:16.238Z",
+      "gate": "scout",
+      "policy": "v5",
+      "older_policy": true,
+      "label": "job lead 2",
+      "without": {
+        "verdict": "CAUTION",
+        "why": "no link reputation and no payment record: nothing to go on but the job post itself"
+      },
+      "with": {
+        "verdict": "CAUTION",
+        "why": "no independent record of Client T paying (5 sources, none mention it)"
+      },
+      "changed": false,
+      "now": {
+        "verdict": "CAUTION",
+        "why": "no independent record of Client T paying (5 sources, none name it)"
+      },
+      "changed_now": false,
+      "overturned": false,
+      "paid_answers": 2,
+      "reused": 0,
+      "sources_with": 2,
+      "sources_without": 0,
+      "cost_usd": 0.02,
+      "ms": 63867,
+      "failures": [],
+      "action": null
+    },
+    {
+      "ts": "2026-11-18T10:23:22.983Z",
+      "gate": "ship",
+      "policy": "v5",
+      "older_policy": true,
+      "label": "Vault.sol",
+      "without": {
+        "verdict": "FIX",
+        "why": "local rules only: tx.origin used for auth (SWC-115); state written after external call (SWC-107 reentrancy)"
+      },
+      "with": {
+        "verdict": "FIX",
+        "why": "security: null (2) CWE-863, CWE-841"
+      },
+      "changed": false,
+      "now": {
+        "verdict": "FIX",
+        "why": "security: null (2) CWE-863, CWE-841"
+      },
+      "changed_now": false,
+      "overturned": false,
+      "paid_answers": 2,
+      "reused": 0,
+      "sources_with": 2,
+      "sources_without": 0,
+      "cost_usd": 0.02,
+      "ms": 66715,
+      "failures": [],
+      "action": null
+    },
+    {
+      "ts": "2026-11-18T10:24:56.109Z",
+      "gate": "ship",
+      "policy": "v5",
+      "older_policy": true,
+      "label": "SafeVault.sol",
+      "without": {
+        "verdict": "SHIP",
+        "why": "local rules found nothing, and nobody else reviewed it"
+      },
+      "with": {
+        "verdict": "SHIP",
+        "why": "security: Secure; CODE_REVIEW_GENERAL: Approve"
+      },
+      "changed": false,
+      "now": {
+        "verdict": "SHIP",
+        "why": "security: Secure; CODE_REVIEW_GENERAL: Approve"
+      },
+      "changed_now": false,
+      "overturned": false,
+      "paid_answers": 2,
+      "reused": 0,
+      "sources_with": 2,
+      "sources_without": 0,
+      "cost_usd": 0.02,
+      "ms": 93098,
+      "failures": [],
+      "action": null
+    },
+    {
+      "ts": "2026-11-18T10:25:04.792Z",
+      "gate": "claim",
+      "policy": "v5",
+      "older_policy": true,
+      "label": "payment D",
+      "without": {
+        "verdict": "CLAIM",
+        "why": "one source only (public RPC): balance 0"
+      },
+      "with": {
+        "verdict": "CLAIM",
+        "why": "chain read agrees (0)"
+      },
+      "changed": false,
+      "now": {
+        "verdict": "CLAIM",
+        "why": "chain read agrees (0)"
+      },
+      "changed_now": false,
+      "overturned": false,
+      "paid_answers": 1,
+      "reused": 0,
+      "sources_with": 2,
+      "sources_without": 1,
+      "cost_usd": 0.01,
+      "ms": 8021,
+      "failures": [],
+      "action": "awaiting user approval"
+    },
+    {
+      "ts": "2026-11-18T10:25:05.091Z",
+      "gate": "claim",
+      "policy": "v5",
+      "older_policy": true,
+      "label": "payment E (user says no)",
+      "without": {
+        "verdict": "CLAIM",
+        "why": "one source only (public RPC): balance 0"
+      },
+      "with": {
+        "verdict": "CLAIM",
+        "why": "chain read agrees (0)"
+      },
+      "changed": false,
+      "now": {
+        "verdict": "CLAIM",
+        "why": "chain read agrees (0)"
+      },
+      "changed_now": false,
+      "overturned": false,
+      "paid_answers": 0,
+      "reused": 1,
+      "sources_with": 2,
+      "sources_without": 1,
+      "cost_usd": 0,
+      "ms": 0,
+      "failures": [],
+      "action": "declined by user: not sent"
+    },
+    {
+      "ts": "2026-11-18T10:25:25.662Z",
+      "gate": "claim",
+      "policy": "v5",
+      "older_policy": true,
+      "label": "payment F",
+      "without": {
+        "verdict": "PENDING",
+        "why": "no free chain read for this chain/token: no proof either way"
+      },
+      "with": {
+        "verdict": "PENDING",
+        "why": "no miner returned a USDT balance on tron (1 paid answer came back empty): chain or token likely unsupported, not claiming without proof"
+      },
+      "changed": false,
+      "now": {
+        "verdict": "PENDING",
+        "why": "no miner returned a USDT balance on tron (1 paid answer came back empty): chain or token likely unsupported, not claiming without proof"
+      },
+      "changed_now": false,
+      "overturned": false,
+      "paid_answers": 0,
+      "reused": 0,
+      "sources_with": 0,
+      "sources_without": 0,
+      "cost_usd": 0.01,
+      "ms": 0,
+      "failures": [
+        "WALLET_BALANCE_CHECK_GENERAL: empty answer",
+        "WALLET_BALANCE_CHECK_GENERAL: no supplier delivered"
+      ],
+      "action": "none"
+    }
+  ]
+}

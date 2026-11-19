@@ -1,9 +1,9 @@
 # Live heartbeat run, 2026-11-18, Telegraph testnet (Ethereum Sepolia escrow).
-# Unedited output except neutral sponsor labels. Command: node src/cli.mjs heartbeat queue.json out.json
+# Unedited output except neutral labels (item ids and wording changed to job/client/payment). Command: node src/cli.mjs heartbeat queue.json out.json
 
-[08:41:06] bounty-1: scout gate, buying intelligence from Telegraph...
-[08:41:25] bounty-1: CAUTION  ($0.02, 2 receipts, 19.4 s)
-           - no independent record of Sponsor T paying winners (5 sources, none mention it)
+[08:41:06] job-1: scout gate, buying intelligence from Telegraph...
+[08:41:25] job-1: CAUTION  ($0.02, 2 receipts, 19.4 s)
+           - no independent record of Client T paying (5 sources, none mention it)
 [08:41:25] deliverable-1: ship gate, buying intelligence from Telegraph...
 [08:42:31] deliverable-1: FIX  ($0.02, 2 receipts, 66.4 s)
            - security: null (2) CWE-863, CWE-841
@@ -11,16 +11,16 @@
 [08:42:31] deliverable-2: ship gate, buying intelligence from Telegraph...
 [08:44:33] deliverable-2: SHIP  ($0.02, 2 receipts, 121.3 s)
            - security: Secure; CODE_REVIEW_GENERAL: Approve
-[08:44:33] prize-a: claim gate, buying intelligence from Telegraph...
-[08:44:43] prize-a: CLAIM  ($0.01, 1 receipt, 10.3 s)  next: awaiting user approval
+[08:44:33] payment-a: claim gate, buying intelligence from Telegraph...
+[08:44:43] payment-a: CLAIM  ($0.01, 1 receipt, 10.3 s)  next: awaiting user approval
            - chain read agrees (0)
-           - wallet holds 0 USDT on ethereum as of 2026-11-18T08:44:39.729Z: prize of $400 not received
-[08:44:43] prize-a-declined: claim gate, buying intelligence from Telegraph...
-[08:44:43] prize-a-declined: CLAIM  ($0.00, 1 receipt, 0.1 s)  next: declined by user: not sent
+           - wallet holds 0 USDT on ethereum as of 2026-11-18T08:44:39.729Z: payment of $400 not received
+[08:44:43] payment-a-declined: claim gate, buying intelligence from Telegraph...
+[08:44:43] payment-a-declined: CLAIM  ($0.00, 1 receipt, 0.1 s)  next: declined by user: not sent
            - chain read agrees (0)
-           - wallet holds 0 USDT on ethereum as of 2026-11-18T08:44:39.729Z: prize of $400 not received
-[08:44:43] prize-x: claim gate, buying intelligence from Telegraph...
-[08:45:01] prize-x: PENDING  ($0.00, 0 receipts, 17.7 s)
+           - wallet holds 0 USDT on ethereum as of 2026-11-18T08:44:39.729Z: payment of $400 not received
+[08:44:43] payment-x: claim gate, buying intelligence from Telegraph...
+[08:45:01] payment-x: PENDING  ($0.00, 0 receipts, 17.7 s)
            - no miner returned a USDT balance on tron (1 paid answer came back empty): chain or token likely unsupported, not claiming without proof
 [08:45:01] bad-input: claim gate, buying intelligence from Telegraph...
 [08:45:01] bad-input: refused before paying: wallet must be a 0x address

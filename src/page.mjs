@@ -57,7 +57,7 @@ code.in{font-size:.8rem;color:var(--mut)}ul{margin:6px 0 0;padding-left:18px;col
 footer{color:var(--mut);font-size:.85rem;margin-top:16px}
 </style>
 <h1>Gig Guard ledger</h1>
-<p class="lead">Every decision an autonomous freelance agent made, and the Telegraph intelligence it paid for to make it. Testnet only (${esc(nets)}, test USDC, no real money). Sponsor names, prize wallets and links are replaced with neutral labels.</p>
+<p class="lead">Every decision an autonomous freelance agent made, and the Telegraph intelligence it paid for to make it. Testnet only (${esc(nets)}, test USDC, no real money). Client names, payout wallets and links are replaced with neutral labels.</p>
 <div class="tiles">
 <div class="tile"><b>${decisions.length}</b><span>decisions</span></div>
 <div class="tile"><b>${buys.length}</b><span>paid requests</span></div>
