@@ -65,21 +65,24 @@ window.row=(i,cap)=>{const r=document.getElementById("r"+i);if(r)r.classList.add
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ggcmp-"));
 fs.writeFileSync(path.join(dir, "v.html"), html);
 const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : {}); // CHROME=/usr/bin/google-chrome where playwright has no browser
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, recordVideo: { dir, size: { width: 1280, height: 720 } } });
+// Stills + system ffmpeg (no Playwright video recorder needed): one screenshot per state, held for its duration.
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
 const page = await ctx.newPage();
-const wait = (s) => page.waitForTimeout(s * 1000);
+const shots = [];
+const hold = async (s) => { await page.waitForTimeout(700); const f = path.join(dir, `f${String(shots.length).padStart(3, "0")}.png`); await page.screenshot({ path: f }); shots.push([f, s]); };
 await page.goto("file://" + path.join(dir, "v.html"));
-await page.evaluate(() => scene("s1")); await wait(11);
-await page.evaluate(() => scene("s2")); await wait(1);
+await page.evaluate(() => scene("s1")); await hold(11);
+await page.evaluate(() => scene("s2")); await hold(1);
 const capFor = (r) => r.overturned ? `${r.label}: we said ${r.with.verdict} on thin evidence. Today's policy says ${r.now.verdict}, same as without Telegraph.`
   : r.changed_now ? `${r.label}: ${r.without.verdict} without, ${r.now.verdict} with Telegraph, for $${r.cost_usd.toFixed(2)}.`
   : `${r.label}: same verdict (${r.now.verdict}), ${r.paid_answers ? `now backed by ${r.paid_answers} paid answer${r.paid_answers === 1 ? "" : "s"}` : r.reused ? "now backed by a reused paid answer (no second charge)" : "the paid lookup came back empty, so it stays unproven"}.`;
-for (let i = 0; i < rows.length; i++) { const s = rows[i].overturned || rows[i].changed_now ? 4.5 : 2.6; await page.evaluate(([i, c]) => row(i, c), [i, capFor(rows[i])]); await wait(s); }
-await wait(3);
-await page.evaluate(() => scene("s3")); await wait(15);
-await page.evaluate(() => scene("s4")); await wait(15);
-await page.evaluate(() => scene("s5")); await wait(10);
-const vpath = await page.video().path();
+for (let i = 0; i < rows.length; i++) { const s = rows[i].overturned || rows[i].changed_now ? 4.5 : 2.6; await page.evaluate(([i, c]) => row(i, c), [i, capFor(rows[i])]); await hold(s); }
+await hold(3);
+await page.evaluate(() => scene("s3")); await hold(15);
+await page.evaluate(() => scene("s4")); await hold(15);
+await page.evaluate(() => scene("s5")); await hold(10);
 await ctx.close(); await browser.close();
-execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", vpath, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "24", "-movflags", "+faststart", outFile]);
+const list = shots.map(([f, s]) => `file '${f}'\nduration ${s}`).join("\n") + `\nfile '${shots.at(-1)[0]}'\n`;
+fs.writeFileSync(path.join(dir, "list.txt"), list);
+execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", path.join(dir, "list.txt"), "-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-crf", "22", "-movflags", "+faststart", outFile]);
 console.log(JSON.stringify({ video: outFile, rows: rows.length, seconds: Math.round(11 + 1 + rows.reduce((s, r) => s + (r.overturned || r.changed_now ? 4.5 : 2.6), 0) + 3 + 15 + 15 + 10) }));
