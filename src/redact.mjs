@@ -41,6 +41,19 @@ export function makeRedactor(entries = readLedger()) {
 }
 
 /** Public copy of the ledger: decisions without claim letters or raw answers, purchases without params or results. */
+// The part of an answer the cost report needs to grade it (report.mjs), and nothing else: a balance and its date (no
+// address), the free chain read's number, and a review's verdict and findings (redacted). Search and link answers stay out:
+// they can name a client or a link, and the report grades them "unknown" anyway.
+function gradable(x, R) {
+  const r = x.result;
+  if (!r || typeof r !== "object") return undefined;
+  if (x.intent === "WALLET_BALANCE_CHECK_GENERAL") return { balance: r.balance, token_symbol: r.token_symbol, as_of: r.as_of };
+  if (x.intent === "CHAIN_READ (free)") return { balance: r.balance };
+  if (x.intent === "SECURITY_REVIEW_GENERAL" || x.intent === "CODE_REVIEW_GENERAL")
+    return R.deep({ verdict: r.verdict, vulnerability_count: r.vulnerability_count, issues: r.issues, findings: r.findings });
+  return undefined;
+}
+
 export function publicLedger(entries = readLedger()) {
   const R = makeRedactor(entries);
   return entries.map((e) => {
@@ -53,7 +66,8 @@ export function publicLedger(entries = readLedger()) {
       const { label: _l, termsText: _t, ...inp } = input || {};
       if (rest.uncertainty) rest.uncertainty = R.deep(rest.uncertainty);
       return { ...rest, input: R.deep({ ...inp, ...(inp.sponsor ? { sponsor: R.label(inp.sponsor) } : {}) }), reasons: (e.reasons || []).map(R.text),
-        evidence: (evidence || []).map((x) => ({ intent: x.intent, ok: x.ok, miner_id: x.miner_id, cost_usd: x.cost_usd, reused: x.reused, error: x.error && R.text(x.error) })), claim_drafted: !!claim };
+        evidence: (evidence || []).map((x) => ({ intent: x.intent, ok: x.ok, miner_id: x.miner_id, cost_usd: x.cost_usd, reused: x.reused, error: x.error && R.text(x.error),
+          result: gradable(x, R), tried: x.tried && x.tried.map((t) => ({ intent: t.intent, miner_id: t.miner_id, cost_usd: t.cost_usd, error: t.error && R.text(t.error) })) })), claim_drafted: !!claim };
     }
     if (e.kind === "reuse") return { ts: e.ts, kind: e.kind, intent: e.intent, of: e.of, age_s: e.age_s };
     return { ts: e.ts, kind: e.kind, intent: e.intent, error: e.error && R.text(e.error) };

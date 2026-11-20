@@ -60,7 +60,7 @@ The whole public ledger (this run plus the first live run at 07:19 UTC) holds 10
 | unconfirmed | The miner flagged something no local rule backs: not proven right or wrong. |
 | unknown | No independent check exists for this Intent yet (link scans, web search). Never counted as correct. |
 
-Cost per verified correct answer = paid spend ÷ correct answers, per Intent and miner and in total. "Over checkable spend" counts only the answers a check could grade (correct, incorrect, empty, unconfirmed; not unknown): on the public ledger 6 answers, $0.06, 5 correct = $0.012. Wasted answers from skipped suppliers are included; reused answers and free chain reads are not. The output names miners and Intents only, no wallets.
+Cost per verified correct answer = paid spend ÷ correct answers, per Intent and miner and in total. "Over checkable spend" counts only the answers a check could grade (correct, incorrect, empty): on the public ledger 6 answers, $0.06, 5 correct = $0.012. The public ledger keeps the part of each answer the grading needs (a balance and its date, the free chain read, a review's verdict and findings), so `GG_LEDGER=ledger.public.jsonl node src/cli.mjs report` reproduces [`docs/cost-per-correct.md`](docs/cost-per-correct.md) exactly ([`docs/TRY-IT.md`](docs/TRY-IT.md)). Wasted answers from skipped suppliers are included; reused answers and free chain reads are not. The output names miners and Intents only, no wallets.
 
 Limits: the local rules are a short list, so "passed, and no rule fires" is agreement with a weak check, not proof of safety. Link scans and web searches stay "unknown" until there is a truth source for them.
 
@@ -96,6 +96,20 @@ Exit codes: 0 = go (GO/PAID/SHIP), 10 = stop and look, 1 = error. That makes eac
 ## Privacy
 
 `ledger.jsonl` is private: it holds client names, payout wallets and claim letters because the agent needs them. It is git-ignored and never published. The public page and `export` replace client names with neutral labels (a queue item's `label`, else "Client A", "Client B"), shorten wallets and tx hashes, replace every link with `[link]`, and drop raw answers and claim letters. Receipt hashes stay, so every decision remains checkable.
+
+## Try it in 5 minutes
+
+[`docs/TRY-IT.md`](docs/TRY-IT.md): no wallet or funds. `npm test`, then check all 12 receipts against the Telegraph testnet node and recompute the cost report from the public ledger. Tell us what happened with the **Tried it** issue template.
+
+## Mainnet: what would change
+
+Nothing has been spent on mainnet. What it would take, as of 2026-11-20:
+
+- **A mainnet payment route.** The node we use (`devnode.telegraphprotocol.com`) offers only testnet routes: its 402 challenge on 2026-11-20 listed x402 `exact` on Base Sepolia and Solana devnet, and escrow on Ethereum Sepolia ([`docs/node-402-2026-11-20.json`](docs/node-402-2026-11-20.json)). Mainnet waits on a mainnet route from Telegraph.
+- **Code, once it exists:** set `TELEGRAPH_NODE` and `TELEGRAPH_NETWORK`, add the mainnet USDC address to `config.assets` and its explorer to `config.explorers`, and let the escrow rail read its network from config instead of the fixed `eip155:11155111` in `src/telegraph.mjs`. Gates, policy, ledger and the receipt check stay as they are.
+- **Already on mainnet data:** the claim gate's free cross-check reads real balances from public mainnet RPCs on six chains (the 10:25 UTC claim read USDT on Ethereum mainnet).
+- **Money and keys:** the same hard caps apply (`GG_MAX_PER_CALL` $0.03, `GG_MAX_PER_DAY` $1.00). At today's prices the 12 answers on the ledger would cost $0.12 in real USDC. Use a dedicated low-balance key, never a treasury key.
+- **Still missing for production:** a truth source for link and web answers (they stay "unknown" in the report) and outside users (none yet).
 
 ## Payment rails
 
