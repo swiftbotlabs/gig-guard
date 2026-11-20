@@ -1,0 +1,141 @@
+{
+  "total": 11,
+  "settled": 11,
+  "pending": 0,
+  "mismatch": 0,
+  "other": 0,
+  "receipts": [
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0x962d566eeab4e2cd9d3014ac7ea5401b92ea38486203db9f11f5fa574cc73493",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0x573f5f3a11b1472025c9cfe198c913b013bd9e4520edbdbdf35516150cf2970c",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0x4e7d9e60bb25b12760378eae04cded86b547e660307f55a179578068ff3f4b68",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0xa471ce075a47d8a9222f7e6ad90138ee5a55d0d083511aaa4a3f4bda2129ff46",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0x1b053dabfaeb4f08b541b306ae79ea4ef984929f88d34629b5a0d1cc04c00e6c",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0x0e6e9b591c9909ebd7c4e348135f56274166e62f9728160dbf5040f8bf350b45",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "receipt_hash": "0x8ff772dfed947cd297e38d0275d362cc7aa6f905bb26f753aed62ba21daab4d8",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5128",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0xabab0bdde17bc2642960d8c503217a786d69a0bce4a2f07198ab8af72a6b2a07",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0xcb9871b2737154fc4ef349fead77e7467bc5a2c5f3813a6ae6355e583d70abcf",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "receipt_hash": "0xca22fc62a300162219e985fa7199f553655100455f683800535a4811ec82c98f",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5128",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0x733e2bf1536d02959fd3263234782e5caceabe4fb531df2dd5d0aa367b2382dc",
+      "epoch_id": 23,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5035",
+      "usdc": 10000,
+      "deliveries_root": "0x2363fc19a2d54d8683d4ec7905a50c92797e429002029097a45db160e03fc6b3",
+      "block_data_root": "0xbc38e07e8f0dbd4c29d9969fe377fcacae367dc848057970e448a87e82c56c78",
+      "proof_len": 6
+    }
+  ]
+}
