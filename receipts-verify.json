@@ -1,37 +1,153 @@
 {
-  "total": 4,
-  "settled": 0,
+  "total": 12,
+  "settled": 12,
   "pending": 0,
   "mismatch": 0,
-  "other": 4,
+  "other": 0,
   "receipts": [
     {
       "intent": "WALLET_BALANCE_CHECK_GENERAL",
       "receipt_hash": "0xb18690815ab0a4b62f5cfeb4c37ed092736732a5d98b6f47beb79880501c42be",
       "epoch_id": 8,
-      "status": "UNREACHABLE",
-      "note": "The operation was aborted due to timeout"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5311",
+      "usdc": 10000,
+      "deliveries_root": "0x788350e0f8f37aabfceb198f757874cc2ec77a09f55d7d6e9ff68d876c3e7331",
+      "block_data_root": "0x3485ab6fea945215d7652d1b374ea361b86a97b51c3c134a9fe8bff65ca4415b",
+      "proof_len": 7
     },
     {
       "intent": "URL_SCAN_VERDICT",
       "receipt_hash": "0x2444e3f095519f75b773a3ddb35c7aefbc8714702e8ca825986fa781bd044067",
       "epoch_id": 8,
-      "status": "UNREACHABLE",
-      "note": "The operation was aborted due to timeout"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5297",
+      "usdc": 10000,
+      "deliveries_root": "0x788350e0f8f37aabfceb198f757874cc2ec77a09f55d7d6e9ff68d876c3e7331",
+      "block_data_root": "0x3485ab6fea945215d7652d1b374ea361b86a97b51c3c134a9fe8bff65ca4415b",
+      "proof_len": 7
     },
     {
       "intent": "WEB_SEARCH_GENERAL",
       "receipt_hash": "0xff0b6da304171856cdd2dbe0d50ca8999b9fc4d77362a8952e3348172a85829a",
       "epoch_id": 8,
-      "status": "UNREACHABLE",
-      "note": "The operation was aborted due to timeout"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4970",
+      "usdc": 10000,
+      "deliveries_root": "0x788350e0f8f37aabfceb198f757874cc2ec77a09f55d7d6e9ff68d876c3e7331",
+      "block_data_root": "0x3485ab6fea945215d7652d1b374ea361b86a97b51c3c134a9fe8bff65ca4415b",
+      "proof_len": 5
     },
     {
       "intent": "WALLET_BALANCE_CHECK_GENERAL",
       "receipt_hash": "0x191054b8ea1b9e6890ea08cc7eba84a701130e23b45590049c2312fe9109aba1",
       "epoch_id": 8,
-      "status": "UNREACHABLE",
-      "note": "The operation was aborted due to timeout"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5311",
+      "usdc": 10000,
+      "deliveries_root": "0x788350e0f8f37aabfceb198f757874cc2ec77a09f55d7d6e9ff68d876c3e7331",
+      "block_data_root": "0x3485ab6fea945215d7652d1b374ea361b86a97b51c3c134a9fe8bff65ca4415b",
+      "proof_len": 7
+    },
+    {
+      "intent": "URL_SAFE_GENERAL",
+      "receipt_hash": "0x0c14ba050c17e384331cb084c3e805a0292c3dec596fc9dea0b6fc513b3570af",
+      "epoch_id": 9,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5311",
+      "usdc": 10000,
+      "deliveries_root": "0xc8a10c4350dd713e2bf8bf4f889b814f452866f64765f86f50a04d89e5164214",
+      "block_data_root": "0xd4041ef9dc926205b198a6410e976ac4603e9bd071b036e988477b4ded7b4b9c",
+      "proof_len": 10
+    },
+    {
+      "intent": "WEB_SEARCH_GENERAL",
+      "receipt_hash": "0x73b383c9b9cb9a40cd21c932e8b0e59c1c8abe0eb7424da4fe9484f80f317d51",
+      "epoch_id": 9,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4970",
+      "usdc": 10000,
+      "deliveries_root": "0xc8a10c4350dd713e2bf8bf4f889b814f452866f64765f86f50a04d89e5164214",
+      "block_data_root": "0xd4041ef9dc926205b198a6410e976ac4603e9bd071b036e988477b4ded7b4b9c",
+      "proof_len": 10
+    },
+    {
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "receipt_hash": "0x8f3540926fb1bc627ae31cf537231dcb25ad976f15e1976b60e852c3378d2204",
+      "epoch_id": 9,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4857",
+      "usdc": 10000,
+      "deliveries_root": "0xc8a10c4350dd713e2bf8bf4f889b814f452866f64765f86f50a04d89e5164214",
+      "block_data_root": "0xd4041ef9dc926205b198a6410e976ac4603e9bd071b036e988477b4ded7b4b9c",
+      "proof_len": 10
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0x8c51bc0599ae828411e6e29f101a8d2c7958fa91a363eedb1f6a57cf9deea90b",
+      "epoch_id": 9,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5311",
+      "usdc": 10000,
+      "deliveries_root": "0xc8a10c4350dd713e2bf8bf4f889b814f452866f64765f86f50a04d89e5164214",
+      "block_data_root": "0xd4041ef9dc926205b198a6410e976ac4603e9bd071b036e988477b4ded7b4b9c",
+      "proof_len": 10
+    },
+    {
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "receipt_hash": "0x71d58da9f568c8f67f2575764579c696df165345a021d57096506441490ff8c9",
+      "epoch_id": 9,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4857",
+      "usdc": 10000,
+      "deliveries_root": "0xc8a10c4350dd713e2bf8bf4f889b814f452866f64765f86f50a04d89e5164214",
+      "block_data_root": "0xd4041ef9dc926205b198a6410e976ac4603e9bd071b036e988477b4ded7b4b9c",
+      "proof_len": 10
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "receipt_hash": "0x49057d154ed710977f85fa41fafeee80a6cc86ad981c33d74b363bc5014972c6",
+      "epoch_id": 9,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5311",
+      "usdc": 10000,
+      "deliveries_root": "0xc8a10c4350dd713e2bf8bf4f889b814f452866f64765f86f50a04d89e5164214",
+      "block_data_root": "0xd4041ef9dc926205b198a6410e976ac4603e9bd071b036e988477b4ded7b4b9c",
+      "proof_len": 10
+    },
+    {
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "receipt_hash": "0x8d4ed1c1fc7d7caef924bc15f4890721ba1d727d63174044d226230b997aa3f0",
+      "epoch_id": 9,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5311",
+      "usdc": 10000,
+      "deliveries_root": "0xc8a10c4350dd713e2bf8bf4f889b814f452866f64765f86f50a04d89e5164214",
+      "block_data_root": "0xd4041ef9dc926205b198a6410e976ac4603e9bd071b036e988477b4ded7b4b9c",
+      "proof_len": 10
+    },
+    {
+      "intent": "WALLET_BALANCE_CHECK_GENERAL",
+      "receipt_hash": "0x9d436c57c9ad6cce43279af935575e5f962bad6b3fbed420b3fa38e5f1852499",
+      "epoch_id": 9,
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "5311",
+      "usdc": 10000,
+      "deliveries_root": "0xc8a10c4350dd713e2bf8bf4f889b814f452866f64765f86f50a04d89e5164214",
+      "block_data_root": "0xd4041ef9dc926205b198a6410e976ac4603e9bd071b036e988477b4ded7b4b9c",
+      "proof_len": 10
     }
   ]
 }

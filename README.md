@@ -4,7 +4,7 @@
 
 **Testnet only.** Ethereum Sepolia escrow, Telegraph test USDC. No real money moves, and nothing here is production usage.
 
-Demo video (2 min 44 s, a real run, long waits sped up and labelled): [`docs/gig-guard-demo.mp4`](docs/gig-guard-demo.mp4). Public ledger: [`ledger.html`](ledger.html).
+Demo video (2 min 45 s, the 10:21 UTC run below, long waits sped up and labelled): https://apps.swiftbotlab.workers.dev/proof/gig-guard-demo.mp4. Public ledger: [`ledger.html`](ledger.html).
 
 | Gate | Mission | What it buys from Telegraph | Free cross-check | Decisions |
 |---|---|---|---|---|
@@ -14,24 +14,24 @@ Demo video (2 min 44 s, a real run, long waits sped up and labelled): [`docs/gig
 
 ## What a run looks like
 
-Live, 2026-11-18 08:41 UTC, one heartbeat over a queue of 7 items (output trimmed; full log in [`docs/demo-run.txt`](docs/demo-run.txt)):
+Live, 2026-11-18 10:21 UTC, one heartbeat over a queue of 7 items, the run shown in the demo video (output trimmed; full log in [`docs/demo-run.txt`](docs/demo-run.txt)). Every paid answer in it is in the public ledger ([`ledger.public.jsonl`](ledger.public.jsonl), page [`ledger.html`](ledger.html)) with its receipt:
 
 ```
-job-1: CAUTION  ($0.02, 2 receipts, 19.4 s)
-  - no independent record of Client T paying (5 sources, none name it)
-deliverable-1: FIX  ($0.02, 2 receipts, 66.4 s)
+bounty-1: CAUTION  ($0.02, 2 receipts, 66.3 s)
+  - no independent record of Sponsor T paying winners (5 sources, none mention it)
+deliverable-1: FIX  ($0.02, 2 receipts, 66.7 s)
   - security: null (2) CWE-863, CWE-841
   - confirmed by local rules: tx.origin used for auth (SWC-115); state written after external call (SWC-107 reentrancy)
-deliverable-2: SHIP  ($0.02, 2 receipts, 121.3 s)
-payment-a: CLAIM  ($0.01, 1 receipt, 10.3 s)  next: awaiting user approval
-  - chain read agrees (0); wallet holds 0 USDT on ethereum: payment of $400 not received
-payment-a-declined: CLAIM  ($0.00, reused answer, 0.1 s)  next: declined by user: not sent
-payment-x: PENDING  (0 usable receipts, 17.7 s)
-  - no miner returned a USDT balance on tron: chain or token likely unsupported, not claiming without proof
+deliverable-2: SHIP  ($0.02, 2 receipts, 93.1 s)
+prize-a: CLAIM  ($0.01, 1 receipt, 8.7 s)  next: awaiting user approval
+  - chain read agrees (0); wallet holds 0 USDT on ethereum: prize of $400 not received
+prize-a-declined: CLAIM  ($0.00, reused answer, 0.3 s)  next: declined by user: not sent
+prize-x: PENDING  ($0.01, 0 usable receipts, 20.6 s)
+  - no miner returned a USDT balance on tron (1 paid answer came back empty): not claiming without proof
 bad-input: refused before paying: wallet must be a 0x address
 ```
 
-Receipt check right after (`gig-guard verify`): 21 receipts, 13 SETTLED in epoch 8's block, 8 PENDING because epoch 9 was still open, 0 mismatched.
+The whole public ledger (this run plus the first live run at 07:19 UTC) holds 10 decisions and 12 paid answers, $0.12. Receipt check re-run on 2026-11-20 (`gig-guard verify`, saved as [`receipts-verify.json`](receipts-verify.json)): 12 receipts, 12 SETTLED (4 in epoch 8, 8 in epoch 9), 0 pending, 0 mismatched.
 
 ## Why you can trust a verdict
 
@@ -45,7 +45,7 @@ Receipt check right after (`gig-guard verify`): 21 receipts, 13 SETTLED in epoch
 
 - About $0.01 per answer, $0.02 per gate.
 - Fresh facts are reused instead of bought twice: balances for 10 minutes, link scans for 24 h, searches for 6 h, reviews of identical code for 7 days. A reused answer costs $0 and points to the original receipt.
-- The ledger page reports spend, reuse, median latency and **cost per useful decision** (spend divided by decisions the agent could act on), all computed from the ledger.
+- The ledger page reports spend, reuse, median latency and **cost per useful decision** (spend divided by decisions the agent could act on: GO, CAUTION, SKIP, SHIP, FIX, CLAIM, PAID; PENDING and HOLD don't count), all computed from the ledger. On the public ledger: $0.12 over 8 useful decisions = $0.015, median answer time 14.4 s.
 - Hard caps, checked before signing: `GG_MAX_PER_CALL` (default $0.03) and `GG_MAX_PER_DAY` (default $1.00).
 
 ## Cost per verified correct answer (Mission 10)
@@ -60,7 +60,7 @@ Receipt check right after (`gig-guard verify`): 21 receipts, 13 SETTLED in epoch
 | unconfirmed | The miner flagged something no local rule backs: not proven right or wrong. |
 | unknown | No independent check exists for this Intent yet (link scans, web search). Never counted as correct. |
 
-Cost per verified correct answer = paid spend ÷ correct answers, per Intent and miner and in total (also over checkable spend only). Wasted answers from skipped suppliers are included; reused answers and free chain reads are not. The output names miners and Intents only, no wallets.
+Cost per verified correct answer = paid spend ÷ correct answers, per Intent and miner and in total. "Over checkable spend" counts only the answers a check could grade (correct, incorrect, empty, unconfirmed; not unknown): on the public ledger 6 answers, $0.06, 5 correct = $0.012. Wasted answers from skipped suppliers are included; reused answers and free chain reads are not. The output names miners and Intents only, no wallets.
 
 Limits: the local rules are a short list, so "passed, and no rule fires" is agreement with a weak check, not proof of safety. Link scans and web searches stay "unknown" until there is a truth source for them.
 
@@ -112,7 +112,7 @@ Written up as found, with the workaround in the code:
 3. `SMART_CONTRACT_AUDIT_GENERAL` and `CRYPTO_TRANSFER_VERIFY_GENERAL` have no published response schema; answers come back as untyped free text with no receipt. Workaround: `CODE_REVIEW_GENERAL` as the second review.
 4. `WEB_SEARCH_GENERAL` returns sources with a null answer for question-style queries. Workaround: keyword queries.
 5. One `SECURITY_REVIEW_GENERAL` miner returns `verdict: null` with real CWE findings. Workaround: counted issues mean FIX.
-6. `WALLET_BALANCE_CHECK_GENERAL` on BNB Smart Chain returns all-null fields when the token is a symbol, and a real balance when it's the contract address. Workaround: USDT/USDC contract map for six chains, contract asked first.
+6. `WALLET_BALANCE_CHECK_GENERAL` on BNB Smart Chain: asked with the token symbol, our request got no answer (ledger 07:19, nothing charged, verdict PENDING); asked with the USDT contract address it returned a balance (ledger 07:29, receipt `0x191054b8…`, verdict CLAIM). In unledgered development runs the symbol form came back with all-null fields. Workaround: USDT/USDC contract map for six chains, contract asked first.
 7. The deliveries Merkle proof uses sorted-pair keccak256 (verified against epoch 7), but the leaf encoding isn't documented, so the proof can't be folded from the delivery fields alone. Workaround: membership and field match against the settled block; the proof length and roots are recorded.
 
 ## Tests

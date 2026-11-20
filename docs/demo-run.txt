@@ -1,29 +1,31 @@
-# Live heartbeat run, 2026-11-18, Telegraph testnet (Ethereum Sepolia escrow).
-# Unedited output except neutral labels (item ids and wording changed to job/client/payment). Command: node src/cli.mjs heartbeat queue.json out.json
+# Live heartbeat run, 2026-11-18 10:21-10:25 UTC, Telegraph testnet (Ethereum Sepolia escrow). This is the run in the demo video.
+# Every paid answer below is in ledger.public.jsonl with its receipt (all 8 SETTLED in epoch 9; see receipts-verify.json).
+# Unedited console output except the client's name, replaced by its ledger label (Sponsor T). Times are wall-clock per item.
+# Command: node src/cli.mjs heartbeat queue.json out.json
 
-[08:41:06] job-1: scout gate, buying intelligence from Telegraph...
-[08:41:25] job-1: CAUTION  ($0.02, 2 receipts, 19.4 s)
-           - no independent record of Client T paying (5 sources, none mention it)
-[08:41:25] deliverable-1: ship gate, buying intelligence from Telegraph...
-[08:42:31] deliverable-1: FIX  ($0.02, 2 receipts, 66.4 s)
+[10:21:09] bounty-1: scout gate, buying intelligence from Telegraph...
+[10:22:16] bounty-1: CAUTION  ($0.02, 2 receipts, 66.3 s)
+           - no independent record of Sponsor T paying winners (5 sources, none mention it)
+[10:22:16] deliverable-1: ship gate, buying intelligence from Telegraph...
+[10:23:22] deliverable-1: FIX  ($0.02, 2 receipts, 66.7 s)
            - security: null (2) CWE-863, CWE-841
            - confirmed by local rules: tx.origin used for auth (SWC-115); state written after external call (SWC-107 reentrancy)
-[08:42:31] deliverable-2: ship gate, buying intelligence from Telegraph...
-[08:44:33] deliverable-2: SHIP  ($0.02, 2 receipts, 121.3 s)
+[10:23:22] deliverable-2: ship gate, buying intelligence from Telegraph...
+[10:24:56] deliverable-2: SHIP  ($0.02, 2 receipts, 93.1 s)
            - security: Secure; CODE_REVIEW_GENERAL: Approve
-[08:44:33] payment-a: claim gate, buying intelligence from Telegraph...
-[08:44:43] payment-a: CLAIM  ($0.01, 1 receipt, 10.3 s)  next: awaiting user approval
+[10:24:56] prize-a: claim gate, buying intelligence from Telegraph...
+[10:25:04] prize-a: CLAIM  ($0.01, 1 receipt, 8.7 s)  next: awaiting user approval
            - chain read agrees (0)
-           - wallet holds 0 USDT on ethereum as of 2026-11-18T08:44:39.729Z: payment of $400 not received
-[08:44:43] payment-a-declined: claim gate, buying intelligence from Telegraph...
-[08:44:43] payment-a-declined: CLAIM  ($0.00, 1 receipt, 0.1 s)  next: declined by user: not sent
+           - wallet holds 0 USDT on ethereum as of 2026-11-18T10:25:01.114Z: prize of $400 not received
+[10:25:04] prize-a-declined: claim gate, buying intelligence from Telegraph...
+[10:25:05] prize-a-declined: CLAIM  ($0.00, 1 receipt, 0.3 s)  next: declined by user: not sent
            - chain read agrees (0)
-           - wallet holds 0 USDT on ethereum as of 2026-11-18T08:44:39.729Z: payment of $400 not received
-[08:44:43] payment-x: claim gate, buying intelligence from Telegraph...
-[08:45:01] payment-x: PENDING  ($0.00, 0 receipts, 17.7 s)
+           - wallet holds 0 USDT on ethereum as of 2026-11-18T10:25:01.114Z: prize of $400 not received
+[10:25:05] prize-x: claim gate, buying intelligence from Telegraph...
+[10:25:25] prize-x: PENDING  ($0.01, 0 receipts, 20.6 s)
            - no miner returned a USDT balance on tron (1 paid answer came back empty): chain or token likely unsupported, not claiming without proof
-[08:45:01] bad-input: claim gate, buying intelligence from Telegraph...
-[08:45:01] bad-input: refused before paying: wallet must be a 0x address
+[10:25:25] bad-input: claim gate, buying intelligence from Telegraph...
+[10:25:25] bad-input: refused before paying: wallet must be a 0x address
 
-$ node src/cli.mjs verify verify.json
-{"total":21,"settled":13,"pending":8,"mismatch":0,"other":0}
+$ node src/cli.mjs verify receipts-verify.json   # re-run 2026-11-20 on the whole public ledger
+{"total":12,"settled":12,"pending":0,"mismatch":0,"other":0}
