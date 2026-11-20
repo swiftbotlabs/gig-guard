@@ -179,7 +179,7 @@ const RULES = [
   [/\.call\{value:[^}]*\}\([^)]*\);[\s\S]{0,200}?\b\w+\[[^\]]+\]\s*(=|-=)/, "state written after external call (SWC-107 reentrancy)"],
   [/block\.timestamp\s*%|blockhash\s*\(/, "weak randomness (SWC-120)"],
 ];
-const localFindings = (code) => RULES.filter(([re]) => re.test(code)).map(([, m]) => m);
+export const localFindings = (code) => RULES.filter(([re]) => re.test(code)).map(([, m]) => m);
 
 /** Mission 14 (whitehat): may this contract/code deliverable be submitted? */
 export async function shipCheck(code, { name = "deliverable" } = {}) {

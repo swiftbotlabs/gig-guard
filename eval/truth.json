@@ -1,0 +1,15 @@
+{
+  "_note": "Ground truth for the planted-bug set. B* = one planted bug each (class given), C* = written to be clean. A review is correct when it flags a B* sample or passes a C* sample.",
+  "B01_Reentrancy.sol": { "bug": true, "class": "SWC-107 reentrancy: balance zeroed after the external call" },
+  "B02_TxOrigin.sol": { "bug": true, "class": "SWC-115 authorization through tx.origin" },
+  "B03_Selfdestruct.sol": { "bug": true, "class": "SWC-106 unprotected selfdestruct: anyone can close the pool" },
+  "B04_Delegatecall.sol": { "bug": true, "class": "SWC-112 delegatecall to a caller-supplied address" },
+  "B05_UncheckedCall.sol": { "bug": true, "class": "SWC-104 unchecked call return: owed zeroed even if the send fails" },
+  "B06_WeakRandom.sol": { "bug": true, "class": "SWC-120 weak randomness from block values" },
+  "B07_MissingAccessControl.sol": { "bug": true, "class": "SWC-105/284 missing access control on setOwner" },
+  "B08_SignatureReplay.sol": { "bug": true, "class": "SWC-121 signature replay: no nonce, no chain id, no used-flag" },
+  "C01_SafeTipJar.sol": { "bug": false },
+  "C02_OwnedVault.sol": { "bug": false },
+  "C03_Escrow.sol": { "bug": false },
+  "C04_Counter.sol": { "bug": false }
+}

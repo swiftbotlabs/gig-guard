@@ -8,3 +8,4 @@ queue*.json
 !examples/queue.example.json
 results*.json
 out*.json
+eval/ledger.eval.jsonl

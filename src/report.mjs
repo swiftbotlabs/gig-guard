@@ -12,8 +12,8 @@ import { readLedger } from "./ledger.mjs";
 
 const TOL = (x) => Math.max(0.01, Math.abs(x) * 0.01);
 const lc = (s) => String(s ?? "").toLowerCase();
-const flagsSecurity = (r) => /insecure|needs changes/.test(lc(r?.verdict)) || (!r?.verdict && Number(r?.vulnerability_count || r?.issues?.length || 0) > 0);
-const flagsCode = (r) => /request changes/.test(lc(r?.verdict)) || /not correct or safe|reentran|critical|vulnerab|tx\.origin|delegatecall|selfdestruct/.test(lc(JSON.stringify(r?.findings || [])));
+export const flagsSecurity = (r) => /insecure|needs changes/.test(lc(r?.verdict)) || (!r?.verdict && Number(r?.vulnerability_count || r?.issues?.length || 0) > 0);
+export const flagsCode = (r) => /request changes/.test(lc(r?.verdict)) || /not correct or safe|reentran|critical|vulnerab|tx\.origin|delegatecall|selfdestruct/.test(lc(JSON.stringify(r?.findings || [])));
 
 /** Grade one paid answer inside a decision. Returns {grade, why}. */
 export function grade(d, e) {

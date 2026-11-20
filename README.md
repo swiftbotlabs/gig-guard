@@ -62,6 +62,8 @@ The whole public ledger (this run plus the first live run at 07:19 UTC) holds 10
 
 Cost per verified correct answer = paid spend ÷ correct answers, per Intent and miner and in total. "Over checkable spend" counts only the answers a check could grade (correct, incorrect, empty): on the public ledger 6 answers, $0.06, 5 correct = $0.012. The public ledger keeps the part of each answer the grading needs (a balance and its date, the free chain read, a review's verdict and findings), so `GG_LEDGER=ledger.public.jsonl node src/cli.mjs report` reproduces [`docs/cost-per-correct.md`](docs/cost-per-correct.md) exactly ([`docs/TRY-IT.md`](docs/TRY-IT.md)). Wasted answers from skipped suppliers are included; reused answers and free chain reads are not. The output names miners and Intents only, no wallets.
 
+Disclosure: miner 731001, the best-graded `SECURITY_REVIEW_GENERAL` miner in our report, is the provider run by another H2 entrant (PR Guard). Telegraph's ranking assigned it to our requests; we have no arrangement with it and grade it like every other miner.
+
 Limits: the local rules are a short list, so "passed, and no rule fires" is agreement with a weak check, not proof of safety. Link scans and web searches stay "unknown" until there is a truth source for them.
 
 ## Run it
@@ -96,6 +98,10 @@ Exit codes: 0 = go (GO/PAID/SHIP), 10 = stop and look, 1 = error. That makes eac
 ## Privacy
 
 `ledger.jsonl` is private: it holds client names, payout wallets and claim letters because the agent needs them. It is git-ignored and never published. The public page and `export` replace client names with neutral labels (a queue item's `label`, else "Client A", "Client B"), shorten wallets and tx hashes, replace every link with `[link]`, and drop raw answers and claim letters. Receipt hashes stay, so every decision remains checkable.
+
+## Planted-bug run (2026-11-20)
+
+[`eval/`](eval/): 12 Solidity contracts with a known answer (8 with one planted bug, 4 clean) through the ship gate on testnet. Gate: 5 bugs caught, 1 missed, 2 false alarms on clean code, 3 held because no review could be bought. 13 of 24 requests failed with no charge (security review route: 10 of 12, mostly HTTP 500 deadline errors). The code-review miner's own text named 3 of the bugs we counted as missed, so our parser is the next fix. $0.11, answer latency p50 29.4 s, p95 38.3 s. Details and every receipt: [`eval/README.md`](eval/README.md), [`eval/RESULTS.md`](eval/RESULTS.md).
 
 ## Try it in 5 minutes
 

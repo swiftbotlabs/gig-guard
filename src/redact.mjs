@@ -50,7 +50,7 @@ function gradable(x, R) {
   if (x.intent === "WALLET_BALANCE_CHECK_GENERAL") return { balance: r.balance, token_symbol: r.token_symbol, as_of: r.as_of };
   if (x.intent === "CHAIN_READ (free)") return { balance: r.balance };
   if (x.intent === "SECURITY_REVIEW_GENERAL" || x.intent === "CODE_REVIEW_GENERAL")
-    return R.deep({ verdict: r.verdict, vulnerability_count: r.vulnerability_count, issues: r.issues, findings: r.findings });
+    return R.deep({ verdict: r.verdict, vulnerability_count: r.vulnerability_count, issues: r.issues, findings: r.findings, summary: r.summary });
   return undefined;
 }
 
@@ -70,6 +70,7 @@ export function publicLedger(entries = readLedger()) {
           result: gradable(x, R), tried: x.tried && x.tried.map((t) => ({ intent: t.intent, miner_id: t.miner_id, cost_usd: t.cost_usd, error: t.error && R.text(t.error) })) })), claim_drafted: !!claim };
     }
     if (e.kind === "reuse") return { ts: e.ts, kind: e.kind, intent: e.intent, of: e.of, age_s: e.age_s };
-    return { ts: e.ts, kind: e.kind, intent: e.intent, error: e.error && R.text(e.error) };
+    return { ts: e.ts, kind: e.kind, intent: e.intent, error: e.error && R.text(e.error), status: e.status, ms: e.ms,
+      body: e.body?.error ? { error: R.text(e.body.error) } : undefined };
   });
 }
