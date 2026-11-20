@@ -87,6 +87,12 @@ node src/cli.mjs report report.md report.json           # Mission 10: cost per v
 
 Exit codes: 0 = go (GO/PAID/SHIP), 10 = stop and look, 1 = error. That makes each gate a one-line guard in any shell loop: `node src/cli.mjs ship out/C.sol && submit || echo held`.
 
+## Docs
+
+- [`docs/TUTORIAL.md`](docs/TUTORIAL.md): pay for verified intelligence from an agent loop in 10 minutes.
+- [`docs/TUTORIAL-with-vs-without.md`](docs/TUTORIAL-with-vs-without.md): add paid answers to a decision step, then measure with `compare` whether they changed anything.
+- [`docs/compare.md`](docs/compare.md): our own run, 10 real decisions with and without paid answers.
+
 ## Privacy
 
 `ledger.jsonl` is private: it holds client names, payout wallets and claim letters because the agent needs them. It is git-ignored and never published. The public page and `export` replace client names with neutral labels (a queue item's `label`, else "Client A", "Client B"), shorten wallets and tx hashes, replace every link with `[link]`, and drop raw answers and claim letters. Receipt hashes stay, so every decision remains checkable.
