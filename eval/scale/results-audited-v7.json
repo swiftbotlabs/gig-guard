@@ -1,0 +1,90 @@
+{
+  "decisions": 22,
+  "rerun": 0,
+  "of": 129,
+  "spend_usd": 0.3,
+  "requests": 30,
+  "paid": 30,
+  "failed": 0,
+  "latency_ms": {
+    "p50": 26294,
+    "p95": 49612,
+    "n": 30
+  },
+  "gate": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 5,
+    "tn": 10,
+    "held": 7
+  },
+  "gate_without_name_hints": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 5,
+    "tn": 10,
+    "held": 7
+  },
+  "local_rules_only": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 1,
+    "tn": 21,
+    "held": 0
+  },
+  "usd_per_right_gate_decision": 0.03,
+  "by_category": {
+    "audited": {
+      "tp": 0,
+      "fn": 0,
+      "fp": 5,
+      "tn": 10,
+      "held": 7
+    }
+  },
+  "by_intent_miner": [
+    {
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "miner": "9002",
+      "answers": 15,
+      "spend": 0.15,
+      "tp": 0,
+      "fn": 0,
+      "fp": 5,
+      "tn": 10,
+      "held": 0,
+      "empty": 0,
+      "right": 10,
+      "usd_per_right": 0.015
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "miner": "9002",
+      "answers": 14,
+      "spend": 0.14,
+      "tp": 0,
+      "fn": 0,
+      "fp": 1,
+      "tn": 13,
+      "held": 0,
+      "empty": 0,
+      "right": 13,
+      "usd_per_right": 0.0108
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "miner": "20260828",
+      "answers": 1,
+      "spend": 0.01,
+      "tp": 0,
+      "fn": 0,
+      "fp": 0,
+      "tn": 1,
+      "held": 0,
+      "empty": 0,
+      "right": 1,
+      "usd_per_right": 0.01
+    }
+  ],
+  "failed_requests": {}
+}

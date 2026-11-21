@@ -12,3 +12,4 @@ eval/ledger.eval.jsonl
 eval/scale/ledger.scale.jsonl
 !eval/scale/results.json
 eval/scale/ledger.audited-v7.jsonl
+!eval/scale/results-audited-v7.json
