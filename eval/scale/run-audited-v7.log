@@ -1,0 +1,23 @@
+2026-11-21T17:41:32.218Z 1 OZ_access_Ownable.sol SHIP $0.02 79.2 s
+2026-11-21T17:42:28.322Z 2 OZ_access_Ownable2Step.sol FIX $0.02 56.1 s
+2026-11-21T17:42:28.333Z 3 OZ_access_AccessControl.sol HOLD $0 0.0 s
+2026-11-21T17:43:16.469Z 4 OZ_utils_ReentrancyGuard.sol SHIP $0.02 48.1 s
+2026-11-21T17:44:17.348Z 5 OZ_utils_Pausable.sol FIX $0.02 60.9 s
+2026-11-21T17:45:15.259Z 6 OZ_utils_Nonces.sol SHIP $0.02 57.9 s
+2026-11-21T17:45:15.266Z 7 OZ_utils_Address.sol HOLD $0 0.0 s
+2026-11-21T17:46:02.055Z 8 OZ_utils_Context.sol SHIP $0.02 46.8 s
+2026-11-21T17:46:59.589Z 9 OZ_utils_Multicall.sol FIX $0.02 57.5 s
+2026-11-21T17:46:59.596Z 10 OZ_utils_cryptography_ECDSA.sol HOLD $0 0.0 s
+2026-11-21T17:48:24.680Z 11 OZ_utils_cryptography_MessageHashUtils.sol SHIP $0.02 85.1 s
+2026-11-21T17:48:24.691Z 12 OZ_finance_VestingWallet.sol HOLD $0 0.0 s
+2026-11-21T17:48:24.703Z 13 OZ_token_ERC20_ERC20.sol HOLD $0 0.0 s
+2026-11-21T17:48:24.713Z 14 OZ_token_ERC20_utils_SafeERC20.sol HOLD $0 0.0 s
+2026-11-21T17:49:16.023Z 15 OZ_token_ERC20_extensions_ERC20Burnable.sol SHIP $0.02 51.3 s
+2026-11-21T17:50:11.514Z 16 OZ_token_ERC20_extensions_ERC20Capped.sol SHIP $0.02 55.5 s
+2026-11-21T17:50:45.982Z 17 OZ_token_ERC20_extensions_ERC20Pausable.sol FIX $0.02 34.5 s
+2026-11-21T17:52:00.699Z 18 OZ_token_ERC20_extensions_ERC20Wrapper.sol FIX $0.02 74.7 s
+2026-11-21T17:52:46.190Z 19 OZ_token_ERC721_utils_ERC721Holder.sol SHIP $0.02 45.5 s
+2026-11-21T17:53:51.201Z 20 OZ_token_ERC1155_utils_ERC1155Holder.sol SHIP $0.02 65.0 s
+2026-11-21T17:53:51.208Z 21 OZ_utils_types_Time.sol HOLD $0 0.0 s
+2026-11-21T17:54:48.633Z 22 OZ_access_manager_AuthorityUtils.sol SHIP $0.02 57.4 s
+{"decided":22,"of":129,"spent_usd":0.3}
