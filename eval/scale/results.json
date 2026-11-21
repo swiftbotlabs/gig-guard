@@ -1,0 +1,151 @@
+{
+  "decisions": 129,
+  "of": 129,
+  "spend_usd": 1.88,
+  "requests": 258,
+  "paid": 188,
+  "failed": 70,
+  "latency_ms": {
+    "p50": 28401,
+    "p95": 56541,
+    "n": 188
+  },
+  "gate": {
+    "tp": 91,
+    "fn": 0,
+    "fp": 1,
+    "tn": 8,
+    "held": 29
+  },
+  "gate_without_name_hints": {
+    "tp": 61,
+    "fn": 0,
+    "fp": 1,
+    "tn": 8,
+    "held": 28
+  },
+  "local_rules_only": {
+    "tp": 29,
+    "fn": 78,
+    "fp": 1,
+    "tn": 21,
+    "held": 0
+  },
+  "usd_per_right_gate_decision": 0.019,
+  "by_category": {
+    "access_control": {
+      "tp": 15,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 1
+    },
+    "arithmetic": {
+      "tp": 14,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 1
+    },
+    "bad_randomness": {
+      "tp": 4,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 3
+    },
+    "denial_of_service": {
+      "tp": 5,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 1
+    },
+    "front_running": {
+      "tp": 3,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 1
+    },
+    "other": {
+      "tp": 2,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 1
+    },
+    "reentrancy": {
+      "tp": 30,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 0
+    },
+    "short_addresses": {
+      "tp": 1,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 0
+    },
+    "time_manipulation": {
+      "tp": 5,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 0
+    },
+    "unchecked_low_level_calls": {
+      "tp": 12,
+      "fn": 0,
+      "fp": 0,
+      "tn": 0,
+      "held": 8
+    },
+    "audited": {
+      "tp": 0,
+      "fn": 0,
+      "fp": 1,
+      "tn": 8,
+      "held": 13
+    }
+  },
+  "by_intent_miner": [
+    {
+      "intent": "SECURITY_REVIEW_GENERAL",
+      "miner": "9002",
+      "answers": 96,
+      "spend": 0.96,
+      "tp": 88,
+      "fn": 0,
+      "fp": 0,
+      "tn": 8,
+      "held": 0,
+      "empty": 0,
+      "right": 96,
+      "usd_per_right": 0.01
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "miner": "7310045",
+      "answers": 92,
+      "spend": 0.92,
+      "tp": 81,
+      "fn": 3,
+      "fp": 1,
+      "tn": 7,
+      "held": 0,
+      "empty": 0,
+      "right": 88,
+      "usd_per_right": 0.0105
+    }
+  ],
+  "failed_requests": {
+    "SECURITY_REVIEW_GENERAL: HTTP 200": 27,
+    "CODE_REVIEW_GENERAL: HTTP 200": 25,
+    "SECURITY_REVIEW_GENERAL: fetch failed": 6,
+    "CODE_REVIEW_GENERAL: fetch failed": 5,
+    "CODE_REVIEW_GENERAL: HTTP 500 upstream call failed: context deadline exceeded": 7
+  }
+}

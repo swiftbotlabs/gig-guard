@@ -9,3 +9,5 @@ queue*.json
 results*.json
 out*.json
 eval/ledger.eval.jsonl
+eval/scale/ledger.scale.jsonl
+!eval/scale/results.json
