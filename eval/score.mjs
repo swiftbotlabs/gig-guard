@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import { readLedger } from "../src/ledger.mjs";
 import { flagsSecurity, flagsCode } from "../src/report.mjs";
-import { localFindings } from "../src/guards.mjs";
+import { localFindings, shipVerdict } from "../src/guards.mjs";
 
 const truth = JSON.parse(fs.readFileSync(new URL("./truth.json", import.meta.url), "utf8"));
 const L = readLedger();
@@ -18,13 +18,19 @@ const row = (intent, miner) => {
 };
 const cell = (bug, flag) => (bug ? (flag ? "tp" : "fn") : flag ? "fp" : "tn");
 const gate = { tp: 0, fn: 0, fp: 0, tn: 0, held: 0 }, rules = { tp: 0, fn: 0, fp: 0, tn: 0 };
+// The verdict the current code gives on the same stored answers (no new purchase). Differs from the recorded verdict
+// only where the parser changed.
+const redo = { tp: 0, fn: 0, fp: 0, tn: 0, held: 0 };
 let spend = 0;
 for (const d of decisions) {
   const bug = truth[d.input.name].bug;
   if (d.verdict === "HOLD") gate.held++; else gate[cell(bug, d.verdict === "FIX")]++;
   const src = fs.readFileSync(new URL(`./samples/${d.input.name}`, import.meta.url), "utf8");
   rules[cell(bug, localFindings(src).length > 0)]++;
-  const line = { sample: d.input.name, bug, gate: d.verdict, answers: [] };
+  const [sr, cr] = d.evidence || [];
+  const now = shipVerdict(sr || { ok: false }, cr || { ok: false, intent: "CODE_REVIEW_GENERAL" }, localFindings(src)).verdict;
+  if (now === "HOLD") redo.held++; else redo[cell(bug, now === "FIX")]++;
+  const line = { sample: d.input.name, bug, gate: d.verdict, gate_now: now, answers: [] };
   for (const e of d.evidence || []) {
     if (!e.ok || !Number(e.cost_usd)) continue;
     const r = row(e.intent, e.miner_id); r.answers++; r.spend += Number(e.cost_usd); spend += Number(e.cost_usd);
@@ -50,7 +56,7 @@ const pct = (x) => `${Math.round(x * 100)}%`;
 const byRows = [...rows.values()].map((r) => ({ ...r, spend: +r.spend.toFixed(4), correct: r.tp + r.tn,
   cost_per_correct_usd: r.tp + r.tn ? +(r.spend / (r.tp + r.tn)).toFixed(4) : null }));
 const out = { samples: decisions.length, spend_usd: +spend.toFixed(4), latency_ms: { p50: q(0.5), p95: q(0.95), n: lat.length },
-  gate, local_rules_only: rules, requests, failed_requests: errs, by_intent_miner: byRows, per_sample: per };
+  gate, gate_current_code: redo, local_rules_only: rules, requests, failed_requests: errs, by_intent_miner: byRows, per_sample: per };
 fs.writeFileSync(new URL("./results.json", import.meta.url), JSON.stringify(out, null, 2) + "\n");
 const md = [
   `# Planted-bug run: ${decisions.length} Solidity samples, ground truth known`, "",
@@ -59,13 +65,15 @@ const md = [
   `Requests sent: ${requests}; answered and paid: ${lat.length}; failed with no charge: ${requests - lat.length}.`, "",
   ...Object.entries(errs).map(([k, n]) => `- ${n} × ${k}`), "",
   "| | Caught (of 8 bugs) | Missed | False alarms (of 4 clean) | Held: no review could be bought | Correct, of decided |", "|---|---|---|---|---|---|",
-  `| Gate verdict (FIX = flagged) | ${gate.tp} | ${gate.fn} | ${gate.fp} | ${gate.held} | ${pct(acc(gate))} |`,
+  `| Gate verdict as recorded on 2026-11-20 (FIX = flagged) | ${gate.tp} | ${gate.fn} | ${gate.fp} | ${gate.held} | ${pct(acc(gate))} |`,
+  `| Same answers, re-decided by the current code (fixed parser, no new purchase) | ${redo.tp} | ${redo.fn} | ${redo.fp} | ${redo.held} | ${pct(acc(redo))} |`,
   `| Local rules alone (free) | ${rules.tp} | ${rules.fn} | ${rules.fp} | 0 | ${pct(acc(rules))} |`, "",
   "| Intent | Miner | Answers | Spend | Caught | Missed | False alarms | Passed clean | Empty | $ per correct answer |",
   "|---|---|---|---|---|---|---|---|---|---|",
   ...byRows.map((r) => `| ${r.intent} | ${r.miner} | ${r.answers} | $${r.spend.toFixed(2)} | ${r.tp} | ${r.fn} | ${r.fp} | ${r.tn} | ${r.empty} | ${r.cost_per_correct_usd == null ? "n/a" : "$" + r.cost_per_correct_usd.toFixed(3)} |`), "",
-  "Per sample:", "", ...per.map((l) => `- ${l.sample} (${l.bug ? "bug" : "clean"}): gate ${l.gate}; ${l.answers.join("; ")}`), "",
-  "Limits: 12 short samples written by us, one pass each, so a rerun can differ. Every answer's receipt is in `eval/ledger.public.jsonl`.", "",
+  "Per sample:", "", ...per.map((l) => `- ${l.sample} (${l.bug ? "bug" : "clean"}): gate ${l.gate}${l.gate_now !== l.gate ? ` (current code: ${l.gate_now})` : ""}; ${l.answers.join("; ")}`), "",
+  "Limits: 12 short samples written by us, one pass each, so a rerun can differ. Every answer's receipt is in `eval/ledger.public.jsonl`.",
+  "The review parser was fixed (2026-11-21) after reading these 11 answers: three code reviews that named the bug (B02 \"not secure\", B05 \"unchecked low-level call\", B07 \"not correct ... can permanently lose funds\") had been read as passes, and one security review that said \"no security vulnerabilities were found\" had been read as a flag because it listed advisory IDs. The re-decided row is therefore in-sample; a fresh run with the frozen parser is the out-of-sample check.", "",
 ].join("\n");
 fs.writeFileSync(new URL("./RESULTS.md", import.meta.url), md);
 console.log(JSON.stringify({ samples: out.samples, spend: out.spend_usd, gate, local_rules_only: rules, latency_ms: out.latency_ms }));

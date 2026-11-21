@@ -4,6 +4,7 @@
 //   claim  (Mission 15 Consumer Automation): an agreed payment is overdue: prove it and draft the claim.
 //   ship   (Mission 14 Web3 Native & DeFi, whitehat): is this contract/code deliverable safe to submit?
 import { ask } from "./telegraph.mjs";
+import { flagsCode, flagsSecurity } from "./report.mjs";
 import { append, readLedger } from "./ledger.mjs";
 import { chainBalance } from "./chain.mjs";
 import { balanceQueries, normChain } from "./tokens.mjs";
@@ -190,20 +191,23 @@ export async function shipCheck(code, { name = "deliverable" } = {}) {
   // SMART_CONTRACT_AUDIT_GENERAL has no published schema yet (answers come back as free text, no receipt),
   // so contracts get the typed CODE_REVIEW Intent as the second opinion.
   ev.push(await buy([["CODE_REVIEW_GENERAL", { code: src }]], {}, "ship"));
-  const [sr, cr] = ev; const reasons = [];
+  const [sr, cr] = ev;
+  const local = isSol ? localFindings(code) : [];
+  const { verdict, reasons, uncertainty } = shipVerdict(sr, cr, local);
+  return decide("ship", { name, bytes: code.length, solidity: isSol }, verdict, reasons, ev, { uncertainty, local_findings: local });
+}
+
+/** The ship decision from the two bought reviews and the local rules. Pure, so a stored run can be re-decided. */
+export function shipVerdict(sr, cr, local) {
+  const reasons = [], uncertainty = [];
   let verdict = "SHIP";
   if (!sr.ok && !cr.ok) { verdict = "HOLD"; reasons.push("no review could be bought: fail closed"); }
-  const sv = lc(sr.result?.verdict), cv = lc(cr.result?.verdict);
-  const nIssues = Number(sr.result?.vulnerability_count || 0) + (sr.result?.issues?.length && !sr.result?.vulnerability_count ? sr.result.issues.length : 0);
-  if (sr.ok && (/insecure|needs changes/.test(sv) || (!sv && nIssues > 0))) { verdict = "FIX"; reasons.push(`security: ${sr.result.verdict} (${sr.result.vulnerability_count ?? "?"}) ${(sr.result.issues || []).slice(0, 5).join(", ")}`); }
-  const cf = lc(JSON.stringify(cr.result?.findings || []));
-  if (cr.ok && (/request changes/.test(cv) || /not correct or safe|reentran|critical|vulnerab/.test(cf))) { verdict = "FIX"; reasons.push(`${cr.intent}: ${cr.result.verdict}. ${cr.result.summary || ""}`); }
+  if (sr.ok && flagsSecurity(sr.result)) { verdict = "FIX"; reasons.push(`security: ${sr.result.verdict} (${sr.result.vulnerability_count ?? "?"}) ${(sr.result.issues || []).slice(0, 5).join(", ")}`); }
+  if (cr.ok && flagsCode(cr.result)) { verdict = "FIX"; reasons.push(`${cr.intent}: ${cr.result.verdict}. ${cr.result.summary || ""}`); }
   if (!reasons.length) reasons.push(`security: ${sr.ok ? sr.result.verdict : "n/a"}; ${cr.intent}: ${cr.ok ? cr.result.verdict : "n/a"}`);
-  const local = isSol ? localFindings(code) : [];
-  const uncertainty = [];
   if (verdict === "FIX" && local.length) reasons.push(`confirmed by local rules: ${local.join("; ")}`);
   else if (verdict === "FIX") uncertainty.push("miner-only finding: no local rule fired; a human should confirm before rework");
   else if (verdict === "SHIP" && local.length) { verdict = "FIX"; reasons.push(`miners passed it, but local rules fired: ${local.join("; ")}`); uncertainty.push("miners and local rules disagree"); }
   if (verdict === "SHIP" && (!sr.ok || !cr.ok)) uncertainty.push("only one review could be bought");
-  return decide("ship", { name, bytes: code.length, solidity: isSol }, verdict, reasons, ev, { uncertainty, local_findings: local });
+  return { verdict, reasons, uncertainty };
 }

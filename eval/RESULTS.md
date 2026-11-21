@@ -13,27 +13,29 @@ Requests sent: 24; answered and paid: 11; failed with no charge: 13.
 
 | | Caught (of 8 bugs) | Missed | False alarms (of 4 clean) | Held: no review could be bought | Correct, of decided |
 |---|---|---|---|---|---|
-| Gate verdict (FIX = flagged) | 5 | 1 | 2 | 3 | 67% |
+| Gate verdict as recorded on 2026-11-20 (FIX = flagged) | 5 | 1 | 2 | 3 | 67% |
+| Same answers, re-decided by the current code (fixed parser, no new purchase) | 6 | 0 | 2 | 3 | 78% |
 | Local rules alone (free) | 5 | 3 | 0 | 0 | 75% |
 
 | Intent | Miner | Answers | Spend | Caught | Missed | False alarms | Passed clean | Empty | $ per correct answer |
 |---|---|---|---|---|---|---|---|---|---|
-| CODE_REVIEW_GENERAL | 7310045 | 9 | $0.09 | 3 | 3 | 2 | 1 | 0 | $0.022 |
-| SECURITY_REVIEW_GENERAL | 719190 | 2 | $0.02 | 0 | 0 | 1 | 1 | 0 | $0.020 |
+| CODE_REVIEW_GENERAL | 7310045 | 9 | $0.09 | 6 | 0 | 2 | 1 | 0 | $0.013 |
+| SECURITY_REVIEW_GENERAL | 719190 | 2 | $0.02 | 0 | 0 | 0 | 2 | 0 | $0.010 |
 
 Per sample:
 
 - B01_Reentrancy.sol (bug): gate FIX; CODE_REVIEW_GENERAL miner 7310045: flagged (TP)
-- B02_TxOrigin.sol (bug): gate FIX; CODE_REVIEW_GENERAL miner 7310045: passed (FN)
+- B02_TxOrigin.sol (bug): gate FIX; CODE_REVIEW_GENERAL miner 7310045: flagged (TP)
 - B03_Selfdestruct.sol (bug): gate FIX; CODE_REVIEW_GENERAL miner 7310045: flagged (TP)
 - B04_Delegatecall.sol (bug): gate FIX; CODE_REVIEW_GENERAL miner 7310045: flagged (TP)
-- B05_UncheckedCall.sol (bug): gate FIX; CODE_REVIEW_GENERAL miner 7310045: passed (FN)
+- B05_UncheckedCall.sol (bug): gate FIX; CODE_REVIEW_GENERAL miner 7310045: flagged (TP)
 - B06_WeakRandom.sol (bug): gate HOLD; 
-- B07_MissingAccessControl.sol (bug): gate SHIP; CODE_REVIEW_GENERAL miner 7310045: passed (FN)
+- B07_MissingAccessControl.sol (bug): gate SHIP (current code: FIX); CODE_REVIEW_GENERAL miner 7310045: flagged (TP)
 - B08_SignatureReplay.sol (bug): gate HOLD; 
-- C01_SafeTipJar.sol (clean): gate FIX; SECURITY_REVIEW_GENERAL miner 719190: flagged (FP); CODE_REVIEW_GENERAL miner 7310045: flagged (FP)
+- C01_SafeTipJar.sol (clean): gate FIX; SECURITY_REVIEW_GENERAL miner 719190: passed (TN); CODE_REVIEW_GENERAL miner 7310045: flagged (FP)
 - C02_OwnedVault.sol (clean): gate HOLD; 
 - C03_Escrow.sol (clean): gate FIX; CODE_REVIEW_GENERAL miner 7310045: flagged (FP)
 - C04_Counter.sol (clean): gate SHIP; SECURITY_REVIEW_GENERAL miner 719190: passed (TN); CODE_REVIEW_GENERAL miner 7310045: passed (TN)
 
 Limits: 12 short samples written by us, one pass each, so a rerun can differ. Every answer's receipt is in `eval/ledger.public.jsonl`.
+The review parser was fixed (2026-11-21) after reading these 11 answers: three code reviews that named the bug (B02 "not secure", B05 "unchecked low-level call", B07 "not correct ... can permanently lose funds") had been read as passes, and one security review that said "no security vulnerabilities were found" had been read as a flag because it listed advisory IDs. The re-decided row is therefore in-sample; a fresh run with the frozen parser is the out-of-sample check.

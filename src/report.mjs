@@ -12,8 +12,20 @@ import { readLedger } from "./ledger.mjs";
 
 const TOL = (x) => Math.max(0.01, Math.abs(x) * 0.01);
 const lc = (s) => String(s ?? "").toLowerCase();
-export const flagsSecurity = (r) => /insecure|needs changes/.test(lc(r?.verdict)) || (!r?.verdict && Number(r?.vulnerability_count || r?.issues?.length || 0) > 0);
-export const flagsCode = (r) => /request changes/.test(lc(r?.verdict)) || /not correct or safe|reentran|critical|vulnerab|tx\.origin|delegatecall|selfdestruct/.test(lc(JSON.stringify(r?.findings || [])));
+// One parser for review answers, used by the ship gate and by the scorer (they used to differ).
+// A review FLAGS the code when its verdict asks for changes, or when its own words (findings or summary) say the code
+// is not correct/secure/safe or name a defect class. A summary that says it found nothing (no vulnerabilities,
+// severity none) wins over an unlabelled list of advisory IDs, which miners attach to clean code too.
+const DEFECT = /\bnot (?:fully |sufficiently |entirely )?(?:correct|secure|safe)\b|vulnerab(?:le|ility|ilities)\b|reentran|unchecked (?:low-level )?(?:call|return)|tx\.origin|delegatecall|selfdestruct|\bcan (?:permanently )?(?:lose|drain|steal|erase|lock)\b|missing access control/;
+const CLEAN = /\bno (?:security )?vulnerabilit(?:y|ies) (?:were |was )?found\b|severity is none/;
+const words = (r) => lc([...(Array.isArray(r?.findings) ? r.findings : []), r?.summary || ""].join(" \n "));
+export const flagsSecurity = (r) => {
+  if (/insecure|needs changes/.test(lc(r?.verdict))) return true;
+  if (/^secure$/.test(lc(r?.verdict).trim())) return false;
+  if (CLEAN.test(lc(r?.summary))) return false;
+  return Number(r?.vulnerability_count || 0) > 0 || (!r?.verdict && (r?.issues?.length || 0) > 0) || DEFECT.test(words(r));
+};
+export const flagsCode = (r) => /request changes|reject/.test(lc(r?.verdict)) || DEFECT.test(words(r).replace(/no (?:security )?vulnerabilit(?:y|ies)[^.]*\./g, ""));
 
 /** Grade one paid answer inside a decision. Returns {grade, why}. */
 export function grade(d, e) {

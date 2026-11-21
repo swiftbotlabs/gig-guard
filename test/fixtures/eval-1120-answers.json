@@ -1,0 +1,134 @@
+[
+ {
+  "sample": "B01_Reentrancy.sol",
+  "bug": true,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Comment",
+   "findings": [
+    "The code is functionally correct for its basic purpose, but it has a reentrancy vulnerability and several smaller design, gas, and clarity issues."
+   ],
+   "summary": "The code is functionally correct for its basic purpose, but it has a reentrancy vulnerability and several smaller design, gas, and clarity issues."
+  }
+ },
+ {
+  "sample": "B02_TxOrigin.sol",
+  "bug": true,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Comment",
+   "findings": [
+    "The code is not secure or sufficiently correct for a treasury contract."
+   ],
+   "summary": "The code is not secure or sufficiently correct for a treasury contract."
+  }
+ },
+ {
+  "sample": "B03_Selfdestruct.sol",
+  "bug": true,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Comment",
+   "findings": [
+    "The code compiles, but it is not correct or safe for the intended prize pool use."
+   ],
+   "summary": "The code compiles, but it is not correct or safe for the intended prize pool use."
+  }
+ },
+ {
+  "sample": "B04_Delegatecall.sol",
+  "bug": true,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Request changes",
+   "findings": [
+    "The code is not correct or safe as written."
+   ],
+   "summary": "The code is not correct or safe as written."
+  }
+ },
+ {
+  "sample": "B05_UncheckedCall.sol",
+  "bug": true,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Comment",
+   "findings": [
+    "Unchecked low-level call return value in `payOut`"
+   ],
+   "summary": "The contract is not fully correct. Salary accounting works for normal successful payouts, but the payout function ignores failed Ether transfers and can permanently erase an employee\u2019s accrued salary without paying it."
+  }
+ },
+ {
+  "sample": "B07_MissingAccessControl.sol",
+  "bug": true,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Comment",
+   "findings": null,
+   "summary": "The code is not correct because the ownership controls are incomplete and the sweep function can permanently lose funds."
+  }
+ },
+ {
+  "sample": "C01_SafeTipJar.sol",
+  "bug": false,
+  "intent": "SECURITY_REVIEW_GENERAL",
+  "result": {
+   "verdict": null,
+   "vulnerability_count": null,
+   "issues": [
+    "CVE-2025-1889",
+    "GHSA-769v-p64c-89pr",
+    "PYSEC-2025-19"
+   ],
+   "summary": "No security vulnerabilities were found in SafeTipJar. Overall severity is none."
+  }
+ },
+ {
+  "sample": "C01_SafeTipJar.sol",
+  "bug": false,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Request changes",
+   "findings": [
+    "The code is not fully correct because it accepts ETH from arbitrary senders without crediting them, which can strand funds and create inconsistent accounting."
+   ],
+   "summary": "The code is not fully correct because it accepts ETH from arbitrary senders without crediting them, which can strand funds and create inconsistent accounting."
+  }
+ },
+ {
+  "sample": "C03_Escrow.sol",
+  "bug": false,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Request changes",
+   "findings": [
+    "The code is not fully correct. It implements the basic buyer release and post-deadline refund paths, but it omits important validation and makes the escrow unnecessarily vulnerable to unusable states and forced ETH transfers."
+   ],
+   "summary": "The code is not fully correct. It implements the basic buyer release and post-deadline refund paths, but it omits important validation and makes the escrow unnecessarily vulnerable to unusable states and forced ETH transfers."
+  }
+ },
+ {
+  "sample": "C04_Counter.sol",
+  "bug": false,
+  "intent": "SECURITY_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Secure",
+   "vulnerability_count": 0,
+   "issues": null,
+   "summary": "No security vulnerabilities were found in the Counter contract."
+  }
+ },
+ {
+  "sample": "C04_Counter.sol",
+  "bug": false,
+  "intent": "CODE_REVIEW_GENERAL",
+  "result": {
+   "verdict": "Comment",
+   "findings": [
+    "The code is functionally correct for a simple per-address counter, but it has an access-control correctness issue and several minor quality issues."
+   ],
+   "summary": "The code is functionally correct for a simple per-address counter, but it has an access-control correctness issue and several minor quality issues."
+  }
+ }
+]
