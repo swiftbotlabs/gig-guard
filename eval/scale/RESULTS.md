@@ -4,14 +4,16 @@
 - The dataset's own answer markers (header and `<yes> <report>` lines) were removed before review. Contract names were kept; 31 contracts have a name or comment that hints at the bug, so results are also shown without them.
 - Truth is the dataset label. OpenZeppelin files are labelled "audited", not proven bug-free.
 
-Spend $1.88 test USDC on Telegraph testnet. Requests 258, answered and paid 188, failed with no charge 70. Answer latency p50 28.4 s, p95 56.5 s.
+29 contracts held in the first pass were run again after the gate learned to fit the review Intents' 2,000-character input limit (comments removed, code never cut); the tables use each contract's latest decision, and every earlier decision stays in the ledger.
 
-**Cost per right gate decision: $0.019** (all spend divided by decisions that matched the label).
+Spend $2.02 test USDC on Telegraph testnet. Requests 272, answered and paid 202, failed with no charge 70. Answer latency p50 28.0 s, p95 56.0 s.
+
+**Cost per right gate decision: $0.020** (all spend divided by decisions that matched the label).
 
 | | Caught (vulnerable, flagged) | Missed | False alarm (audited, flagged) | Passed audited | Held: no review could be bought (availability, not accuracy) | Right, of decided |
 |---|---|---|---|---|---|---|
-| Gate verdict | 91 | 0 | 1 | 8 | 29 | 99% |
-| Gate verdict, contracts without name hints | 61 | 0 | 1 | 8 | 28 | 99% |
+| Gate verdict | 92 | 0 | 7 | 8 | 22 | 93% |
+| Gate verdict, contracts without name hints | 62 | 0 | 7 | 8 | 21 | 91% |
 | Local rules alone (free) | 29 | 78 | 1 | 21 | 0 | 39% |
 
 | Category | Caught | Missed | Held |
@@ -25,12 +27,14 @@ Spend $1.88 test USDC on Telegraph testnet. Requests 258, answered and paid 188,
 | reentrancy | 30 | 0 | 0 |
 | short_addresses | 1 | 0 | 0 |
 | time_manipulation | 5 | 0 | 0 |
-| unchecked_low_level_calls | 12 | 0 | 8 |
+| unchecked_low_level_calls | 13 | 0 | 7 |
 
 | Intent | Miner | Answers | Spend | Caught | Missed | False alarms | Passed audited | Empty | $ per right answer |
 |---|---|---|---|---|---|---|---|---|---|
-| SECURITY_REVIEW_GENERAL | 9002 | 96 | $0.96 | 88 | 0 | 0 | 8 | 0 | $0.010 |
+| SECURITY_REVIEW_GENERAL | 9002 | 103 | $1.03 | 89 | 0 | 5 | 9 | 0 | $0.011 |
 | CODE_REVIEW_GENERAL | 7310045 | 92 | $0.92 | 81 | 3 | 1 | 7 | 0 | $0.011 |
+| CODE_REVIEW_GENERAL | 9002 | 5 | $0.05 | 1 | 0 | 2 | 2 | 0 | $0.017 |
+| CODE_REVIEW_GENERAL | 20260828 | 2 | $0.02 | 0 | 0 | 2 | 0 | 0 | n/a |
 
 Failed requests (not charged):
 

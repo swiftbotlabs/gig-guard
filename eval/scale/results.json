@@ -1,28 +1,29 @@
 {
   "decisions": 129,
+  "rerun": 29,
   "of": 129,
-  "spend_usd": 1.88,
-  "requests": 258,
-  "paid": 188,
+  "spend_usd": 2.02,
+  "requests": 272,
+  "paid": 202,
   "failed": 70,
   "latency_ms": {
-    "p50": 28401,
-    "p95": 56541,
-    "n": 188
+    "p50": 28024,
+    "p95": 55955,
+    "n": 202
   },
   "gate": {
-    "tp": 91,
+    "tp": 92,
     "fn": 0,
-    "fp": 1,
+    "fp": 7,
     "tn": 8,
-    "held": 29
+    "held": 22
   },
   "gate_without_name_hints": {
-    "tp": 61,
+    "tp": 62,
     "fn": 0,
-    "fp": 1,
+    "fp": 7,
     "tn": 8,
-    "held": 28
+    "held": 21
   },
   "local_rules_only": {
     "tp": 29,
@@ -31,7 +32,7 @@
     "tn": 21,
     "held": 0
   },
-  "usd_per_right_gate_decision": 0.019,
+  "usd_per_right_gate_decision": 0.0202,
   "by_category": {
     "access_control": {
       "tp": 15,
@@ -97,34 +98,34 @@
       "held": 0
     },
     "unchecked_low_level_calls": {
-      "tp": 12,
+      "tp": 13,
       "fn": 0,
       "fp": 0,
       "tn": 0,
-      "held": 8
+      "held": 7
     },
     "audited": {
       "tp": 0,
       "fn": 0,
-      "fp": 1,
+      "fp": 7,
       "tn": 8,
-      "held": 13
+      "held": 7
     }
   },
   "by_intent_miner": [
     {
       "intent": "SECURITY_REVIEW_GENERAL",
       "miner": "9002",
-      "answers": 96,
-      "spend": 0.96,
-      "tp": 88,
+      "answers": 103,
+      "spend": 1.03,
+      "tp": 89,
       "fn": 0,
-      "fp": 0,
-      "tn": 8,
+      "fp": 5,
+      "tn": 9,
       "held": 0,
       "empty": 0,
-      "right": 96,
-      "usd_per_right": 0.01
+      "right": 98,
+      "usd_per_right": 0.0105
     },
     {
       "intent": "CODE_REVIEW_GENERAL",
@@ -139,11 +140,39 @@
       "empty": 0,
       "right": 88,
       "usd_per_right": 0.0105
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "miner": "9002",
+      "answers": 5,
+      "spend": 0.05,
+      "tp": 1,
+      "fn": 0,
+      "fp": 2,
+      "tn": 2,
+      "held": 0,
+      "empty": 0,
+      "right": 3,
+      "usd_per_right": 0.0167
+    },
+    {
+      "intent": "CODE_REVIEW_GENERAL",
+      "miner": "20260828",
+      "answers": 2,
+      "spend": 0.02,
+      "tp": 0,
+      "fn": 0,
+      "fp": 2,
+      "tn": 0,
+      "held": 0,
+      "empty": 0,
+      "right": 0,
+      "usd_per_right": null
     }
   ],
   "failed_requests": {
-    "SECURITY_REVIEW_GENERAL: HTTP 200": 27,
-    "CODE_REVIEW_GENERAL: HTTP 200": 25,
+    "SECURITY_REVIEW_GENERAL: input over the node's 2000-character limit for `target` (no miner could take it; not charged)": 27,
+    "CODE_REVIEW_GENERAL: input over the node's 2000-character limit for `code` (no miner could take it; not charged)": 25,
     "SECURITY_REVIEW_GENERAL: fetch failed": 6,
     "CODE_REVIEW_GENERAL: fetch failed": 5,
     "CODE_REVIEW_GENERAL: HTTP 500 upstream call failed: context deadline exceeded": 7
