@@ -5,6 +5,7 @@
 //   ship   (Mission 14 Web3 Native & DeFi, whitehat): is this contract/code deliverable safe to submit?
 import { ask } from "./telegraph.mjs";
 import { flagsCode, flagsSecurity } from "./report.mjs";
+import { REVIEW_LIMIT, fitForReview, stripComments } from "./solsrc.mjs";
 import { append, readLedger } from "./ledger.mjs";
 import { chainBalance } from "./chain.mjs";
 import { balanceQueries, normChain } from "./tokens.mjs";
@@ -185,8 +186,16 @@ export const localFindings = (code) => RULES.filter(([re]) => re.test(code)).map
 /** Mission 14 (whitehat): may this contract/code deliverable be submitted? */
 export async function shipCheck(code, { name = "deliverable" } = {}) {
   if (!code || !code.trim()) throw new Error("empty deliverable");
-  const src = code.length > 12000 ? code.slice(0, 12000) + "\n/* truncated */" : code;
   const isSol = /pragma solidity|contract\s+\w+\s*\{/.test(code);
+  const fit = fitForReview(code);
+  if (!fit) {
+    // Too long for the review Intents even without comments: nothing is sent or paid; fail closed.
+    const local = isSol ? localFindings(code) : [];
+    return decide("ship", { name, bytes: code.length, solidity: isSol }, "HOLD",
+      [`too long to review: ${stripComments(code).length} characters without comments, over the ${REVIEW_LIMIT}-character limit of the review Intents; split the deliverable or review it another way`],
+      [], { uncertainty: ["not reviewed"], local_findings: local });
+  }
+  const src = fit.text;
   const ev = [await buy([["SECURITY_REVIEW_GENERAL", { target: src }]], {}, "ship")];
   // SMART_CONTRACT_AUDIT_GENERAL has no published schema yet (answers come back as free text, no receipt),
   // so contracts get the typed CODE_REVIEW Intent as the second opinion.

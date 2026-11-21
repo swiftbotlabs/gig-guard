@@ -9,7 +9,10 @@ import { readLedger } from "../../src/ledger.mjs";
 
 const man = JSON.parse(fs.readFileSync(new URL("./manifest.json", import.meta.url), "utf8"));
 const cap = Number(process.env.GG_SCALE_MAX_USD || 2.6);
-const decided = () => new Set(readLedger().filter((x) => x.kind === "decision" && x.gate === "ship").map((x) => x.input?.name));
+// GG_SCALE_RETRY_HELD=1: run again only the contracts whose latest decision is HOLD (e.g. after the gate learned to fit the
+// review Intents' 2,000-character limit). The scorer then uses each contract's latest decision and says how many were re-run.
+const latest = () => { const m = new Map(); for (const x of readLedger()) if (x.kind === "decision" && x.gate === "ship") m.set(x.input?.name, x.verdict); return m; };
+const decided = () => new Set([...latest()].filter(([, v]) => !(process.env.GG_SCALE_RETRY_HELD === "1" && v === "HOLD")).map(([k]) => k));
 const spent = () => readLedger().filter((x) => x.kind === "purchase").reduce((s, x) => s + Number(x.cost_usd || 0), 0);
 const done = decided();
 let n = 0;
@@ -24,4 +27,4 @@ for (const it of man.items) {
     console.log(new Date().toISOString(), ++n, it.name, d.verdict, `$${d.cost_usd}`, `${((Date.now() - t) / 1000).toFixed(1)} s`);
   } catch (e) { console.log(new Date().toISOString(), it.name, "ERROR", String(e.message || e).slice(0, 200)); if (/daily cap|BudgetError/i.test(String(e))) break; }
 }
-console.log(JSON.stringify({ decided: decided().size, of: man.items.length, spent_usd: +spent().toFixed(4) }));
+console.log(JSON.stringify({ decided: latest().size, of: man.items.length, spent_usd: +spent().toFixed(4) }));

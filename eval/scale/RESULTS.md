@@ -8,7 +8,7 @@ Spend $1.88 test USDC on Telegraph testnet. Requests 258, answered and paid 188,
 
 **Cost per right gate decision: $0.019** (all spend divided by decisions that matched the label).
 
-| | Caught (vulnerable, flagged) | Missed | False alarm (audited, flagged) | Passed audited | Held: no review bought | Right, of decided |
+| | Caught (vulnerable, flagged) | Missed | False alarm (audited, flagged) | Passed audited | Held: no review could be bought (availability, not accuracy) | Right, of decided |
 |---|---|---|---|---|---|---|
 | Gate verdict | 91 | 0 | 1 | 8 | 29 | 99% |
 | Gate verdict, contracts without name hints | 61 | 0 | 1 | 8 | 28 | 99% |
@@ -34,8 +34,8 @@ Spend $1.88 test USDC on Telegraph testnet. Requests 258, answered and paid 188,
 
 Failed requests (not charged):
 
-- 27 × SECURITY_REVIEW_GENERAL: HTTP 200
-- 25 × CODE_REVIEW_GENERAL: HTTP 200
+- 27 × SECURITY_REVIEW_GENERAL: input over the node's 2000-character limit for `target` (no miner could take it; not charged)
+- 25 × CODE_REVIEW_GENERAL: input over the node's 2000-character limit for `code` (no miner could take it; not charged)
 - 6 × SECURITY_REVIEW_GENERAL: fetch failed
 - 5 × CODE_REVIEW_GENERAL: fetch failed
 - 7 × CODE_REVIEW_GENERAL: HTTP 500 upstream call failed: context deadline exceeded
