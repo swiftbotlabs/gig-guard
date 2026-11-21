@@ -16,7 +16,10 @@ const decided = () => new Set([...latest()].filter(([, v]) => !(process.env.GG_S
 const spent = () => readLedger().filter((x) => x.kind === "purchase").reduce((s, x) => s + Number(x.cost_usd || 0), 0);
 const done = decided();
 let n = 0;
+// GG_SCALE_ONLY=audited|vulnerable: run only that label (e.g. a fresh clean-side run after a parser change, in its own ledger).
+const only = process.env.GG_SCALE_ONLY || "";
 for (const it of man.items) {
+  if (only && it.label !== only) continue;
   if (done.has(it.name)) continue;
   if (spent() + 0.02 > cap + 1e-9) { console.log(`stop: run cap $${cap} reached ($${spent().toFixed(2)} spent)`); break; }
   const src = fs.readFileSync(new URL(`./samples/${it.name}`, import.meta.url), "utf8");

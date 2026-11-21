@@ -25,7 +25,15 @@ export const flagsSecurity = (r) => {
   if (CLEAN.test(lc(r?.summary))) return false;
   return Number(r?.vulnerability_count || 0) > 0 || (!r?.verdict && (r?.issues?.length || 0) > 0) || DEFECT.test(words(r));
 };
-export const flagsCode = (r) => /request changes|reject/.test(lc(r?.verdict)) || DEFECT.test(words(r).replace(/no (?:security )?vulnerabilit(?:y|ies)[^.]*\./g, ""));
+// An explicit verdict wins over the text: "Request changes"/"Reject" flags; "Approve"/"Approved"/"LGTM" passes even when the text
+// mentions defect words while explaining why the code is fine (seen: an Approve that discusses delegatecall). Only a neutral or
+// missing verdict ("Comment", null) falls back to reading the text.
+export const flagsCode = (r) => {
+  const v = lc(r?.verdict).trim();
+  if (/request changes|reject/.test(v)) return true;
+  if (/^(approve|approved|lgtm)\b/.test(v)) return false;
+  return DEFECT.test(words(r).replace(/no (?:security )?vulnerabilit(?:y|ies)[^.]*\./g, ""));
+};
 
 /** Grade one paid answer inside a decision. Returns {grade, why}. */
 export function grade(d, e) {

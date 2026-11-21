@@ -72,7 +72,7 @@ Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow b
 
 ```bash
 npm install
-npm test                                   # 29 tests against a fake node: no network, no funds
+npm test                                   # 30 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
@@ -137,7 +137,7 @@ Written up as found, with the workaround in the code:
 
 ## Tests
 
-`npm test` runs 29 tests (20 policy, 3 report, 3 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 30 tests (20 policy, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Limits
 

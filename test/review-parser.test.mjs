@@ -36,6 +36,13 @@ test("wording that must not flag", () => {
   }
 });
 
+test("an explicit Approve passes even when its text names a defect class; Comment still reads the text", () => {
+  assert.equal(flagsCode({ verdict: "Approve", findings: ["uses delegatecall correctly to preserve the context"], summary: "Approve. Correct." }), false);
+  assert.equal(flagsCode({ verdict: "Approved", findings: [], summary: "reentrancy guard is in place" }), false);
+  assert.equal(flagsCode({ verdict: "Comment", findings: [], summary: "This is vulnerable to reentrancy." }), true);
+  assert.equal(flagsCode({ verdict: "Request changes", findings: [], summary: "Looks fine otherwise." }), true);
+});
+
 test("wording that must flag", () => {
   for (const summary of ["The contract is not safe: anyone can call sweep.", "Uses tx.origin for auth.", "This is vulnerable to reentrancy.",
     "The owner can permanently lose funds."]) assert.equal(flagsCode({ verdict: "Comment", findings: null, summary }), true, summary);

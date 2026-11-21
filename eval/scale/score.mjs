@@ -54,7 +54,8 @@ const gateRight = gate.tp + gate.tn;
 const out = { decisions: dec.length, rerun, of: man.items.length, spend_usd: +spend.toFixed(4), requests, paid, failed: requests - paid,
   latency_ms: { p50: q(0.5), p95: q(0.95), n: lat.length }, gate, gate_without_name_hints: gateNoHint, local_rules_only: rules,
   usd_per_right_gate_decision: gateRight ? +(spend / gateRight).toFixed(4) : null, by_category: cats, by_intent_miner: byRows, failed_requests: errs };
-fs.writeFileSync(new URL("./results.json", import.meta.url), JSON.stringify(out, null, 2) + "\n");
+const TAG = process.env.GG_SCALE_TAG ? `-${process.env.GG_SCALE_TAG.replace(/[^a-z0-9-]/gi, "")}` : "";
+fs.writeFileSync(new URL(`./results${TAG}.json`, import.meta.url), JSON.stringify(out, null, 2) + "\n");
 const tr = (label, m) => `| ${label} | ${m.tp} | ${m.fn} | ${m.fp} | ${m.tn} | ${m.held} | ${acc(m)} |`;
 const md = [
   `# Scale run: ${dec.length} ship-gate decisions on public contracts with known labels`, "",
@@ -73,5 +74,5 @@ const md = [
   "Failed requests (not charged):", "", ...Object.entries(errs).map(([k, n]) => `- ${n} × ${k}`), "",
   "Every paid answer has its receipt in `eval/scale/ledger.public.jsonl`; `node src/cli.mjs verify` checks them against the testnet node.", "",
 ].join("\n");
-fs.writeFileSync(new URL("./RESULTS.md", import.meta.url), md);
+fs.writeFileSync(new URL(`./RESULTS${TAG}.md`, import.meta.url), md);
 console.log(JSON.stringify({ decisions: out.decisions, spend: out.spend_usd, gate, usd_per_right: out.usd_per_right_gate_decision }));
