@@ -19,6 +19,12 @@ const answers = {
   SECURITY_REVIEW_GENERAL: (p) => p.target.includes("nullverdict") ? { verdict: null, vulnerability_count: 1, issues: ["CWE-863"], summary: null } : ({ verdict: p.target.includes("tx.origin") ? "Insecure" : "Secure", vulnerability_count: p.target.includes("tx.origin") ? 1 : 0, issues: ["SWC-115"] }),
   SMART_CONTRACT_AUDIT_GENERAL: (p) => ({ verdict: p.code.includes("tx.origin") ? "High" : "Low" }),
   CODE_REVIEW_GENERAL: () => ({ verdict: "Approve", summary: "ok" }),
+  // deliver gate: the fake judge reads a marker in the result; the fake CI reads the patch ref
+  TASK_EXECUTION_QUALITY_GENERAL: (p) => ({ verdict: p.result.includes("[bad]") ? "fails" : p.result.includes("[half]") ? "partially_satisfies" : "satisfies",
+    score: p.result.includes("[bad]") ? 2 : 9, reason: p.result.includes("[bad]") ? "the CSV has no totals row" : "meets the task" }),
+  LLM_OUTPUT_EVALUATION_GENERAL: (p) => ({ rating: p.output.includes("[bad]") ? "Fails" : "Good", score: 8, strengths: ["clear"], errors: [] }),
+  CODE_PATCH_VERIFY_GENERAL: (p) => ({ conclusion: p.patch.endsWith("@red") ? "failure" : p.patch.endsWith("@wip") ? "pending" : "success",
+    passed: p.patch.endsWith("@red") ? false : p.patch.endsWith("@wip") ? null : true, commit: p.patch.split("@")[1] }),
 };
 let failNext = new Set(), emptyNext = new Set(), unrelated = false;
 let agentSlow = false, agentAsks = [], agentDone = {};
@@ -243,3 +249,40 @@ test("scout: a delegated sponsor investigation (API key) adds sourced evidence, 
     assert.match(w.reasons.join(" "), /HTTP 401/);
   } finally { delete process.env.ANJOMAN_API_KEY; unrelated = false; agentSlow = false; }
 });
+
+const TASK = "Export November invoices to CSV with a totals row.";
+test("deliver: satisfied task is SUBMIT; failed is FIX with the judge's reason; partial is HOLD", async () => {
+  const ok = await g.deliverCheck({ task: TASK, result: "invoice,amount\nA,1\ntotal,1" });
+  assert.equal(ok.verdict, "SUBMIT");
+  assert.equal(ok.receipts.length, 1);
+  const bad = await g.deliverCheck({ task: TASK, result: "invoice,amount\nA,1 [bad]" });
+  assert.equal(bad.verdict, "FIX");
+  assert.match(bad.reasons.join(" "), /fails.*totals row/);
+  assert.equal((await g.deliverCheck({ task: TASK, result: "invoice,amount [half]" })).verdict, "HOLD");
+});
+test("deliver: a required item missing from the result is FIX even when the judge passes it, shown as uncertainty", async () => {
+  const d = await g.deliverCheck({ task: TASK, result: "invoice,amount\nA,1", mustInclude: ["total"] });
+  assert.equal(d.verdict, "FIX");
+  assert.match(d.uncertainty.join(" "), /judge passed it/);
+});
+test("deliver: CI on the patch decides too: failure FIX, pending HOLD, success SUBMIT", async () => {
+  assert.equal((await g.deliverCheck({ task: TASK, result: "done, totals added", patch: "acme/app@red" })).verdict, "FIX");
+  assert.equal((await g.deliverCheck({ task: TASK, result: "done, totals added", patch: "acme/app@wip" })).verdict, "HOLD");
+  const s = await g.deliverCheck({ task: TASK, result: "done, totals added", patch: "acme/app@abc123" });
+  assert.equal(s.verdict, "SUBMIT");
+  assert.equal(s.receipts.length, 2);
+});
+test("deliver: falls back to LLM_OUTPUT_EVALUATION; no judge at all is HOLD (fail closed); too long is HOLD with nothing paid", async () => {
+  failNext = new Set(["TASK_EXECUTION_QUALITY_GENERAL"]);
+  const f = await g.deliverCheck({ task: TASK, result: "invoice,amount\ntotal,1" });
+  assert.equal(f.evidence[0].intent, "LLM_OUTPUT_EVALUATION_GENERAL");
+  assert.equal(f.verdict, "SUBMIT");
+  failNext = new Set(["TASK_EXECUTION_QUALITY_GENERAL", "LLM_OUTPUT_EVALUATION_GENERAL"]);
+  assert.equal((await g.deliverCheck({ task: TASK, result: "x" })).verdict, "HOLD");
+  failNext = new Set();
+  const long = await g.deliverCheck({ task: TASK, result: "x".repeat(5000) });
+  assert.equal(long.verdict, "HOLD");
+  assert.equal(long.receipts.length, 0);
+  await assert.rejects(g.deliverCheck({ task: "", result: "x" }));
+});
+

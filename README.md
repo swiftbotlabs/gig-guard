@@ -10,6 +10,7 @@ Demo video (2 min 45 s, the 10:21 UTC run below, long waits sped up and labelled
 |---|---|---|---|---|
 | `scout`: a new job lead shows up in the agent's heartbeat | 09 Personal Agent | `URL_SCAN_VERDICT` (fallback `URL_SAFE_GENERAL`), `WEB_SEARCH_GENERAL` (fallback `NEWS_SEARCH_GENERAL`) on the client's payment record | sources must name the client | GO / CAUTION / SKIP |
 | `ship`: a contract or code deliverable is about to be submitted | 14 Web3 Native & DeFi (whitehat) | `SECURITY_REVIEW_GENERAL`, `CODE_REVIEW_GENERAL` | local Solidity rules (SWC-104/106/107/112/115/120) | SHIP / FIX / HOLD |
+| `deliver`: the agent is about to tell its client "done" | 09 Personal Agent | `TASK_EXECUTION_QUALITY_GENERAL` (fallback `LLM_OUTPUT_EVALUATION_GENERAL`) on the task and the actual result; `CODE_PATCH_VERIFY_GENERAL` on the commit's CI when code was pushed | the client's required items must appear in the result | SUBMIT / FIX / HOLD |
 | `claim`: an agreed payment is overdue | 15 Consumer Automation | `WALLET_BALANCE_CHECK_GENERAL` (or `ONCHAIN_TX_LOOKUP_GENERAL` for a tx), `CONTRACT_OBLIGATION_AUDIT_GENERAL` on the terms | public RPC `balanceOf` | PAID / CLAIM (letter drafted, waits for the user's yes) / PENDING |
 
 ## What a run looks like
@@ -72,13 +73,14 @@ Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow b
 
 ```bash
 npm install
-npm test                                   # 30 tests against a fake node: no network, no funds
+npm test                                   # 34 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
 node src/cli.mjs scout https://example.org/job "Example Client" 500
 node src/cli.mjs ship samples/Vault.sol                 # FIX
 node src/cli.mjs ship samples/SafeVault.sol             # SHIP
+node src/cli.mjs deliver '{"task":"Export the invoices to CSV with a totals row","resultFile":"out/invoices.csv","mustInclude":["total"]}'
 node src/cli.mjs claim '{"wallet":"0x...","chain":"ethereum","token":"USDT","sponsor":"Example Client","label":"Payment A","prizeUsd":400,"dueDate":"2026-11-15"}'
 node src/cli.mjs heartbeat examples/queue.example.json results.json   # what the agent runs every cycle
 node src/cli.mjs verify verify.json                     # check every receipt against settled epoch blocks
@@ -87,7 +89,7 @@ node src/cli.mjs export ledger.public.jsonl             # public copy of the led
 node src/cli.mjs report report.md report.json           # Mission 10: cost per verified correct answer
 ```
 
-Exit codes: 0 = go (GO/PAID/SHIP), 10 = stop and look, 1 = error. That makes each gate a one-line guard in any shell loop: `node src/cli.mjs ship out/C.sol && submit || echo held`.
+Exit codes: 0 = go (GO/PAID/SHIP/SUBMIT), 10 = stop and look, 1 = error. That makes each gate a one-line guard in any shell loop: `node src/cli.mjs ship out/C.sol && submit || echo held`.
 
 ## Docs
 
@@ -137,7 +139,7 @@ Written up as found, with the workaround in the code:
 
 ## Tests
 
-`npm test` runs 30 tests (20 policy, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 34 tests (24 policy, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Limits
 

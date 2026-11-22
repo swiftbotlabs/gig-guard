@@ -1,0 +1,313 @@
+{
+ "note": "Known-answer set for the deliver gate. Each task has one result that does it and one with a planted defect (truth by construction).",
+ "cases": [
+  {
+   "id": "csv-totals/good",
+   "task": "Export these invoices to CSV with columns invoice,amount and a final row 'total' with the sum: INV-1 120.00, INV-2 80.50, INV-3 19.50.",
+   "result": "invoice,amount\nINV-1,120.00\nINV-2,80.50\nINV-3,19.50\ntotal,220.00",
+   "mustInclude": [
+    "total,220.00"
+   ],
+   "truth": "done"
+  },
+  {
+   "id": "csv-totals/bad",
+   "task": "Export these invoices to CSV with columns invoice,amount and a final row 'total' with the sum: INV-1 120.00, INV-2 80.50, INV-3 19.50.",
+   "result": "invoice,amount\nINV-1,120.00\nINV-2,80.50\nINV-3,19.50\ntotal,210.00",
+   "mustInclude": [
+    "total,220.00"
+   ],
+   "truth": "not_done",
+   "defect": "wrong total"
+  },
+  {
+   "id": "json-keys/good",
+   "task": "Return a JSON object with exactly the keys name, email and plan for the customer Ana Ruiz, ana@example.com, on the Pro plan.",
+   "result": "{\"name\": \"Ana Ruiz\", \"email\": \"ana@example.com\", \"plan\": \"Pro\"}",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "json-keys/bad",
+   "task": "Return a JSON object with exactly the keys name, email and plan for the customer Ana Ruiz, ana@example.com, on the Pro plan.",
+   "result": "{\"name\": \"Ana Ruiz\", \"email\": \"ana@example.com\"}",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "missing key"
+  },
+  {
+   "id": "py-even/good",
+   "task": "Write a Python function is_even(n) that returns True for even integers and False for odd ones.",
+   "result": "def is_even(n):\n    return n % 2 == 0",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "py-even/bad",
+   "task": "Write a Python function is_even(n) that returns True for even integers and False for odd ones.",
+   "result": "def is_even(n):\n    return n % 2 == 1",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "inverted logic"
+  },
+  {
+   "id": "translate-es/good",
+   "task": "Translate into Spanish: 'The meeting is moved to Thursday at 3 pm.'",
+   "result": "La reunión se traslada al jueves a las 3 de la tarde.",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "translate-es/bad",
+   "task": "Translate into Spanish: 'The meeting is moved to Thursday at 3 pm.'",
+   "result": "La reunión se traslada al martes a las 3 de la tarde.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "wrong day"
+  },
+  {
+   "id": "summary-3/good",
+   "task": "Summarise in at most 3 bullet points: 'Q3 revenue rose 12% to $4.1M. Costs fell 3%. The company hired 14 engineers and opened a Berlin office.'",
+   "result": "- Q3 revenue up 12% to $4.1M\n- Costs down 3%\n- 14 engineers hired; Berlin office opened",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "summary-3/bad",
+   "task": "Summarise in at most 3 bullet points: 'Q3 revenue rose 12% to $4.1M. Costs fell 3%. The company hired 14 engineers and opened a Berlin office.'",
+   "result": "- Q3 revenue up 21% to $4.1M\n- Costs up 3%\n- 14 engineers hired; Paris office opened",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "invented facts"
+  },
+  {
+   "id": "sql-count/good",
+   "task": "Write a SQL query that returns the number of orders per customer_id from the table orders.",
+   "result": "SELECT customer_id, COUNT(*) AS orders FROM orders GROUP BY customer_id;",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "sql-count/bad",
+   "task": "Write a SQL query that returns the number of orders per customer_id from the table orders.",
+   "result": "SELECT customer_id, SUM(amount) FROM orders;",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "wrong query"
+  },
+  {
+   "id": "regex-zip/good",
+   "task": "Give a regular expression that matches exactly a 5-digit US ZIP code and nothing else.",
+   "result": "^\\d{5}$",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "regex-zip/bad",
+   "task": "Give a regular expression that matches exactly a 5-digit US ZIP code and nothing else.",
+   "result": "\\d{5}",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "unanchored (matches inside longer strings)"
+  },
+  {
+   "id": "email-reply/good",
+   "task": "Draft a two-sentence polite reply declining a meeting on Friday and proposing Monday at 10:00 instead.",
+   "result": "Thank you for the invitation; unfortunately I can't make Friday. Would Monday at 10:00 work for you instead?",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "email-reply/bad",
+   "task": "Draft a two-sentence polite reply declining a meeting on Friday and proposing Monday at 10:00 instead.",
+   "result": "Thanks, Friday works for me. See you then.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "does the opposite"
+  },
+  {
+   "id": "unit-convert/good",
+   "task": "Convert 5 kilometres to miles, rounded to two decimals, and show the factor used.",
+   "result": "5 km x 0.621371 = 3.11 miles",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "unit-convert/bad",
+   "task": "Convert 5 kilometres to miles, rounded to two decimals, and show the factor used.",
+   "result": "5 km x 1.609 = 8.05 miles",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "wrong conversion"
+  },
+  {
+   "id": "readme-install/good",
+   "task": "Write the Installation section of a README for a Node.js CLI published on npm as 'gigtool', with the install command and how to run it.",
+   "result": "## Installation\n\n```\nnpm install -g gigtool\n```\n\nThen run `gigtool --help`.",
+   "mustInclude": [
+    "npm install -g gigtool"
+   ],
+   "truth": "done"
+  },
+  {
+   "id": "readme-install/bad",
+   "task": "Write the Installation section of a README for a Node.js CLI published on npm as 'gigtool', with the install command and how to run it.",
+   "result": "## Installation\n\nDownload the source and build it.",
+   "mustInclude": [
+    "npm install -g gigtool"
+   ],
+   "truth": "not_done",
+   "defect": "missing the required command"
+  },
+  {
+   "id": "dates-iso/good",
+   "task": "Rewrite these dates in ISO 8601 (YYYY-MM-DD): 3 March 2026, 25 Dec 2025.",
+   "result": "2026-03-03, 2025-12-25",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "dates-iso/bad",
+   "task": "Rewrite these dates in ISO 8601 (YYYY-MM-DD): 3 March 2026, 25 Dec 2025.",
+   "result": "2026-03-03, 2025-25-12",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "malformed date"
+  },
+  {
+   "id": "bug-fix/good",
+   "task": "Fix the off-by-one bug so the loop prints 1 to 5 inclusive: for i in range(1, 5): print(i)",
+   "result": "for i in range(1, 6):\n    print(i)",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "bug-fix/bad",
+   "task": "Fix the off-by-one bug so the loop prints 1 to 5 inclusive: for i in range(1, 5): print(i)",
+   "result": "for i in range(0, 5):\n    print(i)",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "still wrong range"
+  },
+  {
+   "id": "tweet-limit/good",
+   "task": "Write a product announcement for 'Ledger Lite' in under 200 characters that mentions the free trial.",
+   "result": "Ledger Lite is here: simple bookkeeping for freelancers. Start your 14-day free trial today.",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "tweet-limit/bad",
+   "task": "Write a product announcement for 'Ledger Lite' in under 200 characters that mentions the free trial.",
+   "result": "Ledger Lite is here: simple bookkeeping for freelancers, with invoicing, receipts, bank sync, multi-currency reports, tax exports and a mobile app for iOS and Android that works offline everywhere.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "over the limit and no trial"
+  },
+  {
+   "id": "extract-amount/good",
+   "task": "From this email, extract the invoice number and the amount due as JSON {invoice, amount}: 'Hi, please find invoice INV-7781 attached; the amount due is $1,240.00 by 30 Nov.'",
+   "result": "{\"invoice\": \"INV-7781\", \"amount\": \"1240.00\"}",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "extract-amount/bad",
+   "task": "From this email, extract the invoice number and the amount due as JSON {invoice, amount}: 'Hi, please find invoice INV-7781 attached; the amount due is $1,240.00 by 30 Nov.'",
+   "result": "{\"invoice\": \"INV-7781\", \"amount\": \"1420.00\"}",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "transposed digits"
+  },
+  {
+   "id": "sort-list/good",
+   "task": "Sort these names alphabetically, one per line: Zoe, adam, Mia, Ben.",
+   "result": "adam\nBen\nMia\nZoe",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "sort-list/bad",
+   "task": "Sort these names alphabetically, one per line: Zoe, adam, Mia, Ben.",
+   "result": "Ben\nMia\nZoe\nadam",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "case-sensitive sort, not alphabetical"
+  },
+  {
+   "id": "api-status/good",
+   "task": "Explain in one sentence what HTTP status 404 means.",
+   "result": "404 Not Found means the server could not find the requested resource.",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "api-status/bad",
+   "task": "Explain in one sentence what HTTP status 404 means.",
+   "result": "404 means the server crashed while handling the request.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "factually wrong"
+  },
+  {
+   "id": "csv-dedupe/good",
+   "task": "Remove duplicate rows from this CSV and keep the header: id,name\\n1,Ann\\n2,Bo\\n1,Ann",
+   "result": "id,name\n1,Ann\n2,Bo",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "csv-dedupe/bad",
+   "task": "Remove duplicate rows from this CSV and keep the header: id,name\\n1,Ann\\n2,Bo\\n1,Ann",
+   "result": "id,name\n1,Ann\n2,Bo\n1,Ann",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "duplicates left in"
+  },
+  {
+   "id": "percent/good",
+   "task": "What is 15% of 240? Give only the number.",
+   "result": "36",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "percent/bad",
+   "task": "What is 15% of 240? Give only the number.",
+   "result": "34",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "wrong arithmetic"
+  },
+  {
+   "id": "css-center/good",
+   "task": "Give the CSS to center a child div horizontally and vertically inside its parent using flexbox.",
+   "result": ".parent { display: flex; justify-content: center; align-items: center; }",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "css-center/bad",
+   "task": "Give the CSS to center a child div horizontally and vertically inside its parent using flexbox.",
+   "result": ".parent { display: flex; justify-content: center; }",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "only horizontal"
+  },
+  {
+   "id": "password-rule/good",
+   "task": "Write a one-line JavaScript expression that is true when the string s has at least 12 characters.",
+   "result": "s.length >= 12",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "password-rule/bad",
+   "task": "Write a one-line JavaScript expression that is true when the string s has at least 12 characters.",
+   "result": "s.length > 12",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "off by one"
+  }
+ ]
+}

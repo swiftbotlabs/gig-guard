@@ -3,6 +3,7 @@
 //   scout  (Mission 09 Personal Agent): should the heartbeat loop spend effort on this job lead?
 //   claim  (Mission 15 Consumer Automation): an agreed payment is overdue: prove it and draft the claim.
 //   ship   (Mission 14 Web3 Native & DeFi, whitehat): is this contract/code deliverable safe to submit?
+//   deliver (Mission 09 Personal Agent): did the agent actually do the task? Checked before it claims success.
 import { ask } from "./telegraph.mjs";
 import { flagsCode, flagsSecurity } from "./report.mjs";
 import { REVIEW_LIMIT, fitForReview, stripComments } from "./solsrc.mjs";
@@ -15,7 +16,8 @@ import { delegate, delegateEnabled } from "./delegate.mjs";
 // TTL per Intent, in minutes; GG_REUSE=0 turns reuse off.
 const TTL_MIN = { WALLET_BALANCE_CHECK_GENERAL: 10, ONCHAIN_TX_LOOKUP_GENERAL: 10, CRYPTO_TRANSFER_VERIFY_GENERAL: 10,
   URL_SCAN_VERDICT: 1440, URL_SAFE_GENERAL: 1440, WEB_SEARCH_GENERAL: 360, NEWS_SEARCH_GENERAL: 360,
-  SECURITY_REVIEW_GENERAL: 10080, CODE_REVIEW_GENERAL: 10080, CONTRACT_OBLIGATION_AUDIT_GENERAL: 10080 };
+  SECURITY_REVIEW_GENERAL: 10080, CODE_REVIEW_GENERAL: 10080, CONTRACT_OBLIGATION_AUDIT_GENERAL: 10080,
+  TASK_EXECUTION_QUALITY_GENERAL: 10080, LLM_OUTPUT_EVALUATION_GENERAL: 10080, CODE_PATCH_VERIFY_GENERAL: 30 };
 const STALE_MIN = 60; // a balance reading older than this is not evidence of "now"
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 function reusable(intent, p, need) {
@@ -220,3 +222,60 @@ export function shipVerdict(sr, cr, local) {
   if (verdict === "SHIP" && (!sr.ok || !cr.ok)) uncertainty.push("only one review could be bought");
   return { verdict, reasons, uncertainty };
 }
+
+// ---------------------------------------------------------------------------------------------------- deliver
+// Before an agent tells its client "done", it checks the actual outcome, not its own claim of success:
+//   1. a paid judge of the result against the task: TASK_EXECUTION_QUALITY_GENERAL (task, result) -> satisfies / partially_satisfies /
+//      fails, falling back to LLM_OUTPUT_EVALUATION_GENERAL (task, output) -> Excellent..Fails;
+//   2. for code pushed as a commit or PR: CODE_PATCH_VERIFY_GENERAL (patch) -> the CI conclusion, passed or not;
+//   3. free local checks the client wrote down (`mustInclude`: strings that must appear in the result).
+// SUBMIT only if every bought check passes and every local check holds. A disagreement between the judge and the local checks is
+// shown as uncertainty and never resolved toward SUBMIT. Nothing bought -> HOLD (fail closed).
+export const DELIVER_LIMIT = Number(process.env.GG_DELIVER_LIMIT || 2000); // characters of task + result sent to the judge
+const GOOD_RATING = new Set(["Excellent", "Good"]);
+
+/** Mission 09 (Personal Agent): may the agent report this task as done? */
+export async function deliverCheck({ task, result, patch, mustInclude = [], name = "deliverable" } = {}) {
+  if (!task || !String(task).trim() || !result || !String(result).trim()) throw new Error("task and result are both required");
+  const input = { name, task_chars: String(task).length, result_chars: String(result).length, patch: patch ? String(patch).slice(0, 200) : undefined };
+  const missing = mustInclude.filter((m) => !String(result).includes(m));
+  if (String(task).length + String(result).length > DELIVER_LIMIT) {
+    return decide("deliver", input, "HOLD", [`too long to judge: task + result are ${String(task).length + String(result).length} characters, over ${DELIVER_LIMIT}; judge a summary or split the task`],
+      [], { uncertainty: ["not judged"], local_missing: missing });
+  }
+  const ev = [await buy([["TASK_EXECUTION_QUALITY_GENERAL", { task, result }], ["LLM_OUTPUT_EVALUATION_GENERAL", { task, output: result }]], {}, "deliver")];
+  if (patch) ev.push(await buy([["CODE_PATCH_VERIFY_GENERAL", { patch }]], {}, "deliver", "conclusion"));
+  const { verdict, reasons, uncertainty } = deliverVerdict(ev[0], patch ? ev[1] : null, missing);
+  return decide("deliver", input, verdict, reasons, ev, { uncertainty, local_missing: missing });
+}
+
+/** The deliver decision from the bought judgement, the optional CI check and the local checks. Pure. */
+export function deliverVerdict(judge, ci, missing) {
+  const reasons = [], uncertainty = [];
+  let verdict = "SUBMIT";
+  if (!judge.ok) { verdict = "HOLD"; reasons.push("no judgement could be bought: fail closed"); }
+  else {
+    const r = judge.result || {};
+    const v = judge.intent === "TASK_EXECUTION_QUALITY_GENERAL" ? r.verdict : r.rating;
+    const score = r.score === null || r.score === undefined ? "?" : Number(r.score).toFixed(1);
+    const pass = judge.intent === "TASK_EXECUTION_QUALITY_GENERAL" ? v === "satisfies" : GOOD_RATING.has(v);
+    const fail = judge.intent === "TASK_EXECUTION_QUALITY_GENERAL" ? v === "fails" : v === "Poor" || v === "Fails";
+    if (fail) { verdict = "FIX"; reasons.push(`judge: ${v} (score ${score}). ${String(r.reason || (r.errors || []).join("; ") || "").slice(0, 200)}`); }
+    else if (!pass) { verdict = "HOLD"; reasons.push(`judge: ${v ?? "no verdict"} (score ${score}): not a clear pass; a human decides`); }
+    else reasons.push(`judge: ${v} (score ${score})`);
+  }
+  if (ci) {
+    const c = ci.ok ? ci.result || {} : null;
+    if (!ci.ok) { if (verdict === "SUBMIT") verdict = "HOLD"; reasons.push("CI result could not be bought: fail closed"); }
+    else if (c.conclusion === "pending" || c.passed === null || c.passed === undefined) { if (verdict === "SUBMIT") verdict = "HOLD"; reasons.push(`CI: ${c.conclusion ?? "unknown"}: wait for a finished run`); }
+    else if (c.passed === false || c.passed === "false" || c.conclusion === "failure") { verdict = "FIX"; reasons.push(`CI: ${c.conclusion} on ${c.commit || "the patch"}`); }
+    else reasons.push(`CI: ${c.conclusion} on ${c.commit || "the patch"}`);
+  }
+  if (missing.length) {
+    if (verdict === "SUBMIT") uncertainty.push("the judge passed it, but a required item is missing");
+    verdict = "FIX";
+    reasons.push(`missing from the result: ${missing.join(", ")}`);
+  }
+  return { verdict, reasons, uncertainty };
+}
+

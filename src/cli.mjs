@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // gig-guard: the three gates as shell commands, plus `heartbeat` for an agent loop.
 import fs from "node:fs";
-import { scoutBounty, claimPayout, shipCheck } from "./guards.mjs";
+import { scoutBounty, claimPayout, shipCheck, deliverCheck } from "./guards.mjs";
 import { writeLedgerPage } from "./page.mjs";
 import { publicLedger } from "./redact.mjs";
 import { readLedger } from "./ledger.mjs";
@@ -14,6 +14,8 @@ gig-guard claim <json>                                 Mission 15: overdue payme
      json: {"wallet","chain","token","txHash?","sponsor","prizeUsd","termsFile?","dueDate?","contact?","label?","approved?"}
      approved: true|false|absent. A CLAIM is never sent by Gig Guard; without approved:true it waits for the user.
 gig-guard ship <file>                                  Mission 14: review a deliverable before submitting
+gig-guard deliver <json>                               Mission 09: did the agent actually do the task? (before it says "done")
+     json: {"task" or "taskFile", "result" or "resultFile", "patch?": "owner/repo@sha or PR/CI URL", "mustInclude?": ["..."]}
 gig-guard heartbeat <queue.json> [out.json]            run every pending item in a queue (agent loop)
 gig-guard ledger [out.html] [verify.json]              render the public ledger page (redacted)
 gig-guard export [out.jsonl]                           redacted copy of the ledger, safe to publish
@@ -22,11 +24,13 @@ gig-guard compare [out.md] [out.json]                  same decisions with vs wi
 gig-guard report [out.md] [out.json]                   Mission 10: cost per verified correct answer, by Intent and miner
   Public output replaces client names (or a queue item's "label"), payout wallets, tx hashes and links.
   ledger.jsonl itself is PRIVATE: never publish it.`;
-const GO = ["GO", "PAID", "SHIP"];
+const GO = ["GO", "PAID", "SHIP", "SUBMIT"];
 async function runItem(it) {
   if (it.gate === "scout") return scoutBounty(it);
   if (it.gate === "claim") return claimPayout({ ...it, termsText: it.termsFile ? fs.readFileSync(it.termsFile, "utf8") : it.termsText });
   if (it.gate === "ship") return shipCheck(fs.readFileSync(it.file, "utf8"), { name: it.file.split("/").pop() });
+  if (it.gate === "deliver") return deliverCheck({ ...it, task: it.taskFile ? fs.readFileSync(it.taskFile, "utf8") : it.task,
+    result: it.resultFile ? fs.readFileSync(it.resultFile, "utf8") : it.result, name: it.label || (it.resultFile || "deliverable").split("/").pop() });
   throw new Error(`unknown gate ${it.gate}`);
 }
 try {
@@ -34,6 +38,7 @@ try {
   if (cmd === "scout") d = await scoutBounty({ url: a[0], sponsor: a[1], prizeUsd: Number(a[2]) || undefined });
   else if (cmd === "claim") d = await runItem({ gate: "claim", ...JSON.parse(a[0]) });
   else if (cmd === "ship") d = await runItem({ gate: "ship", file: a[0] });
+  else if (cmd === "deliver") d = await runItem({ gate: "deliver", ...JSON.parse(a[0]) });
   else if (cmd === "heartbeat") {
     const q = JSON.parse(fs.readFileSync(a[0], "utf8"));
     const out = [];
