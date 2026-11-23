@@ -10,9 +10,11 @@
  "not_done_stopped": 17,
  "not_done_total": 17,
  "held": 1,
+ "judge_stopped_bad": 15,
  "judge_pass_on_bad": 0,
+ "judge_none_on_bad": 2,
  "judge_fail_on_good": 1,
- "caught_only_by_local": 0,
+ "caught_only_by_local": 2,
  "cost_usd": 0.32
 }
 ```

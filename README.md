@@ -73,7 +73,7 @@ Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow b
 
 ```bash
 npm install
-npm test                                   # 34 tests against a fake node: no network, no funds
+npm test                                   # 38 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
@@ -136,10 +136,13 @@ Written up as found, with the workaround in the code:
 5. One `SECURITY_REVIEW_GENERAL` miner returns `verdict: null` with real CWE findings. Workaround: counted issues mean FIX.
 6. `WALLET_BALANCE_CHECK_GENERAL` on BNB Smart Chain: asked with the token symbol, our request got no answer (ledger 07:19, nothing charged, verdict PENDING); asked with the USDT contract address it returned a balance (ledger 07:29, receipt `0x191054b8…`, verdict CLAIM). In unledgered development runs the symbol form came back with all-null fields. Workaround: USDT/USDC contract map for six chains, contract asked first.
 7. The deliveries Merkle proof uses sorted-pair keccak256 (verified against epoch 7), but the leaf encoding isn't documented, so the proof can't be folded from the delivery fields alone. Workaround: membership and field match against the settled block; the proof length and roots are recorded.
+8. On the escrow rail the node reserves each request's whole `max_budget_usdc` until the next epoch block, so a high cap exhausts a
+   funded balance early (402 `insufficient escrow ... unbilled=U + price=P > balance=B`). Workaround: the judge is offered its $0.01 price,
+   and the 402 stops the run with the shortfall instead of being logged as HOLD.
 
 ## Tests
 
-`npm test` runs 34 tests (24 policy, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 38 tests (24 policy, 4 escrow rail, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Limits
 

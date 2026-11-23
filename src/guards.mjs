@@ -5,6 +5,7 @@
 //   ship   (Mission 14 Web3 Native & DeFi, whitehat): is this contract/code deliverable safe to submit?
 //   deliver (Mission 09 Personal Agent): did the agent actually do the task? Checked before it claims success.
 import { ask } from "./telegraph.mjs";
+import { config } from "./config.mjs";
 import { flagsCode, flagsSecurity } from "./report.mjs";
 import { REVIEW_LIMIT, fitForReview, stripComments } from "./solsrc.mjs";
 import { append, readLedger } from "./ledger.mjs";
@@ -31,7 +32,7 @@ const stale = (r) => r?.as_of && Date.now() - Date.parse(r.as_of) > STALE_MIN * 
 
 // Buy from the first intent in the list that delivers (some intents have thin supply on testnet).
 // `need` names the answer field that must be filled for the answer to count (e.g. "balance").
-async function buy(intents, params, purpose, need) {
+async function buy(intents, params, purpose, need, budget) {
   const tried = [];
   for (const [intent, p] of intents.map((i) => (Array.isArray(i) ? i : [i, params]))) {
     const hit = reusable(intent, p, need);
@@ -40,7 +41,7 @@ async function buy(intents, params, purpose, need) {
       return { ok: true, intent, result: hit.result, receipt: hit.receipt, miner_id: hit.miner_id, cost_usd: 0, ms: 0, reused: hit.receipt?.receipt_hash, tried };
     }
     try {
-      const r = await ask(intent, p, { purpose });
+      const r = await ask(intent, p, budget ? { purpose, budget } : { purpose });
       // A paid answer whose fields are all empty is no answer: note it and try the next supplier.
       const vals = Object.entries(r.result || {}).filter(([k]) => !Object.values(p).includes(r.result[k])).map(([, v]) => v);
       const filled = (v) => v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && !v.length);
@@ -48,7 +49,7 @@ async function buy(intents, params, purpose, need) {
       if (need && stale(r.result)) { tried.push({ intent, error: `stale answer (as_of ${r.result.as_of})`, receipt: r.receipt?.receipt_hash, cost_usd: r.cost_usd }); continue; }
       return { ok: true, intent, ...r, tried };
     }
-    catch (e) { if (e.name === "BudgetError") throw e; tried.push({ intent, error: String(e.message || e).slice(0, 200) }); }
+    catch (e) { if (e.name === "BudgetError" || e.name === "EscrowFundsError") throw e; tried.push({ intent, error: String(e.message || e).slice(0, 200) }); }
   }
   return { ok: false, intent: intents.map((i) => (Array.isArray(i) ? i[0] : i)).join("|"), error: "no supplier delivered", tried };
 }
@@ -84,7 +85,7 @@ export async function scoutBounty({ url, sponsor, prizeUsd, label }) {
       const d = await delegate(`Investigate "${sponsor}" as a bounty or hackathon sponsor. Is it a real organisation, and is there public evidence that it has paid, or failed to pay, its winners? Cite sources. Answer in under 120 words.`, { purpose: "scout" });
       inv = { intent: "ANJOMAN_AGENT_TASK", ok: d.ok, result: { status: d.status, brief: d.answer, sources: d.sources }, cost_usd: d.cost_usd, ms: d.ms, job_id: d.job_id,
         ...(d.ok ? {} : { error: `delegated task ${d.status}`, tried: [{ intent: "ANJOMAN_AGENT_TASK", error: `delegated task ${d.status}`, cost_usd: d.cost_usd }] }) };
-    } catch (e) { if (e.name === "BudgetError") throw e; inv = { intent: "ANJOMAN_AGENT_TASK", ok: false, error: String(e.message || e).slice(0, 200), tried: [] }; }
+    } catch (e) { if (e.name === "BudgetError" || e.name === "EscrowFundsError") throw e; inv = { intent: "ANJOMAN_AGENT_TASK", ok: false, error: String(e.message || e).slice(0, 200), tried: [] }; }
     ev.push(inv);
   }
   const { verdict, reasons } = scoutVerdict({ url: u.href, sponsor }, ev);
@@ -232,6 +233,9 @@ export function shipVerdict(sr, cr, local) {
 // SUBMIT only if every bought check passes and every local check holds. A disagreement between the judge and the local checks is
 // shown as uncertainty and never resolved toward SUBMIT. Nothing bought -> HOLD (fail closed).
 export const DELIVER_LIMIT = Number(process.env.GG_DELIVER_LIMIT || 2000); // characters of task + result sent to the judge
+// The judge answers at $0.01. Sending the $0.03 per-call cap as max_budget_usdc made the node reserve 3x that against the escrow
+// balance until each epoch block billed it (the 402 stall of 22 Nov), so the deliver gate offers $0.01 unless told otherwise.
+export const JUDGE_BUDGET = Math.min(Number(process.env.GG_JUDGE_BUDGET || 10000), config.maxPerCall);
 const GOOD_RATING = new Set(["Excellent", "Good"]);
 
 /** Mission 09 (Personal Agent): may the agent report this task as done? */
@@ -243,7 +247,7 @@ export async function deliverCheck({ task, result, patch, mustInclude = [], name
     return decide("deliver", input, "HOLD", [`too long to judge: task + result are ${String(task).length + String(result).length} characters, over ${DELIVER_LIMIT}; judge a summary or split the task`],
       [], { uncertainty: ["not judged"], local_missing: missing });
   }
-  const ev = [await buy([["TASK_EXECUTION_QUALITY_GENERAL", { task, result }], ["LLM_OUTPUT_EVALUATION_GENERAL", { task, output: result }]], {}, "deliver")];
+  const ev = [await buy([["TASK_EXECUTION_QUALITY_GENERAL", { task, result }], ["LLM_OUTPUT_EVALUATION_GENERAL", { task, output: result }]], {}, "deliver", undefined, JUDGE_BUDGET)];
   if (patch) ev.push(await buy([["CODE_PATCH_VERIFY_GENERAL", { patch }]], {}, "deliver", "conclusion"));
   const { verdict, reasons, uncertainty } = deliverVerdict(ev[0], patch ? ev[1] : null, missing);
   return decide("deliver", input, verdict, reasons, ev, { uncertainty, local_missing: missing });

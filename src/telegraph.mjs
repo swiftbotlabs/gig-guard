@@ -23,6 +23,22 @@ function client() {
 
 export class BudgetError extends Error { name = "BudgetError"; }
 
+// The node reserves each request's max_budget_usdc against the prepaid escrow balance until the next epoch block bills it.
+// When reservations reach the balance it answers 402 "insufficient escrow for delivery: unbilled=U μUSDC + price=P μUSDC > balance=B μUSDC".
+// That is not "no miner": every later request fails the same way. It is thrown as EscrowFundsError, so a gate records no
+// decision (no false HOLD) and a run stops at once with the shortfall, instead of walking through the remaining cases.
+export class EscrowFundsError extends Error {
+  name = "EscrowFundsError";
+  constructor(message, info) { super(message); this.info = info; }
+}
+/** Parses the node's insufficient-escrow reason. Returns { unbilled, price, balance, shortfall } in μUSDC, or null. */
+export function parseEscrowShortfall(reason) {
+  const m = String(reason || "").match(/unbilled=(\d+)\D+?price=(\d+)\D+?balance=(\d+)/);
+  if (!m) return null;
+  const [unbilled, price, balance] = m.slice(1).map(Number);
+  return { unbilled, price, balance, shortfall: Math.max(0, unbilled + price - balance) };
+}
+
 // Escrow rail (Ethereum Sepolia): prepaid balance on the Telegraph Diamond, one EIP-191 signature
 // per request, no facilitator in the path. Enabled with GG_RAIL=escrow.
 let escrowAccount;
@@ -79,6 +95,11 @@ export async function ask(intent, params, { budget = config.maxPerCall, purpose 
   let body; try { body = JSON.parse(text); } catch { body = { raw: text.slice(0, 500) }; }
   const rh = res.headers.get("x-telegraph-receipt") || res.headers.get("x-payment-response");
   const receipt = rh ? JSON.parse(Buffer.from(rh, "base64").toString("utf8")) : null;
+  if (res.status === 402 && /insufficient escrow/i.test(`${body.reason || ""} ${body.error || ""}`)) {
+    const info = parseEscrowShortfall(body.reason);
+    append({ kind: "error", intent, params, purpose, status: 402, escrow: info, ms });
+    throw new EscrowFundsError(`escrow balance exhausted: ${body.reason || body.error}`, info);
+  }
   if (res.status !== 200 || !receipt) {
     append({ kind: "error", intent, params, purpose, status: res.status, body, ms });
     throw new Error(`Telegraph ${intent} failed: HTTP ${res.status} ${JSON.stringify(body).slice(0, 200)}`);
