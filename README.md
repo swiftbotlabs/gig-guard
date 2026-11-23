@@ -95,6 +95,7 @@ Exit codes: 0 = go (GO/PAID/SHIP/SUBMIT), 10 = stop and look, 1 = error. That ma
 
 - [`docs/TUTORIAL.md`](docs/TUTORIAL.md): pay for verified intelligence from an agent loop in 10 minutes.
 - [`docs/TUTORIAL-with-vs-without.md`](docs/TUTORIAL-with-vs-without.md): add paid answers to a decision step, then measure with `compare` whether they changed anything.
+- [`docs/TUTORIAL-done-check.md`](docs/TUTORIAL-done-check.md): a paid done-check before your agent says "done", and how to measure it on your own cases.
 - [`docs/M09-DEMOS.md`](docs/M09-DEMOS.md): Mission 09's five failure tests (stale local answer, no budget, failed payment, conflicting provider answer, permission for external effects), run offline with `node examples/m09-demos.mjs`.
 - [`eval/deliver/RESULTS.md`](eval/deliver/RESULTS.md): the deliver gate on 40 known-answer cases (testnet), with cost and latency per decision.
 - [`docs/compare.md`](docs/compare.md): our own run, 10 real decisions with and without paid answers.
