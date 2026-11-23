@@ -1,0 +1,94 @@
+// Hosted done-check (hosted/worker.mjs) against a fake Telegraph node and an in-memory Durable Object. No network, no funds.
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import http from "node:http";
+
+let mode = "ok", asks = 0;
+const srv = http.createServer((req, res) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
+  const { intent, params, max_budget_usdc } = JSON.parse(b); const price = Number(max_budget_usdc);
+  res.setHeader("content-type", "application/json");
+  if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a7", amount: String(price),
+    extra: { message: `Telegraph Escrow Payment\nWallet: {from}\nAmount: ${price} uUSDC\nNonce: {nonce}\nValid After: {validAfter}\nValid Before: {validBefore}` } }] })); }
+  asks++;
+  if (mode === "empty") { res.writeHead(402); return res.end(JSON.stringify({ error: "payment required", reason: "insufficient escrow for delivery: unbilled=0 μUSDC + price=10000 μUSDC > balance=0 μUSDC" })); }
+  if (mode === "fail") { res.writeHead(504); return res.end('{"error":"miner timed out"}'); }
+  const bad = /> 12/.test(params.result || params.output || "");
+  res.writeHead(200, { "X-TELEGRAPH-RECEIPT": Buffer.from(JSON.stringify({ receipt_hash: "0x" + "ef".repeat(32), amount_uusdc: 10000, intent, epoch_id: 41 })).toString("base64") });
+  res.end(JSON.stringify({ miner_id: "302", cost_usd: 0.01, result: bad ? { verdict: "fails", reason: "uses > instead of >=" } : { verdict: "satisfies", reason: "correct" } }));
+}); });
+await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+const NODE = `http://127.0.0.1:${srv.address().port}`;
+const worker = (await import("../hosted/worker.mjs")).default;
+const { Budget, clientKey, parseInput } = await import("../hosted/worker.mjs");
+test.after(() => srv.close());
+
+function makeEnv(vars = {}) {
+  const store = new Map();
+  const ctx = { storage: { get: async (k) => structuredClone(store.get(k)), put: async (k, v) => { store.set(k, structuredClone(v)); } } };
+  const env = { TELEGRAPH_NODE: NODE, DONECHECK_PAYER_KEY: "0x" + "22".repeat(32), DAY_CAP_UUSDC: "200000", IP_MAX: "5", ...vars };
+  const b = new Budget(ctx, env);
+  env.BUDGET = { idFromName: () => "global", get: () => ({ fetch: (url, init) => b.fetch(new Request(url, init)) }) };
+  return env;
+}
+const T = "Write a one-line JavaScript expression that is true when the string s has at least 12 characters.";
+const call = (env, body, { ip = "203.0.113.7", origin } = {}) => worker.fetch(new Request("https://donecheck.example/api/check", { method: "POST",
+  headers: { "content-type": "application/json", "cf-connecting-ip": ip, ...(origin ? { origin } : {}) }, body: JSON.stringify(body) }), env, {});
+
+test("a correct result is SUBMIT, a planted defect FIX, each with a receipt; the budget goes down by what was spent", async () => {
+  mode = "ok"; const env = makeEnv();
+  const g = await (await call(env, { task: T, result: "s.length >= 12" })).json();
+  assert.equal(g.verdict, "SUBMIT"); assert.equal(g.receipt.epoch_id, 41); assert.equal(g.cost_usd, 0.01);
+  const b = await (await call(env, { task: T, result: "s.length > 12" })).json();
+  assert.equal(b.verdict, "FIX"); assert.match(b.reasons.join(" "), /instead of >=/);
+  assert.equal(b.budget_left_usd, 0.18);
+});
+test("a required item missing is FIX even when the judge passes it", async () => {
+  mode = "ok"; const r = await (await call(makeEnv(), { task: T, result: "s.length >= 12", mustInclude: ["=== 12"] })).json();
+  assert.equal(r.verdict, "FIX"); assert.deepEqual(r.missing, ["=== 12"]);
+});
+test("per-connection limit: the 6th check from one IPv4 (or one IPv6 /64) is refused before anything is signed", async () => {
+  mode = "ok"; let env = makeEnv(); const n = asks;
+  for (let i = 0; i < 5; i++) assert.equal((await call(env, { task: T, result: "s.length >= 12" })).status, 200);
+  const r = await call(env, { task: T, result: "s.length >= 12" });
+  assert.equal(r.status, 429); assert.equal(asks, n + 5);
+  env = makeEnv();
+  for (let i = 0; i < 5; i++) await call(env, { task: T, result: "x" }, { ip: `2001:db8:1:2:${i}::1` });
+  assert.equal((await call(env, { task: T, result: "x" }, { ip: "2001:db8:1:2:ffff::9" })).status, 429, "same /64 shares the limit");
+  assert.equal((await call(env, { task: T, result: "x" }, { ip: "2001:db8:1:3::1" })).status, 200);
+});
+test("global daily cap: once reservations reach it, checks are refused and nothing reaches the node", async () => {
+  mode = "ok"; const env = makeEnv({ DAY_CAP_UUSDC: "40000" }); const n = asks;
+  assert.equal((await call(env, { task: T, result: "a" }, { ip: "198.51.100.1" })).status, 200);
+  assert.equal((await call(env, { task: T, result: "b" }, { ip: "198.51.100.2" })).status, 200);   // spent 10000 + reserve 20000 fits
+  assert.equal((await call(env, { task: T, result: "c" }, { ip: "198.51.100.3" })).status, 200);   // spent 20000 + reserve 20000 = 40000 fits; then 30000 + 20000 does not
+  const r = await call(env, { task: T, result: "d" }, { ip: "198.51.100.4" });
+  assert.equal(r.status, 429); assert.match((await r.json()).error, /budget/);
+  assert.equal(asks, n + 3);
+});
+test("escrow used up: HOLD (fail closed), and the service stops for the day", async () => {
+  mode = "empty"; const env = makeEnv();
+  const r = await (await call(env, { task: T, result: "s.length >= 12" })).json();
+  assert.equal(r.verdict, "HOLD"); assert.match(r.reasons.join(" "), /used up/); assert.equal(r.cost_usd, 0);
+  mode = "ok";
+  assert.equal((await call(env, { task: T, result: "s.length >= 12" }, { ip: "192.0.2.9" })).status, 429);
+});
+test("a signed request that fails counts as spent (issue #228); both failing -> HOLD", async () => {
+  mode = "fail"; const env = makeEnv();
+  const r = await (await call(env, { task: T, result: "s.length >= 12" })).json();
+  assert.equal(r.verdict, "HOLD"); assert.equal(r.cost_usd, 0.02); assert.equal(r.budget_left_usd, 0.18);
+  mode = "ok";
+});
+test("refused before any spend: cross-origin, bad input, too long, no key; the page is served with a CSP", async () => {
+  const env = makeEnv(); const n = asks;
+  assert.equal((await call(env, { task: T, result: "x" }, { origin: "https://evil.example" })).status, 403);
+  assert.equal((await call(env, { task: T })).status, 400);
+  assert.equal((await call(env, { task: T, result: "x".repeat(2000) })).status, 400);
+  assert.equal((await call(env, { task: T, result: "x", mustInclude: ["a", "b", "c", "d", "e", "f"] })).status, 400);
+  assert.equal((await call(makeEnv({ DONECHECK_PAYER_KEY: "" }), { task: T, result: "x" })).status, 503);
+  assert.equal(asks, n);
+  const p = await worker.fetch(new Request("https://donecheck.example/"), env, {});
+  assert.equal(p.status, 200); assert.match(p.headers.get("content-security-policy"), /frame-ancestors 'none'/);
+  assert.match(await p.text(), /Done-check/);
+  assert.equal(parseInput({ task: " ", result: "x" }).error, "task and result are both required");
+  assert.notEqual(await clientKey("1.2.3.4", "2026-11-23"), await clientKey("1.2.3.4", "2026-11-24"));
+});

@@ -1,0 +1,19 @@
+# Gig Guard hosted done-check (testnet only). Deploy from this folder: wrangler deploy
+# Secret (a THROWAWAY testnet key, never the main payer): wrangler secret put DONECHECK_PAYER_KEY
+name = "donecheck"
+main = "worker.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+TELEGRAPH_NODE = "https://devnode.telegraphprotocol.com"
+DAY_CAP_UUSDC = "200000"   # $0.20 of test USDC per UTC day, all visitors together
+IP_MAX = "5"               # checks per connection (IPv4, or IPv6 /64) per UTC day
+
+[[durable_objects.bindings]]
+name = "BUDGET"
+class_name = "Budget"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Budget"]
