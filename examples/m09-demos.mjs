@@ -6,6 +6,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
+import { challengeMessage } from "../src/escrowmsg.mjs";
 
 let balance = 1000000, unbilled = 0, requests = 0;
 const judge = (p) => ({ verdict: "satisfies", score: 9, reason: "the CSV has a totals row" });
@@ -21,8 +22,8 @@ const srv = http.createServer((req, res) => {
       return res.end(JSON.stringify({ jsonrpc: "2.0", id: 1, result: sel === "0x313ce567" ? "0x6" : "0x0" }));
     }
     const { intent, params, max_budget_usdc } = JSON.parse(b); const price = Number(max_budget_usdc || 10000);
-    const ch = { accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a7", amount: String(price),
-      extra: { message: `Telegraph Escrow Payment\nWallet: {from}\nAmount: ${price} uUSDC\nNonce: {nonce}\nValid After: {validAfter}\nValid Before: {validBefore}` } }] };
+    const ch = { accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a70e949362670bf8bcead24efc5b8f950aa08b", amount: String(price),
+      extra: { message: challengeMessage(price) } }] };
     if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify(ch)); }
     requests++;
     if (unbilled + price > balance) { res.writeHead(402); return res.end(JSON.stringify({ ...ch, error: "payment required",

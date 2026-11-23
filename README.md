@@ -73,7 +73,7 @@ Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow b
 
 ```bash
 npm install
-npm test                                   # 48 tests against a fake node: no network, no funds
+npm test                                   # 51 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
@@ -100,7 +100,7 @@ https://donecheck.swiftbotlab.workers.dev: paste a task and an agent's result, g
 - signed requests that fail count as spent (issue #228);
 - when the escrow deposit is used up, the check answers HOLD and stops for the day.
 
-Code: [`hosted/`](hosted/), a Cloudflare Worker with one Durable Object for the budget. It uses the same `deliverVerdict` as the CLI. Tests: `test/hosted.test.mjs` (7, against a fake node).
+Code: [`hosted/`](hosted/), a Cloudflare Worker with one Durable Object for the budget. It uses the same `deliverVerdict` as the CLI. Neither the Worker nor the CLI ever signs the node's payment text as given: the escrow message must match the known template exactly (one amount, the Telegraph Diamond as payee, Ethereum Sepolia) and is rebuilt locally (`src/escrowmsg.mjs`). Spend is booked from what was signed, never from the node's receipt. Tests: `test/hosted.test.mjs` (9, against a fake node), reviewed by an independent security pass.
 
 ## Named failure cases (run each one)
 
@@ -175,7 +175,7 @@ Written up as found, with the workaround in the code:
 
 ## Tests
 
-`npm test` runs 48 tests (24 policy, 7 escrow rail, 7 hosted done-check, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, a signed request that fails but may still be billed (issue #228: logged, counted by the cap and in the decision's cost), bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 51 tests (24 policy, 8 escrow rail, 9 hosted done-check, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, a signed request that fails but may still be billed (issue #228: logged, counted by the cap and in the decision's cost), bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Limits
 

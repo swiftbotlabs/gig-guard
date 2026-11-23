@@ -9,6 +9,7 @@
 // Nothing the visitor pastes is stored. Their text is sent to Telegraph Miners for judging, so the page says not to paste secrets.
 import { privateKeyToAccount } from "viem/accounts";
 import { deliverVerdict } from "../src/verdict.mjs";
+import { parseEscrowOption, escrowMessage, ESCROW_NETWORK } from "../src/escrowmsg.mjs";
 import { PAGE } from "./page.mjs";
 
 const JUDGE = "TASK_EXECUTION_QUALITY_GENERAL", FALLBACK = "LLM_OUTPUT_EVALUATION_GENERAL";
@@ -21,9 +22,25 @@ const SEC = { "x-content-type-options": "nosniff", "referrer-policy": "no-referr
 const utcDay = () => new Date().toISOString().slice(0, 10);
 
 /** Client key: IPv4 address, or the /64 of an IPv6 address, hashed with the day (no raw address is stored). */
+/** Expands an IPv6 address to its 8 groups (so "2a01:4f8::1" and "2a01:4f8:0:0::1" are the same /64). Returns null if malformed. */
+export function expandIPv6(ip) {
+  const a = String(ip).toLowerCase().split("%")[0];
+  if (!/^[0-9a-f:.]+$/.test(a) || (a.match(/::/g) || []).length > 1) return null;
+  let [head, tail] = a.includes("::") ? a.split("::") : [a, null];
+  const h = head ? head.split(":") : [], t = tail ? tail.split(":") : [];
+  const last = (tail !== null ? t : h).at(-1) || "";
+  if (last.includes(".")) { const p = last.split(".").map(Number); if (p.length !== 4 || p.some((x) => !(x >= 0 && x <= 255))) return null;
+    const arr = tail !== null ? t : h; arr.splice(-1, 1, ((p[0] << 8) | p[1]).toString(16), ((p[2] << 8) | p[3]).toString(16)); }
+  const fill = tail !== null ? 8 - h.length - t.length : 0;
+  if (fill < 0 || (tail === null && h.length !== 8)) return null;
+  const g = [...h, ...Array(fill).fill("0"), ...t];
+  if (g.length !== 8 || g.some((x) => !/^[0-9a-f]{1,4}$/.test(x))) return null;
+  return g.map((x) => x.padStart(4, "0"));
+}
+/** Client key: IPv4 address, or the /64 of an IPv6 address, hashed with the day (no raw address is stored). */
 export async function clientKey(ip, day = utcDay()) {
   let k = String(ip || "unknown");
-  if (k.includes(":")) k = k.split(":").slice(0, 4).join(":") + "::/64";
+  if (k.includes(":")) { const g = expandIPv6(k); k = g ? g.slice(0, 4).join(":") + "::/64" : "ipv6-malformed"; }
   const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${day}|${k}`));
   return [...new Uint8Array(h)].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
@@ -50,14 +67,14 @@ export async function askEscrow(node, account, intent, params, fetchImpl = fetch
     if (first.status === 402) {
       const h = first.headers.get("payment-required");
       const ch = h ? JSON.parse(atob(h)) : await first.json();
-      const opt = (ch.accepts || []).find((a) => a.scheme === "escrow" && a.network === "eip155:11155111");
+      const opt = (ch.accepts || []).find((a) => a.scheme === "escrow" && a.network === ESCROW_NETWORK);
       if (!opt) return { ok: false, intent, error: "no escrow payment option offered" };
-      const amount = (String(opt.extra?.message || "").match(/Amount:\s*(\d+)/) || [])[1] || opt.amount;
-      if (!(Number(amount) > 0) || Number(amount) > PRICE) return { ok: false, intent, error: `quote ${amount} over the $0.01 price` };
+      let amount;
+      try { ({ amount } = parseEscrowOption(opt, PRICE)); } catch { return { ok: false, intent, error: "unexpected payment request from the node: not signed" }; }
       const now = Math.floor(Date.now() / 1000);
-      const auth = { from: account.address.toLowerCase(), to: opt.payTo, value: String(amount), validAfter: String(now - 5), validBefore: String(now + 90),
+      const auth = { from: account.address.toLowerCase(), to: opt.payTo.toLowerCase(), value: String(amount), validAfter: String(now - 5), validBefore: String(now + 90),
         nonce: `dc-${now}-${crypto.getRandomValues(new Uint32Array(2)).join("")}` };
-      const message = String(opt.extra.message).replace("{from}", auth.from).replace("{nonce}", auth.nonce).replace("{validAfter}", auth.validAfter).replace("{validBefore}", auth.validBefore);
+      const message = escrowMessage({ from: auth.from, amount, nonce: auth.nonce, validAfter: auth.validAfter, validBefore: auth.validBefore });
       const signature = await account.signMessage({ message });
       const xp = btoa(JSON.stringify({ x402Version: 2, scheme: "escrow", network: opt.network, payload: { signature, authorization: auth } }));
       signed = Number(amount);
@@ -69,7 +86,8 @@ export async function askEscrow(node, account, intent, params, fetchImpl = fetch
     const rh = res.headers.get("x-telegraph-receipt") || res.headers.get("x-payment-response");
     const receipt = rh ? JSON.parse(atob(rh)) : null;
     if (res.status !== 200 || !receipt) return { ok: false, intent, error: `HTTP ${res.status}`, signed };
-    return { ok: true, intent, result: b.result || {}, receipt, cost_usd: b.cost_usd, miner_id: b.miner_id, ms: Date.now() - t0, signed: Number(receipt.amount_uusdc || signed) };
+    // Book what we signed, never the node's own figure (a bad receipt must not lower the booked spend).
+    return { ok: true, intent, result: b.result || {}, receipt, cost_usd: signed / 1e6, miner_id: b.miner_id, ms: Date.now() - t0, signed };
   } catch (e) { return { ok: false, intent, error: "no answer (timeout or network)", signed }; }
 }
 
@@ -118,20 +136,36 @@ async function bud(env, op, body) {
   return r.json();
 }
 
-async function check(request, env, fetchImpl) {
+async function readCapped(request, max) {
+  if (!request.body) return "";
+  const reader = request.body.getReader(), parts = []; let n = 0;
+  for (;;) { const { done, value } = await reader.read(); if (done) break; n += value.byteLength; if (n > max) { try { await reader.cancel(); } catch {} return null; } parts.push(value); }
+  const all = new Uint8Array(n); let o = 0; for (const p of parts) { all.set(p, o); o += p.byteLength; }
+  return new TextDecoder().decode(all);
+}
+
+// Per-isolate shortcut once the day's budget is spent: refused requests stop hitting the Durable Object (keyed by the binding).
+const spent_ = new WeakMap();
+const isSpent = (env) => spent_.get(env.BUDGET) === utcDay(), markSpent = (env) => spent_.set(env.BUDGET, utcDay());
+
+async function check(request, env, fetchImpl, ctx) {
   if (!/^application\/json\b/i.test(request.headers.get("content-type") || "")) return json({ error: "content-type must be application/json" }, 415);
-  const raw = await request.text();
-  if (raw.length > 8192) return json({ error: "request too large" }, 413);
+  if (Number(request.headers.get("content-length") || 0) > 8192) return json({ error: "request too large" }, 413);
+  const raw = await readCapped(request, 8192);
+  if (raw === null) return json({ error: "request too large" }, 413);
   let body; try { body = JSON.parse(raw); } catch { return json({ error: "invalid JSON" }, 400); }
   const inp = parseInput(body);
   if (inp.error) return json({ error: inp.error }, 400);
   if (!/^0x[0-9a-fA-F]{64}$/.test(env.DONECHECK_PAYER_KEY || "")) return json({ error: "the hosted check is not configured" }, 503);
+  if (isSpent(env)) return json({ error: "today's testnet budget for the hosted check is used up; it resets at 00:00 UTC (or run it yourself, see the tutorial)" }, 429);
   let r; try { r = await bud(env, "reserve", { client: await clientKey(request.headers.get("cf-connecting-ip")) }); } catch { return json({ error: "budget keeper unavailable; nothing was spent" }, 503); }
-  if (!r.ok) return json({ error: r.reason }, 429);
-  const account = privateKeyToAccount(env.DONECHECK_PAYER_KEY);
+  if (!r.ok) { if (/budget/.test(r.reason)) markSpent(env); return json({ error: r.reason }, 429); }
   const node = env.TELEGRAPH_NODE || "https://devnode.telegraphprotocol.com";
-  let spent = 0, out = null, exhausted = false;
+  let spent = 0, out = null, exhausted = false, settled = false;
+  // Release the reservation whatever happens (also if the visitor disconnects): waitUntil keeps the settle alive.
+  const settle = (extra = false) => { if (settled) return null; settled = true; const p = bud(env, "settle", { spent, exhausted: extra }); ctx?.waitUntil?.(p.catch(() => {})); return p; };
   try {
+    const account = privateKeyToAccount(env.DONECHECK_PAYER_KEY);
     const tried = [];
     for (const [intent, params] of [[JUDGE, { task: inp.task, result: inp.result }], [FALLBACK, { task: inp.task, output: inp.result }]]) {
       const a = await askEscrow(node, account, intent, params, fetchImpl);
@@ -144,13 +178,14 @@ async function check(request, env, fetchImpl) {
     const judge = out ? { ok: true, intent: out.intent, result: out.result } : { ok: false };
     const v = deliverVerdict(judge, null, missing);
     if (exhausted) v.reasons.push("today's testnet budget is used up: no judgement could be bought (fail closed)");
-    const left = (await bud(env, "settle", { spent, exhausted })).left;
+    if (exhausted) markSpent(env);
+    const left = (await settle(exhausted)).left;
     return json({ verdict: v.verdict, reasons: v.reasons, uncertainty: v.uncertainty, missing,
       receipt: out ? { receipt_hash: out.receipt.receipt_hash, epoch_id: out.receipt.epoch_id, intent: out.intent, amount_uusdc: Number(out.receipt.amount_uusdc || 0), miner_id: out.miner_id } : null,
       judge: out ? { intent: out.intent, verdict: out.result.verdict ?? out.result.rating ?? null, reason: String(out.result.reason || (out.result.errors || []).join("; ") || "").slice(0, 400) } : null,
       cost_usd: spent / 1e6, ms: out?.ms ?? null, budget_left_usd: left / 1e6, node, network: "Ethereum Sepolia escrow (testnet, test USDC)" });
   } catch {
-    try { await bud(env, "settle", { spent }); } catch {}
+    try { await settle(exhausted); } catch {}
     return json({ error: "the check failed; nothing beyond the signed requests was spent" }, 502);
   }
 }
@@ -158,6 +193,10 @@ async function check(request, env, fetchImpl) {
 export default {
   async fetch(request, env, ctx, fetchImpl = fetch) {
     const u = new URL(request.url);
+    // Short-window limit per connection on the API (Workers rate-limiting binding, if configured), before any Durable Object call.
+    if (u.pathname.startsWith("/api/") && env.RL) {
+      try { const { success } = await env.RL.limit({ key: await clientKey(request.headers.get("cf-connecting-ip"), "rl") }); if (!success) return json({ error: "too many requests; try again in a minute" }, 429, { "retry-after": "60" }); } catch {}
+    }
     if (u.pathname === "/" && (request.method === "GET" || request.method === "HEAD")) return new Response(PAGE, { headers: { "content-type": "text/html; charset=utf-8", ...SEC } });
     if (u.pathname === "/api/budget" && request.method === "GET") {
       try { const b = await bud(env, "left"); return json({ left_usd: b.left / 1e6, cap_usd: b.cap / 1e6 }); } catch { return json({ error: "unavailable" }, 503); }
@@ -166,7 +205,7 @@ export default {
       // Same-origin only: a browser on another site can't spend our budget through a visitor.
       const origin = request.headers.get("origin");
       if (origin && origin !== u.origin) return json({ error: "cross-origin requests are not accepted" }, 403);
-      return check(request, env, fetchImpl);
+      return check(request, env, fetchImpl, ctx);
     }
     return json({ error: "not found" }, 404);
   },

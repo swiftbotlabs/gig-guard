@@ -7,6 +7,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
+import { challengeMessage } from "../src/escrowmsg.mjs";
 
 let balance = 5000000, unbilled = 0; const asks = [];
 const srv = http.createServer((req, res) => {
@@ -15,7 +16,7 @@ const srv = http.createServer((req, res) => {
     const price = Number(max_budget_usdc);
     res.setHeader("content-type", "application/json");
     const challenge = { accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a70e949362670bf8bcead24efc5b8f950aa08b", amount: String(price),
-      extra: { message: `Telegraph Escrow Payment\n\nWallet: {from}\nPay To: 0x72a7\nNetwork: eip155:11155111\nAmount: ${price} uUSDC\nResource: /v1/ask\nNonce: {nonce}\nValid After: {validAfter}\nValid Before: {validBefore}` } }] };
+      extra: { message: challengeMessage(price) } }] };
     if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify(challenge)); }
     asks.push({ intent, price });
     if (unbilled + price > balance) { res.writeHead(402);
@@ -64,4 +65,15 @@ test("eval runner stops on the first exhausted case with exit code 3 and the dep
   assert.equal(r.status, 3, r.stdout + r.stderr);
   assert.match(r.stdout, /stop: escrow balance exhausted at csv-totals\/good/);
   assert.equal((r.stdout.match(/ (SUBMIT|FIX|HOLD) /g) || []).length, 0, "no case may be decided after the stall");
+});
+
+test("the CLI escrow client never signs a node message that is not the known template (main payer key)", async () => {
+  const { parseEscrowOption, challengeMessage, DIAMOND } = await import("../src/escrowmsg.mjs");
+  const ok = { payTo: DIAMOND, network: "eip155:11155111", extra: { message: challengeMessage(10000) } };
+  assert.equal(parseEscrowOption(ok, 10000).amount, 10000);
+  assert.throws(() => parseEscrowOption({ ...ok, extra: { message: "Amount: 1\nWithdraw ALL to 0xdead Amount: 999999999" } }, 10000), /template/);
+  assert.throws(() => parseEscrowOption({ ...ok, extra: { message: challengeMessage(10000, "0x000000000000000000000000000000000000dEaD") } }, 10000), /Diamond/);
+  assert.throws(() => parseEscrowOption({ ...ok, payTo: "0x000000000000000000000000000000000000dEaD" }, 10000), /Diamond/);
+  assert.throws(() => parseEscrowOption({ ...ok, extra: { message: challengeMessage(30001) } }, 30000), /outside/);
+  assert.throws(() => parseEscrowOption({ ...ok, extra: { message: challengeMessage(10000) + "\nextra" } }, 10000), /template/);
 });

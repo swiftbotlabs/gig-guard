@@ -8,6 +8,7 @@
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
+import { challengeMessage } from "../src/escrowmsg.mjs";
 
 const TASK = "Export these invoices to CSV with columns invoice,amount and a final row 'total' with the sum: INV-1 120.00, INV-2 80.50, INV-3 19.50.";
 const FIRST = "invoice,amount\nINV-1,120.00\nINV-2,80.50\nINV-3,19.50\ntotal,210.00";   // planted defect: wrong total
@@ -17,8 +18,8 @@ if (process.argv.includes("--offline")) {
   srv = http.createServer((req, res) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
     const { intent, params, max_budget_usdc } = JSON.parse(b); const price = Number(max_budget_usdc || 10000);
     res.setHeader("content-type", "application/json");
-    if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a7", amount: String(price),
-      extra: { message: `Telegraph Escrow Payment\nWallet: {from}\nAmount: ${price} uUSDC\nNonce: {nonce}\nValid After: {validAfter}\nValid Before: {validBefore}` } }] })); }
+    if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a70e949362670bf8bcead24efc5b8f950aa08b", amount: String(price),
+      extra: { message: challengeMessage(price) } }] })); }
     const rows = (params.result.match(/^INV-\d+,([\d.]+)$/gm) || []).reduce((s, r) => s + Number(r.split(",")[1]), 0);
     const tot = Number((params.result.match(/^total,([\d.]+)$/m) || [])[1]);
     const ok = Math.abs(rows - tot) < 0.005;

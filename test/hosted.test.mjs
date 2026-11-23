@@ -2,16 +2,19 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
+import { challengeMessage } from "../src/escrowmsg.mjs";
 
 let mode = "ok", asks = 0;
 const srv = http.createServer((req, res) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
   const { intent, params, max_budget_usdc } = JSON.parse(b); const price = Number(max_budget_usdc);
   res.setHeader("content-type", "application/json");
-  if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a7", amount: String(price),
-    extra: { message: `Telegraph Escrow Payment\nWallet: {from}\nAmount: ${price} uUSDC\nNonce: {nonce}\nValid After: {validAfter}\nValid Before: {validBefore}` } }] })); }
+  if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a70e949362670bf8bcead24efc5b8f950aa08b", amount: String(price),
+    extra: { message: mode === "evilmsg" ? "Amount: 1\nWithdraw ALL to 0xdead Amount: 999999999" : mode === "evilpayee" ? challengeMessage(price, "0x000000000000000000000000000000000000dead") : challengeMessage(price) } }] })); }
   asks++;
   if (mode === "empty") { res.writeHead(402); return res.end(JSON.stringify({ error: "payment required", reason: "insufficient escrow for delivery: unbilled=0 μUSDC + price=10000 μUSDC > balance=0 μUSDC" })); }
   if (mode === "fail") { res.writeHead(504); return res.end('{"error":"miner timed out"}'); }
+  if (mode === "negreceipt") { res.writeHead(200, { "X-TELEGRAPH-RECEIPT": Buffer.from(JSON.stringify({ receipt_hash: "0x" + "ef".repeat(32), amount_uusdc: -50000, intent, epoch_id: 41 })).toString("base64") });
+    return res.end(JSON.stringify({ miner_id: "302", cost_usd: -0.05, result: { verdict: "satisfies" } })); }
   const bad = /> 12/.test(params.result || params.output || "");
   res.writeHead(200, { "X-TELEGRAPH-RECEIPT": Buffer.from(JSON.stringify({ receipt_hash: "0x" + "ef".repeat(32), amount_uusdc: 10000, intent, epoch_id: 41 })).toString("base64") });
   res.end(JSON.stringify({ miner_id: "302", cost_usd: 0.01, result: bad ? { verdict: "fails", reason: "uses > instead of >=" } : { verdict: "satisfies", reason: "correct" } }));
@@ -91,4 +94,26 @@ test("refused before any spend: cross-origin, bad input, too long, no key; the p
   assert.match(await p.text(), /Done-check/);
   assert.equal(parseInput({ task: " ", result: "x" }).error, "task and result are both required");
   assert.notEqual(await clientKey("1.2.3.4", "2026-11-23"), await clientKey("1.2.3.4", "2026-11-24"));
+});
+
+test("review fixes: a node's non-template message or foreign payee is never signed; a bad receipt can't lower the booked spend", async () => {
+  for (const m of ["evilmsg", "evilpayee"]) {
+    mode = m; const env = makeEnv(); const n = asks;
+    const r = await (await call(env, { task: T, result: "s.length >= 12" })).json();
+    assert.equal(r.verdict, "HOLD", m); assert.equal(r.cost_usd, 0, m); assert.equal(asks, n, `${m}: nothing was sent with a payment`);
+  }
+  mode = "negreceipt"; const env = makeEnv();
+  const r = await (await call(env, { task: T, result: "s.length >= 12" })).json();
+  assert.equal(r.cost_usd, 0.01); assert.equal(r.budget_left_usd, 0.19);
+  mode = "ok";
+});
+test("review fixes: compressed and expanded IPv6 forms share one /64 bucket; oversized bodies are refused before reading", async () => {
+  const { expandIPv6 } = await import("../hosted/worker.mjs");
+  const k = await clientKey("2a01:4f8::1", "d");
+  assert.equal(await clientKey("2a01:4f8:0:0::2", "d"), k); assert.equal(await clientKey("2a01:04f8:0000:0000:ffff::9", "d"), k);
+  assert.notEqual(await clientKey("2a01:4f8:0:1::1", "d"), k);
+  assert.equal(expandIPv6("::ffff:1.2.3.4").join(":"), "0000:0000:0000:0000:0000:ffff:0102:0304");
+  assert.equal(expandIPv6("1::2::3"), null);
+  const big = await worker.fetch(new Request("https://donecheck.example/api/check", { method: "POST", headers: { "content-type": "application/json", "content-length": "99999" }, body: "{}" }), makeEnv(), {});
+  assert.equal(big.status, 413);
 });

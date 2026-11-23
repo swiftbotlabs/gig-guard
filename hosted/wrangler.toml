@@ -17,3 +17,9 @@ class_name = "Budget"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Budget"]
+
+# Short-window limit per connection on /api/* (soft, per Cloudflare location), on top of the daily limits in the Durable Object.
+[[ratelimits]]
+name = "RL"
+namespace_id = "41231"
+simple = { limit = 10, period = 60 }

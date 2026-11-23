@@ -4,6 +4,7 @@ import { ExactEvmScheme } from "@x402/evm";
 import { privateKeyToAccount } from "viem/accounts";
 import { config } from "./config.mjs";
 import { append, spentToday } from "./ledger.mjs";
+import { parseEscrowOption, escrowMessage } from "./escrowmsg.mjs";
 
 let paidFetch, payer;
 function client() {
@@ -56,13 +57,12 @@ function escrowFetch(maxPerCall, ctx = {}) {
     const ch = h ? JSON.parse(Buffer.from(h, "base64").toString("utf8")) : await first.json();
     const opt = (ch.accepts || []).find((a) => a.scheme === "escrow" && a.network === "eip155:11155111");
     if (!opt) throw new Error("node offered no escrow option");
-    const amount = (opt.extra.message.match(/Amount:\s*(\d+)/) || [])[1] || opt.amount;
-    if (Number(amount) > maxPerCall) throw new BudgetError(`escrow quote ${amount} exceeds per-call cap ${maxPerCall}`);
+    let amount;
+    try { ({ amount } = parseEscrowOption(opt, maxPerCall)); } catch (e) { throw new BudgetError(e.message); }   // never sign an unknown text
     const now = Math.floor(Date.now() / 1000);
-    const authorization = { from: escrowAccount.address.toLowerCase(), to: opt.payTo, value: String(amount),
+    const authorization = { from: escrowAccount.address.toLowerCase(), to: opt.payTo.toLowerCase(), value: String(amount),
       validAfter: String(now - 5), validBefore: String(now + 90), nonce: `gg-${now}-${Math.random().toString(36).slice(2, 10)}` };
-    const message = opt.extra.message.replace("{from}", authorization.from).replace("{nonce}", authorization.nonce)
-      .replace("{validAfter}", authorization.validAfter).replace("{validBefore}", authorization.validBefore);
+    const message = escrowMessage({ from: authorization.from, amount, nonce: authorization.nonce, validAfter: authorization.validAfter, validBefore: authorization.validBefore });
     const signature = await escrowAccount.signMessage({ message });
     const xp = Buffer.from(JSON.stringify({ x402Version: 2, scheme: "escrow", network: opt.network, payload: { signature, authorization } })).toString("base64");
     ctx.signedUusdc = Number(amount);   // from here on the node may bill this request, whatever it answers (issue #228)

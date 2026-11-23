@@ -52,8 +52,9 @@ if(d.uncertainty&&d.uncertainty.length)h+="<p class='unc'>Uncertain: "+esc(d.unc
 if(d.receipt){h+="<p class='mut'>Paid "+esc(d.judge.intent)+", miner "+esc(d.receipt.miner_id)+", $"+(d.receipt.amount_uusdc/1e6).toFixed(2)+(d.ms?", "+(d.ms/1000).toFixed(1)+" s":"")+". Receipt <code>"+esc(d.receipt.receipt_hash)+"</code>, epoch "+esc(d.receipt.epoch_id)+": <span class='st' id='st'>not checked</span> <button type='button' id='ck'>Check receipt</button></p><p class='mut'>A receipt is listed in Telegraph's epoch block once that block is recorded (up to a few hours); until then it shows PENDING.</p>"}
 else h+="<p class='mut'>No paid answer, nothing charged beyond signed requests ($"+Number(d.cost_usd).toFixed(2)+").</p>";
 o.innerHTML=h;const ck=$("ck");if(ck)ck.onclick=async()=>{const st=$("st");st.textContent="checking…";let s="OTHER";
-try{const q=await fetch(d.node+"/v1/blocks/"+d.receipt.epoch_id+"/deliveries/"+d.receipt.receipt_hash);const j=await q.json();
-if(q.ok){const x=j.delivery||{};s=(x.intent===d.receipt.intent&&Number(x.usdc)===d.receipt.amount_uusdc)?"SETTLED":"MISMATCH"}else if(/no block recorded/.test(j.error||""))s="PENDING"}catch(e){}
+try{const e=String(d.receipt.epoch_id),hh=String(d.receipt.receipt_hash);if(!/^\\d{1,9}$/.test(e)||!/^0x[0-9a-fA-F]{64}$/.test(hh))throw 0;
+const q=await fetch(d.node+"/v1/blocks/"+encodeURIComponent(e)+"/deliveries/"+encodeURIComponent(hh));const j=await q.json();
+if(q.ok){const x=j.delivery||{};s=(String(x.receipt_hash||hh).toLowerCase()===hh.toLowerCase()&&x.intent===d.receipt.intent&&Number(x.usdc)===d.receipt.amount_uusdc)?"SETTLED":"MISMATCH"}else if(/no block recorded/.test(j.error||""))s="PENDING"}catch(e){}
 st.textContent=s;st.className="st "+s};
 if(d.budget_left_usd!=null)$("budget").textContent="Shared testnet budget left today: $"+d.budget_left_usd.toFixed(2)+".";
 }catch(e){o.innerHTML="<p class='unc'>The check could not be reached. Nothing was charged to you.</p>"}finally{$("go").disabled=false}};

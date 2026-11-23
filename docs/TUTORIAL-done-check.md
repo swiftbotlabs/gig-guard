@@ -18,11 +18,11 @@ No wallet? Try the hosted check first: paste a task and a result, and you get th
 ## 1. Install and run it offline (no key, no funds)
 ```bash
 git clone https://github.com/swiftbotlabs/gig-guard && cd gig-guard
-npm install && npm test          # 48 tests against a fake Telegraph node
+npm install && npm test          # 51 tests against a fake Telegraph node
 node examples/m09-demos.mjs      # stale answer, no budget, failed payment, conflicting answers, consent
 node examples/fix-loop.mjs --offline
 ```
-Expected: `# pass 48`, `# fail 0`. The last command ends with `SUBMIT after one redo; total $0.02`.
+Expected: `# pass 51`, `# fail 0`. The last command ends with `SUBMIT after one redo; total $0.02`.
 
 ## 2. Make a testnet key and fund an escrow balance
 ```bash

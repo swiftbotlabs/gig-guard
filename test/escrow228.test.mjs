@@ -6,6 +6,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
+import { challengeMessage } from "../src/escrowmsg.mjs";
 
 let failSigned = new Set(), failUnsigned = new Set();
 const srv = http.createServer((req, res) => {
@@ -13,8 +14,8 @@ const srv = http.createServer((req, res) => {
     const { intent, max_budget_usdc } = JSON.parse(b); const price = Number(max_budget_usdc);
     res.setHeader("content-type", "application/json");
     if (failUnsigned.has(intent)) { res.writeHead(503); return res.end('{"error":"no miner"}'); }
-    if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a7", amount: String(price),
-      extra: { message: `Telegraph Escrow Payment\nWallet: {from}\nAmount: ${price} uUSDC\nNonce: {nonce}\nValid After: {validAfter}\nValid Before: {validBefore}` } }] })); }
+    if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a70e949362670bf8bcead24efc5b8f950aa08b", amount: String(price),
+      extra: { message: challengeMessage(price) } }] })); }
     if (failSigned.has(intent)) { res.writeHead(504); return res.end('{"error":"miner timed out"}'); }   // signed, then failed: may be billed
     res.writeHead(200, { "X-TELEGRAPH-RECEIPT": Buffer.from(JSON.stringify({ receipt_hash: "0x" + "cd".repeat(32), amount_uusdc: 10000, intent, epoch_id: 8 })).toString("base64") });
     res.end(JSON.stringify({ miner_id: "7", cost_usd: 0.01, result: { verdict: "satisfies", score: 9, reason: "ok", rating: "Good" } }));
