@@ -9,6 +9,7 @@ export function append(entry) {
 }
 export function spentToday() {
   const day = new Date().toISOString().slice(0, 10);
-  return readLedger().filter((e) => e.kind === "purchase" && e.ts.startsWith(day))
-    .reduce((s, e) => s + (e.amount_uusdc || 0), 0);
+  // Purchases, plus signed requests that failed but may have been charged (issue #228): the cap counts the worst case.
+  return readLedger().filter((e) => e.ts.startsWith(day) && (e.kind === "purchase" || (e.kind === "error" && e.signed)))
+    .reduce((s, e) => s + (e.kind === "purchase" ? e.amount_uusdc || 0 : e.charged_uusdc || 0), 0);
 }

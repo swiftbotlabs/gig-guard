@@ -7,7 +7,7 @@ and only says "done" on SUBMIT. Testnet only (Ethereum Sepolia escrow, Telegraph
 ## 1. Install and run the tests (no funds)
 ```bash
 git clone https://github.com/swiftbotlabs/gig-guard && cd gig-guard
-npm install && npm test          # 38 tests against a fake node
+npm install && npm test          # 41 tests against a fake node
 node examples/m09-demos.mjs      # stale answer, no budget, failed payment, conflicting answers, consent: offline
 ```
 

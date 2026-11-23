@@ -73,7 +73,7 @@ Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow b
 
 ```bash
 npm install
-npm test                                   # 38 tests against a fake node: no network, no funds
+npm test                                   # 41 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
@@ -142,10 +142,11 @@ Written up as found, with the workaround in the code:
 8. On the escrow rail the node reserves each request's whole `max_budget_usdc` until the next epoch block, so a high cap exhausts a
    funded balance early (402 `insufficient escrow ... unbilled=U + price=P > balance=B`). Workaround: the judge is offered its $0.01 price,
    and the 402 stops the run with the shortfall instead of being logged as HOLD.
+9. A signed request that fails (an error status or no response) can still be billed (Telegraph issue #228). Workaround: it is logged as `signed` with `charged_uusdc` (the signed amount, worst case), the daily cap counts it and so does the decision's cost; a 402 `insufficient escrow` is refused before delivery and counts nothing.
 
 ## Tests
 
-`npm test` runs 38 tests (24 policy, 4 escrow rail, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 41 tests (24 policy, 7 escrow rail, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, a signed request that fails but may still be billed (issue #228: logged, counted by the cap and in the decision's cost), bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Limits
 

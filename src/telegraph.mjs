@@ -42,7 +42,7 @@ export function parseEscrowShortfall(reason) {
 // Escrow rail (Ethereum Sepolia): prepaid balance on the Telegraph Diamond, one EIP-191 signature
 // per request, no facilitator in the path. Enabled with GG_RAIL=escrow.
 let escrowAccount;
-function escrowFetch(maxPerCall) {
+function escrowFetch(maxPerCall, ctx = {}) {
   if (!escrowAccount) {
     const key = process.env.TELEGRAPH_PAYER_KEY;
     if (!key) throw new Error("TELEGRAPH_PAYER_KEY is not set (use a testnet-only key)");
@@ -65,6 +65,7 @@ function escrowFetch(maxPerCall) {
       .replace("{validAfter}", authorization.validAfter).replace("{validBefore}", authorization.validBefore);
     const signature = await escrowAccount.signMessage({ message });
     const xp = Buffer.from(JSON.stringify({ x402Version: 2, scheme: "escrow", network: opt.network, payload: { signature, authorization } })).toString("base64");
+    ctx.signedUusdc = Number(amount);   // from here on the node may bill this request, whatever it answers (issue #228)
     const res = await fetch(url, { ...init, headers: { ...init.headers, "X-PAYMENT": xp } });
     return res;
   };
@@ -74,7 +75,12 @@ function escrowFetch(maxPerCall) {
 export async function ask(intent, params, { budget = config.maxPerCall, purpose = "" } = {}) {
   if (budget > config.maxPerCall) throw new BudgetError(`budget ${budget} exceeds per-call cap ${config.maxPerCall}`);
   if (spentToday() + budget > config.maxPerDay) throw new BudgetError(`daily cap ${config.maxPerDay} uUSDC reached`);
-  const f = config.rail === "escrow" ? escrowFetch(config.maxPerCall) : client();
+  // Telegraph issue #228: a signed request that fails (non-200, or no response) can still be charged. Every such failure is
+  // logged with signed: true and charged_uusdc = the signed amount (worst case), counted by the daily cap and by the decision's
+  // cost. An "insufficient escrow" 402 is the exception: the node refused it before delivery, so nothing is charged.
+  const ctx = { signedUusdc: 0 };
+  const f = config.rail === "escrow" ? escrowFetch(budget, ctx) : client();
+  const charged = () => (ctx.signedUusdc ? { signed: true, charged_uusdc: ctx.signedUusdc } : {});
   const t0 = Date.now();
   const ctrl = AbortSignal.timeout(config.timeoutMs);
   let res;
@@ -87,7 +93,8 @@ export async function ask(intent, params, { budget = config.maxPerCall, purpose 
       body: JSON.stringify(config.rail === "escrow" || config.network === "eip155:11155111" ? { intent, params, max_budget_usdc: budget } : { intent, params }),
     });
   } catch (e) {
-    append({ kind: "error", intent, params, purpose, error: String(e.message || e) });
+    append({ kind: "error", intent, params, purpose, error: String(e.message || e), ...charged() });
+    if (ctx.signedUusdc) e.charged_uusdc = ctx.signedUusdc;
     throw e;
   }
   const ms = Date.now() - t0;
@@ -101,8 +108,10 @@ export async function ask(intent, params, { budget = config.maxPerCall, purpose 
     throw new EscrowFundsError(`escrow balance exhausted: ${body.reason || body.error}`, info);
   }
   if (res.status !== 200 || !receipt) {
-    append({ kind: "error", intent, params, purpose, status: res.status, body, ms });
-    throw new Error(`Telegraph ${intent} failed: HTTP ${res.status} ${JSON.stringify(body).slice(0, 200)}`);
+    append({ kind: "error", intent, params, purpose, status: res.status, body, ms, ...charged() });
+    const err = new Error(`Telegraph ${intent} failed: HTTP ${res.status} ${JSON.stringify(body).slice(0, 200)}`);
+    if (ctx.signedUusdc) err.charged_uusdc = ctx.signedUusdc;
+    throw err;
   }
   append({ kind: "purchase", intent, params, purpose, payer, network: config.rail === "escrow" ? "eip155:11155111" : config.network, rail: config.rail, miner_id: body.miner_id,
     cost_usd: body.cost_usd, amount_uusdc: Number(receipt.amount_uusdc || 0), receipt, result: body.result,

@@ -49,7 +49,11 @@ async function buy(intents, params, purpose, need, budget) {
       if (need && stale(r.result)) { tried.push({ intent, error: `stale answer (as_of ${r.result.as_of})`, receipt: r.receipt?.receipt_hash, cost_usd: r.cost_usd }); continue; }
       return { ok: true, intent, ...r, tried };
     }
-    catch (e) { if (e.name === "BudgetError" || e.name === "EscrowFundsError") throw e; tried.push({ intent, error: String(e.message || e).slice(0, 200) }); }
+    catch (e) {
+      if (e.name === "BudgetError" || e.name === "EscrowFundsError") throw e;
+      // A failed request that was signed may still be billed (issue #228): its worst-case cost counts toward the decision.
+      tried.push({ intent, error: String(e.message || e).slice(0, 200), ...(e.charged_uusdc ? { cost_usd: e.charged_uusdc / 1e6, charged_uusdc: e.charged_uusdc } : {}) });
+    }
   }
   return { ok: false, intent: intents.map((i) => (Array.isArray(i) ? i[0] : i)).join("|"), error: "no supplier delivered", tried };
 }
