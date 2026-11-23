@@ -113,6 +113,7 @@ Every case below is a test against a fake Telegraph node that speaks the real 40
 - [`docs/TUTORIAL.md`](docs/TUTORIAL.md): pay for verified intelligence from an agent loop in 10 minutes.
 - [`docs/TUTORIAL-with-vs-without.md`](docs/TUTORIAL-with-vs-without.md): add paid answers to a decision step, then measure with `compare` whether they changed anything.
 - [`docs/TUTORIAL-done-check.md`](docs/TUTORIAL-done-check.md): a paid done-check before your agent says "done", and how to measure it on your own cases.
+- `examples/fix-loop.mjs`: a FIX makes the agent redo the work, then the redone work is checked again (planted wrong total -> FIX -> recomputed -> SUBMIT, a receipt for each check). `--offline` runs it against a fake node; the live testnet run is in [`docs/FIX-LOOP.md`](docs/FIX-LOOP.md).
 - [`docs/M09-DEMOS.md`](docs/M09-DEMOS.md): Mission 09's five failure tests (stale local answer, no budget, failed payment, conflicting provider answer, permission for external effects), run offline with `node examples/m09-demos.mjs`.
 - [`eval/deliver/RESULTS.md`](eval/deliver/RESULTS.md): the deliver gate on 40 known-answer cases (testnet), with cost and latency per decision. One-click replay of every case (task, output, free check, paid judgement, receipts with a live check): https://apps.swiftbotlab.workers.dev/gig-guard/replay (built by `node eval/deliver/replay.mjs`).
 - [`docs/compare.md`](docs/compare.md): our own run, 10 real decisions with and without paid answers.
