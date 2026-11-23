@@ -91,6 +91,23 @@ node src/cli.mjs report report.md report.json           # Mission 10: cost per v
 
 Exit codes: 0 = go (GO/PAID/SHIP/SUBMIT), 10 = stop and look, 1 = error. That makes each gate a one-line guard in any shell loop: `node src/cli.mjs ship out/C.sol && submit || echo held`.
 
+## Named failure cases (run each one)
+
+Every case below is a test against a fake Telegraph node that speaks the real 402, signed-retry and receipt headers (no network, no funds), and most also have a live row on testnet. None of them is a replayed synthetic answer: the tests drive the real gates, policy, ledger and escrow client.
+
+| Case | Command | Expected | Live evidence (testnet) |
+|---|---|---|---|
+| Over the spend cap | `node examples/m09-demos.mjs` (demo 5); `node --test --test-name-pattern="cap stops" test/escrow228.test.mjs` | `BudgetError`, 0 requests reach the node | caps in every run (`GG_MAX_PER_CALL`, `GG_MAX_PER_DAY`) |
+| Failed but charged (issue #228) | `node --test test/escrow228.test.mjs` | error logged `signed: true`, `charged_uusdc`; counted by the cap and the decision cost | - |
+| Escrow exhausted | `node --test test/escrow.test.mjs` | `EscrowFundsError`, run stops (exit 3), no false HOLD | `eval/deliver/run-1.log`, `run-2.log` (22 Nov) |
+| Empty paid answer | `node --test --test-name-pattern="empty answer" test/policy.test.mjs` | next supplier tried; wasted answer counted in the cost | BNB symbol request, ledger 07:19 (18 Nov) |
+| Unsourced claim | `node --test --test-name-pattern="never mentions the sponsor" test/policy.test.mjs` | CAUTION, not GO | - |
+| `verdict: null` with real findings | `node --test --test-name-pattern="null verdict" test/policy.test.mjs` | FIX | Vault.sol review, ledger 10:23 (18 Nov) |
+| Miners disagree with the chain | `node --test --test-name-pattern="free chain read overrules" test/policy.test.mjs`; `node examples/m09-demos.mjs` (demo 2) | chain value used, conflict listed as uncertainty | claim, ledger 10:25 (18 Nov): "chain read agrees" |
+| Stale balance | `node --test --test-name-pattern="stale balance" test/policy.test.mjs`; demo 1 | stale answer not used | - |
+| Free check beats the paid judge | `node --test --test-name-pattern="required item missing" test/policy.test.mjs` | FIX with "the judge passed it, but a required item is missing" | `eval/deliver`: csv-totals/bad, readme-install/bad |
+| Judge contradicts itself | `node eval/deliver/score.mjs` | HOLD, never SUBMIT | `eval/deliver`: bug-fix/good, css-center/bad |
+
 ## Docs
 
 - [`docs/TUTORIAL.md`](docs/TUTORIAL.md): pay for verified intelligence from an agent loop in 10 minutes.

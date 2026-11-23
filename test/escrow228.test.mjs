@@ -47,10 +47,11 @@ test("#228: an unsigned failure (refused before payment) is not counted", async 
   assert.equal(spentToday(), before + 10000, "only the fallback's paid answer");
 });
 test("#228: the cap stops new requests once failed-but-signed charges fill it", async () => {
-  failSigned = new Set(["TASK_EXECUTION_QUALITY_GENERAL", "LLM_OUTPUT_EVALUATION_GENERAL"]);
-  await g.deliverCheck({ task: "Add a totals row", result: "a,1\ntotal,1", name: "t228c" }).catch(() => {});
+  failSigned = new Set(["TASK_EXECUTION_QUALITY_GENERAL", "LLM_OUTPUT_EVALUATION_GENERAL"]);   // every request fails after signing
+  let err = null;
+  for (let i = 0; i < 6 && !err; i++) await g.deliverCheck({ task: "Add a totals row", result: "a,1\ntotal,1", name: `t228c${i}` }).catch((e) => { err = e; });
   failSigned = new Set();
-  assert.ok(spentToday() >= 40000, String(spentToday()));
-  await assert.rejects(g.deliverCheck({ task: "Add a totals row", result: "a,1\ntotal,1", name: "t228d" }), (e) => e.name === "BudgetError");
+  assert.equal(err?.name, "BudgetError", "nothing was ever paid, yet the failed signed requests must fill the $0.04 cap");
+  assert.ok(spentToday() >= 40000 - 10000, String(spentToday()));
   fs.rmSync(process.env.GG_LEDGER, { force: true });
 });
