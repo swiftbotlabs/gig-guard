@@ -24,6 +24,10 @@ for (const c of cases) {
   rows.push(`| ${c.id} | ${c.truth} | ${j} | ${d.verdict} | ${c.defect || ""} |`);
 }
 t.cost_usd = +t.cost_usd.toFixed(4);
+// Answer latency of the paid judgements (purchases in the same ledger), so the cost and time per decision are both reproducible.
+const ms = fs.readFileSync(ledger, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)).filter((x) => x.kind === "purchase" && x.purpose === "deliver").map((x) => x.ms).filter(Number.isFinite).sort((a, b) => a - b);
+const pct = (f) => (ms.length ? +(ms[Math.floor(f * (ms.length - 1))] / 1000).toFixed(1) : null);
+Object.assign(t, { paid_answers: ms.length, latency_p50_s: pct(0.5), latency_p95_s: pct(0.95), cost_per_decided_usd: t.decided ? +(t.cost_usd / t.decided).toFixed(4) : null });
 const md = [`# Deliver gate, known-answer run`, "", "```", JSON.stringify(t, null, 1), "```", "",
   "| case | truth | judge alone | gate | planted defect |", "|---|---|---|---|---|", ...rows].join("\n") + "\n";
 fs.writeFileSync(new URL("./RESULTS.md", import.meta.url), md);

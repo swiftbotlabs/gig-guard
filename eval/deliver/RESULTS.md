@@ -15,7 +15,11 @@
  "judge_none_on_bad": 2,
  "judge_fail_on_good": 1,
  "caught_only_by_local": 2,
- "cost_usd": 0.32
+ "cost_usd": 0.32,
+ "paid_answers": 32,
+ "latency_p50_s": 15,
+ "latency_p95_s": 27.2,
+ "cost_per_decided_usd": 0.0094
 }
 ```
 
