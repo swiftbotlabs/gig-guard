@@ -143,7 +143,7 @@ Every case below is a test against a fake Telegraph node that speaks the real 40
 
 ## Mainnet: what would change
 
-Nothing has been spent on mainnet. What it would take, as of 2026-11-20:
+Nothing has been spent on mainnet. The dated blocker and the change list are in [`docs/MAINNET.md`](docs/MAINNET.md) (node re-checked 2026-11-23: still testnet routes only). In short:
 
 - **A mainnet payment route.** The node we use (`devnode.telegraphprotocol.com`) offers only testnet routes: its 402 challenge on 2026-11-20 listed x402 `exact` on Base Sepolia and Solana devnet, and escrow on Ethereum Sepolia ([`docs/node-402-2026-11-20.json`](docs/node-402-2026-11-20.json)). Mainnet waits on a mainnet route from Telegraph.
 - **Code, once it exists:** set `TELEGRAPH_NODE` and `TELEGRAPH_NETWORK`, add the mainnet USDC address to `config.assets` and its explorer to `config.explorers`, and let the escrow rail read its network from config instead of the fixed `eip155:11155111` in `src/telegraph.mjs`. Gates, policy, ledger and the receipt check stay as they are.

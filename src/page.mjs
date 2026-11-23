@@ -43,13 +43,13 @@ export function writeLedgerPage(out = "ledger.html", { verifyFile } = {}) {
   const data = JSON.stringify({ node: config.node, checks }).replace(/</g, "\\u003c");
   const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gig Guard ledger</title>
 <style>
-:root{--bg:#fbfbf9;--card:#fff;--fg:#16171a;--mut:#62666d;--line:#e3e3df;--ok:#0a7d3b;--bad:#b3261e;--warn:#8a5a00;--acc:#2f5bd3}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121316;--card:#1a1b1f;--fg:#ececea;--mut:#9a9da3;--line:#2c2e33;--ok:#5fd38d;--bad:#ff8a80;--warn:#ffcc66;--acc:#8fb0ff}}
-:root[data-theme="dark"]{--bg:#121316;--card:#1a1b1f;--fg:#ececea;--mut:#9a9da3;--line:#2c2e33;--ok:#5fd38d;--bad:#ff8a80;--warn:#ffcc66;--acc:#8fb0ff}
+:root{--onacc:#ffffff;--bg:#fbfbf9;--card:#fff;--fg:#16171a;--mut:#62666d;--line:#e3e3df;--ok:#0a7d3b;--bad:#b3261e;--warn:#8a5a00;--acc:#2f5bd3}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--onacc:#0b1020;--bg:#121316;--card:#1a1b1f;--fg:#ececea;--mut:#9a9da3;--line:#2c2e33;--ok:#5fd38d;--bad:#ff8a80;--warn:#ffcc66;--acc:#8fb0ff}}
+:root[data-theme="dark"]{--onacc:#0b1020;--bg:#121316;--card:#1a1b1f;--fg:#ececea;--mut:#9a9da3;--line:#2c2e33;--ok:#5fd38d;--bad:#ff8a80;--warn:#ffcc66;--acc:#8fb0ff}
 *{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;margin:0 auto;max-width:1040px;padding:24px 16px}
 h1{font-size:1.6rem;margin:0 0 4px}p.lead{color:var(--mut);margin:0 0 20px;max-width:70ch}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 20px}.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}.tile b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}.tile span{color:var(--mut);font-size:.85rem}
-button{font:inherit;background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer}#vs{color:var(--mut);margin-left:10px}
+button{font:inherit;background:var(--acc);color:var(--onacc);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}#vs{color:var(--mut);margin-left:10px}
 .wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line)}th{text-align:left;color:var(--mut);font-weight:600;font-size:.85rem}td,th{border-top:1px solid var(--line);padding:10px;vertical-align:top;word-break:break-word}td:nth-child(-n+3),th:nth-child(-n+3){white-space:nowrap;word-break:normal}
 code.in{font-size:.8rem;color:var(--mut)}ul{margin:6px 0 0;padding-left:18px;color:var(--mut);font-size:.88rem}.v{font-weight:700}
 .GO,.SHIP,.PAID{color:var(--ok)}.SKIP,.FIX,.CLAIM{color:var(--bad)}.HOLD,.PENDING,.CAUTION{color:var(--warn)}

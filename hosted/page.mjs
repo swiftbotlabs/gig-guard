@@ -3,9 +3,9 @@ export const PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <title>Gig Guard done-check</title>
 <meta name="description" content="Paste a task and an agent's result: a paid Telegraph judge decides SUBMIT, FIX or HOLD, with a receipt you can check. Testnet.">
 <style>
-:root{--bg:#fbfbf9;--card:#fff;--fg:#16171a;--mut:#5d6168;--line:#e3e3df;--ok:#0a7d3b;--bad:#b3261e;--warn:#8a5a00;--acc:#2f5bd3;--code:#f3f3ef}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121316;--card:#1a1b1f;--fg:#ececea;--mut:#a0a3a9;--line:#2c2e33;--ok:#5fd38d;--bad:#ff8a80;--warn:#ffcc66;--acc:#8fb0ff;--code:#22242a}}
-:root[data-theme="dark"]{--bg:#121316;--card:#1a1b1f;--fg:#ececea;--mut:#a0a3a9;--line:#2c2e33;--ok:#5fd38d;--bad:#ff8a80;--warn:#ffcc66;--acc:#8fb0ff;--code:#22242a}
+:root{--onacc:#ffffff;--bg:#fbfbf9;--card:#fff;--fg:#16171a;--mut:#5d6168;--line:#e3e3df;--ok:#0a7d3b;--bad:#b3261e;--warn:#8a5a00;--acc:#2f5bd3;--code:#f3f3ef}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--onacc:#0b1020;--bg:#121316;--card:#1a1b1f;--fg:#ececea;--mut:#a0a3a9;--line:#2c2e33;--ok:#5fd38d;--bad:#ff8a80;--warn:#ffcc66;--acc:#8fb0ff;--code:#22242a}}
+:root[data-theme="dark"]{--onacc:#0b1020;--bg:#121316;--card:#1a1b1f;--fg:#ececea;--mut:#a0a3a9;--line:#2c2e33;--ok:#5fd38d;--bad:#ff8a80;--warn:#ffcc66;--acc:#8fb0ff;--code:#22242a}
 *{box-sizing:border-box}body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;margin:0 auto;max-width:860px;padding:28px 16px}
 h1{font-size:1.7rem;margin:0 0 6px}p.lead{color:var(--mut);margin:0 0 18px;max-width:68ch}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 14px}
@@ -14,7 +14,7 @@ textarea,input{width:100%;font:15px/1.45 ui-monospace,SFMono-Regular,Menlo,monos
 textarea{min-height:96px;resize:vertical}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
 button{font:inherit;border-radius:8px;padding:9px 14px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--fg)}
-button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}button:disabled{opacity:.6;cursor:wait}
+button.pri{background:var(--acc);border-color:var(--acc);color:var(--onacc);font-weight:600}button:disabled{opacity:.6;cursor:wait}
 #count,#budget{color:var(--mut);font-size:.9rem}
 .verdict{font-size:2rem;font-weight:800;letter-spacing:.02em}.SUBMIT{color:var(--ok)}.FIX{color:var(--bad)}.HOLD{color:var(--warn)}
 ul{margin:6px 0 0;padding-left:20px}li{margin:2px 0}.mut{color:var(--mut);font-size:.9rem}.unc{color:var(--warn)}
