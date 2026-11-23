@@ -1,0 +1,8 @@
+2026-11-23T17:16:29.518Z percent/good SUBMIT $0.01
+2026-11-23T17:16:37.378Z percent/bad FIX $0.01
+2026-11-23T17:16:49.932Z css-center/good SUBMIT $0.01
+2026-11-23T17:16:59.889Z css-center/bad HOLD $0.01
+2026-11-23T17:17:08.454Z password-rule/good SUBMIT $0.01
+2026-11-23T17:17:16.492Z password-rule/bad FIX $0.01
+{"spent_usd":0.38}
+exit=0

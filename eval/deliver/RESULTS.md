@@ -3,23 +3,25 @@
 ```
 {
  "cases": 40,
- "decided": 34,
- "done_submitted": 15,
- "done_total": 17,
+ "decided": 40,
+ "done_submitted": 18,
+ "done_total": 20,
  "not_done_submitted": 0,
- "not_done_stopped": 17,
- "not_done_total": 17,
- "held": 1,
- "judge_stopped_bad": 15,
+ "not_done_stopped": 20,
+ "not_done_total": 20,
+ "held": 2,
+ "judge_stopped_bad": 17,
+ "local_stopped_bad": 2,
+ "held_unclear_bad": 1,
  "judge_pass_on_bad": 0,
  "judge_none_on_bad": 2,
  "judge_fail_on_good": 1,
- "caught_only_by_local": 2,
- "cost_usd": 0.32,
- "paid_answers": 32,
- "latency_p50_s": 15,
+ "caught_only_by_local": 3,
+ "cost_usd": 0.38,
+ "paid_answers": 38,
+ "latency_p50_s": 13.2,
  "latency_p95_s": 27.2,
- "cost_per_decided_usd": 0.0094
+ "cost_per_decided_usd": 0.0095
 }
 ```
 
@@ -59,3 +61,9 @@
 | api-status/bad | not_done | fail | FIX | factually wrong |
 | csv-dedupe/good | done | fail | FIX |  |
 | csv-dedupe/bad | not_done | fail | FIX | duplicates left in |
+| percent/good | done | pass | SUBMIT |  |
+| percent/bad | not_done | fail | FIX | wrong arithmetic |
+| css-center/good | done | pass | SUBMIT |  |
+| css-center/bad | not_done | unclear | HOLD | only horizontal |
+| password-rule/good | done | pass | SUBMIT |  |
+| password-rule/bad | not_done | fail | FIX | off by one |
