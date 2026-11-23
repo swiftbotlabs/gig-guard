@@ -5,6 +5,8 @@
 //   ship   (Mission 14 Web3 Native & DeFi, whitehat): is this contract/code deliverable safe to submit?
 //   deliver (Mission 09 Personal Agent): did the agent actually do the task? Checked before it claims success.
 import { ask } from "./telegraph.mjs";
+import { deliverVerdict } from "./verdict.mjs";
+export { deliverVerdict };
 import { config } from "./config.mjs";
 import { flagsCode, flagsSecurity } from "./report.mjs";
 import { REVIEW_LIMIT, fitForReview, stripComments } from "./solsrc.mjs";
@@ -240,7 +242,6 @@ export const DELIVER_LIMIT = Number(process.env.GG_DELIVER_LIMIT || 2000); // ch
 // The judge answers at $0.01. Sending the $0.03 per-call cap as max_budget_usdc made the node reserve 3x that against the escrow
 // balance until each epoch block billed it (the 402 stall of 22 Nov), so the deliver gate offers $0.01 unless told otherwise.
 export const JUDGE_BUDGET = Math.min(Number(process.env.GG_JUDGE_BUDGET || 10000), config.maxPerCall);
-const GOOD_RATING = new Set(["Excellent", "Good"]);
 
 /** Mission 09 (Personal Agent): may the agent report this task as done? */
 export async function deliverCheck({ task, result, patch, mustInclude = [], name = "deliverable" } = {}) {
@@ -257,33 +258,4 @@ export async function deliverCheck({ task, result, patch, mustInclude = [], name
   return decide("deliver", input, verdict, reasons, ev, { uncertainty, local_missing: missing });
 }
 
-/** The deliver decision from the bought judgement, the optional CI check and the local checks. Pure. */
-export function deliverVerdict(judge, ci, missing) {
-  const reasons = [], uncertainty = [];
-  let verdict = "SUBMIT";
-  if (!judge.ok) { verdict = "HOLD"; reasons.push("no judgement could be bought: fail closed"); }
-  else {
-    const r = judge.result || {};
-    const v = judge.intent === "TASK_EXECUTION_QUALITY_GENERAL" ? r.verdict : r.rating;
-    const score = r.score === null || r.score === undefined ? "?" : Number(r.score).toFixed(1);
-    const pass = judge.intent === "TASK_EXECUTION_QUALITY_GENERAL" ? v === "satisfies" : GOOD_RATING.has(v);
-    const fail = judge.intent === "TASK_EXECUTION_QUALITY_GENERAL" ? v === "fails" : v === "Poor" || v === "Fails";
-    if (fail) { verdict = "FIX"; reasons.push(`judge: ${v} (score ${score}). ${String(r.reason || (r.errors || []).join("; ") || "").slice(0, 200)}`); }
-    else if (!pass) { verdict = "HOLD"; reasons.push(`judge: ${v ?? "no verdict"} (score ${score}): not a clear pass; a human decides`); }
-    else reasons.push(`judge: ${v} (score ${score})`);
-  }
-  if (ci) {
-    const c = ci.ok ? ci.result || {} : null;
-    if (!ci.ok) { if (verdict === "SUBMIT") verdict = "HOLD"; reasons.push("CI result could not be bought: fail closed"); }
-    else if (c.conclusion === "pending" || c.passed === null || c.passed === undefined) { if (verdict === "SUBMIT") verdict = "HOLD"; reasons.push(`CI: ${c.conclusion ?? "unknown"}: wait for a finished run`); }
-    else if (c.passed === false || c.passed === "false" || c.conclusion === "failure") { verdict = "FIX"; reasons.push(`CI: ${c.conclusion} on ${c.commit || "the patch"}`); }
-    else reasons.push(`CI: ${c.conclusion} on ${c.commit || "the patch"}`);
-  }
-  if (missing.length) {
-    if (verdict === "SUBMIT") uncertainty.push("the judge passed it, but a required item is missing");
-    verdict = "FIX";
-    reasons.push(`missing from the result: ${missing.join(", ")}`);
-  }
-  return { verdict, reasons, uncertainty };
-}
 
