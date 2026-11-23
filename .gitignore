@@ -14,3 +14,4 @@ eval/scale/ledger.scale.jsonl
 eval/scale/ledger.audited-v7.jsonl
 !eval/scale/results-audited-v7.json
 eval/deliver/ledger.deliver.jsonl
+eval/deliver/replay.html
