@@ -1,7 +1,7 @@
 {
   "total": 38,
-  "settled": 32,
-  "pending": 6,
+  "settled": 38,
+  "pending": 0,
   "mismatch": 0,
   "other": 0,
   "receipts": [
@@ -393,43 +393,73 @@
       "intent": "TASK_EXECUTION_QUALITY_GENERAL",
       "receipt_hash": "0xc01ee8f3dbc3518ac029a3b83cbf2e6c48c3257b8d80301d80a402720e5a72b5",
       "epoch_id": 45,
-      "status": "PENDING",
-      "note": "no block recorded for this epoch"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4425",
+      "usdc": 10000,
+      "deliveries_root": "0xeafc5538d0bfb8bc74b6cd86f16903eb56c5fb81da6c69944720c1c953fae102",
+      "block_data_root": "0x9b67f2ad4623bcfb253d20f53e00770fe667a048e67d355298dc3facc1eeda64",
+      "proof_len": 8
     },
     {
       "intent": "TASK_EXECUTION_QUALITY_GENERAL",
       "receipt_hash": "0x6e66e8616c647d4b53814d831358fefc826fe9dad2b43f38441e983361ee849d",
       "epoch_id": 45,
-      "status": "PENDING",
-      "note": "no block recorded for this epoch"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4425",
+      "usdc": 10000,
+      "deliveries_root": "0xeafc5538d0bfb8bc74b6cd86f16903eb56c5fb81da6c69944720c1c953fae102",
+      "block_data_root": "0x9b67f2ad4623bcfb253d20f53e00770fe667a048e67d355298dc3facc1eeda64",
+      "proof_len": 9
     },
     {
       "intent": "TASK_EXECUTION_QUALITY_GENERAL",
       "receipt_hash": "0x22b1d42be74fce496a66ce058300a383c14e586b970c6b6db5d050c47174d912",
       "epoch_id": 45,
-      "status": "PENDING",
-      "note": "no block recorded for this epoch"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4425",
+      "usdc": 10000,
+      "deliveries_root": "0xeafc5538d0bfb8bc74b6cd86f16903eb56c5fb81da6c69944720c1c953fae102",
+      "block_data_root": "0x9b67f2ad4623bcfb253d20f53e00770fe667a048e67d355298dc3facc1eeda64",
+      "proof_len": 9
     },
     {
       "intent": "TASK_EXECUTION_QUALITY_GENERAL",
       "receipt_hash": "0x1d78fbb147b8539b2a45df682bb360898293b8ff06ace4498a1c0ffe63febe1b",
       "epoch_id": 45,
-      "status": "PENDING",
-      "note": "no block recorded for this epoch"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4425",
+      "usdc": 10000,
+      "deliveries_root": "0xeafc5538d0bfb8bc74b6cd86f16903eb56c5fb81da6c69944720c1c953fae102",
+      "block_data_root": "0x9b67f2ad4623bcfb253d20f53e00770fe667a048e67d355298dc3facc1eeda64",
+      "proof_len": 9
     },
     {
       "intent": "TASK_EXECUTION_QUALITY_GENERAL",
       "receipt_hash": "0xfa10b1fbbb5a086eeb68b9476819e5a6c0f42c29f80e0f75e193e020ccac798c",
       "epoch_id": 45,
-      "status": "PENDING",
-      "note": "no block recorded for this epoch"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "6119",
+      "usdc": 10000,
+      "deliveries_root": "0xeafc5538d0bfb8bc74b6cd86f16903eb56c5fb81da6c69944720c1c953fae102",
+      "block_data_root": "0x9b67f2ad4623bcfb253d20f53e00770fe667a048e67d355298dc3facc1eeda64",
+      "proof_len": 7
     },
     {
       "intent": "TASK_EXECUTION_QUALITY_GENERAL",
       "receipt_hash": "0xd09d6414207fa20765843d1fa26577f758b83b084d38360015aea4fcdc0a4cf4",
       "epoch_id": 45,
-      "status": "PENDING",
-      "note": "no block recorded for this epoch"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "6119",
+      "usdc": 10000,
+      "deliveries_root": "0xeafc5538d0bfb8bc74b6cd86f16903eb56c5fb81da6c69944720c1c953fae102",
+      "block_data_root": "0x9b67f2ad4623bcfb253d20f53e00770fe667a048e67d355298dc3facc1eeda64",
+      "proof_len": 8
     }
   ]
 }
