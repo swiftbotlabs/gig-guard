@@ -139,6 +139,16 @@ test("ship: tx.origin contract is sent back, clean contract ships", async () => 
   assert.equal((await g.shipCheck("pragma solidity ^0.8.0; contract A { uint x; }")).verdict, "SHIP");
   await assert.rejects(g.shipCheck("   "));
 });
+test("ship: no security answer is never SHIP, even when the code review passes (falsum#97, B07); a missing code review only adds uncertainty", async () => {
+  failNext = new Set(["SECURITY_REVIEW_GENERAL"]);
+  const d = await g.shipCheck("pragma solidity ^0.8.0; contract B { uint y; }");
+  failNext = new Set();
+  assert.equal(d.verdict, "HOLD"); assert.match(d.reasons.join(" "), /no security review could be bought/);
+  failNext = new Set(["CODE_REVIEW_GENERAL"]);
+  const e = await g.shipCheck("pragma solidity ^0.8.0; contract C { uint z; }");
+  failNext = new Set();
+  assert.equal(e.verdict, "SHIP"); assert.ok(e.uncertainty.includes("only one review could be bought"));
+});
 test("every decision carries receipts and the ledger page renders", async () => {
   const { readLedger } = await import("../src/ledger.mjs");
   const ds = readLedger().filter((e) => e.kind === "decision" && e.verdict !== "PENDING");

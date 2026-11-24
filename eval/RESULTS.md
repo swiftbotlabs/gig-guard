@@ -39,3 +39,5 @@ Per sample:
 
 Limits: 12 short samples written by us, one pass each, so a rerun can differ. Every answer's receipt is in `eval/ledger.public.jsonl`.
 The review parser was fixed (2026-11-21) after reading these 11 answers: three code reviews that named the bug (B02 "not secure", B05 "unchecked low-level call", B07 "not correct ... can permanently lose funds") had been read as passes, and one security review that said "no security vulnerabilities were found" had been read as a flag because it listed advisory IDs. The re-decided row is therefore in-sample; a fresh run with the frozen parser is the out-of-sample check.
+
+B07_MissingAccessControl.sol also shipped with NO security answer: SECURITY_REVIEW_GENERAL failed (HTTP 500, context deadline exceeded) and the gate shipped on the code review alone. An outside replay pointed this out (Iniwura/falsum#97). Since policy v7 (24 Nov), a contract never ships without a security answer; the best outcome without one is HOLD (test: 'ship: no security answer is never SHIP'). On the stored answers, the current code gives B07 FIX, because the fixed parser reads its code review as a flag.

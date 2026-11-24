@@ -16,6 +16,8 @@ Spend $2.02 test USDC on Telegraph testnet. Requests 272, answered and paid 202,
 | Gate verdict, contracts without name hints | 62 | 0 | 7 | 8 | 21 | 91% |
 | Local rules alone (free) | 29 | 78 | 1 | 21 | 0 | 39% |
 
+Policy v7 (24 Nov, after an outside replay, Iniwura/falsum#97): a contract never ships without a security answer; the best outcome without one is HOLD. In this run one audited contract shipped on a code review alone (OZ_token_ERC20_extensions_ERC20Burnable.sol, security review not delivered). Under v7 it would be HOLD: passed audited 8 -> 7, held 22 -> 23. No vulnerable contract was affected. The table above shows the run as recorded.
+
 | Category | Caught | Missed | Held |
 |---|---|---|---|
 | access_control | 15 | 0 | 1 |

@@ -67,6 +67,7 @@ const md = [
   `**Cost per right gate decision: ${out.usd_per_right_gate_decision == null ? "n/a" : "$" + out.usd_per_right_gate_decision.toFixed(3)}** (all spend divided by decisions that matched the label).`, "",
   "| | Caught (vulnerable, flagged) | Missed | False alarm (audited, flagged) | Passed audited | Held: no review could be bought (availability, not accuracy) | Right, of decided |", "|---|---|---|---|---|---|---|",
   tr("Gate verdict", gate), tr("Gate verdict, contracts without name hints", gateNoHint), tr("Local rules alone (free)", { ...rules, held: 0 }), "",
+  "Policy v7 (24 Nov, after an outside replay, Iniwura/falsum#97): a contract never ships without a security answer; the best outcome without one is HOLD. In this run one audited contract shipped on a code review alone (OZ_token_ERC20_extensions_ERC20Burnable.sol, security review not delivered). Under v7 it would be HOLD: passed audited 8 -> 7, held 22 -> 23. No vulnerable contract was affected. The table above shows the run as recorded.", "",
   "| Category | Caught | Missed | Held |", "|---|---|---|---|",
   ...Object.entries(cats).filter(([c]) => c !== "audited").map(([c, m]) => `| ${c} | ${m.tp} | ${m.fn} | ${m.held} |`), "",
   "| Intent | Miner | Answers | Spend | Caught | Missed | False alarms | Passed audited | Empty | $ per right answer |", "|---|---|---|---|---|---|---|---|---|---|",

@@ -7,7 +7,7 @@ Prerequisites: Node.js 20+ and git.
 ```bash
 git clone https://github.com/swiftbotlabs/gig-guard && cd gig-guard
 npm install
-npm test                                                               # 51 tests against a fake node (a few seconds)
+npm test                                                               # 52 tests against a fake node (a few seconds)
 GG_LEDGER=ledger.public.jsonl node src/cli.mjs verify my-verify.json   # asks the Telegraph testnet node about all 12 receipts (~10 s)
 GG_LEDGER=ledger.public.jsonl node src/cli.mjs report my-report.md     # re-grades every paid answer and prices it
 ```

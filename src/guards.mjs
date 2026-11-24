@@ -72,7 +72,7 @@ function decide(gate, input, verdict, reasons, evidence, extra = {}) {
   return d;
 }
 const lc = (s) => String(s ?? "").toLowerCase();
-export const POLICY = "v6"; // decisions record the policy version that made them
+export const POLICY = "v7"; // decisions record the policy version that made them
 
 /** Mission 09: triage a job lead found by the agent's heartbeat. */
 export async function scoutBounty({ url, sponsor, prizeUsd, label }) {
@@ -226,7 +226,10 @@ export function shipVerdict(sr, cr, local) {
   if (verdict === "FIX" && local.length) reasons.push(`confirmed by local rules: ${local.join("; ")}`);
   else if (verdict === "FIX") uncertainty.push("miner-only finding: no local rule fired; a human should confirm before rework");
   else if (verdict === "SHIP" && local.length) { verdict = "FIX"; reasons.push(`miners passed it, but local rules fired: ${local.join("; ")}`); uncertainty.push("miners and local rules disagree"); }
-  if (verdict === "SHIP" && (!sr.ok || !cr.ok)) uncertainty.push("only one review could be bought");
+  // A contract never ships without a security answer (falsum#97: B07 shipped on a code review alone after the security review
+  // failed). With no security review the best outcome is HOLD; a code review that passes is not enough.
+  if (verdict === "SHIP" && !sr.ok) { verdict = "HOLD"; reasons.push("no security review could be bought: not shipping on a code review alone (fail closed)"); }
+  else if (verdict === "SHIP" && !cr.ok) uncertainty.push("only one review could be bought");
   return { verdict, reasons, uncertainty };
 }
 
