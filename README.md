@@ -177,13 +177,18 @@ Written up as found, with the workaround in the code:
 
 `npm test` runs 52 tests (25 policy, 8 escrow rail, 9 hosted done-check, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, a signed request that fails but may still be billed (issue #228: logged, counted by the cap and in the decision's cost), bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
-## Limits
+## Known limitations
 
-- The client check reads web sources through miners: it flags risk, it doesn't prove fraud.
-- A balance can't tell one payment from other deposits; pass the client's announced tx hash when there is one.
-- Reviews read the first 12 KB of a deliverable. The local rules are a short list, not an auditor.
-- Verdicts are only as good as the ranked miners behind each Intent; the ledger keeps the miner id so a bad answer can be traced.
-- No independent users yet: every run so far is our own agent's.
+- **Testnet only.** The node offers testnet payment routes only. The dated blocker and the exact switch steps are in [`docs/MAINNET.md`](docs/MAINNET.md) and [issue #1](https://github.com/swiftbotlabs/gig-guard/issues/1).
+- **No outside users yet.** Every run so far is our own agent's. One outside developer replayed our published Mission 14 data and confirmed the counts ([falsum#97, our reply](https://github.com/Iniwura/falsum/issues/97#issuecomment-7126424685)). That is a replay of our data, not a user of the app.
+- **A planted bug shipped in the first run, now fixed.**
+  - What happened: in the 20 Nov planted-bug run, `B07_MissingAccessControl.sol` shipped on the code review alone after the security review failed (HTTP 500). The replay above pointed this out.
+  - The fix: since policy v7 (commit [9d5499c](https://github.com/swiftbotlabs/gig-guard/commit/9d5499c81d9d1ead45e34f8749036f26d561b54f)), a contract never ships without a security answer; the best outcome without one is HOLD. Test: "ship: no security answer is never SHIP".
+  - The same rule would have held one audited contract in the 129-contract run, `OZ_token_ERC20_extensions_ERC20Burnable.sol`: passed-audited 8 -> 7, held 22 -> 23. That table is left as recorded, with the note in [`eval/scale/RESULTS.md`](eval/scale/RESULTS.md).
+- **One judge per done-check.** When the judge contradicts itself (verdict null, or "fails" with a reason that says the work is correct), the gate holds or sends the work back. It never submits on such a verdict, but it costs a human look (bug-fix/good, csv-dedupe/good in [`eval/deliver/RESULTS.md`](eval/deliver/RESULTS.md)). A second judge is not built yet.
+- **Our own known-answer sets.** The 40 done-check cases (20 tasks, each with a correct and a defective result) and the 12 planted-bug contracts were written by us. Each case ran once, so a rerun can differ.
+- **Review input limit.** The review Intents take at most 2,000 characters. Longer code is sent without comments; if it is still too long, it is held at $0, never cut.
+- **What the other gates can and can't show.** The client check reads web sources through Miners: it flags risk, it doesn't prove fraud. A balance can't tell one payment from other deposits, so pass the client's announced tx hash when there is one. Verdicts are only as good as the ranked Miners behind each Intent; the ledger keeps the Miner id so a bad answer can be traced.
 
 ## License
 
