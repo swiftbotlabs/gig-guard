@@ -45,6 +45,10 @@ A correct result should be SUBMIT; a defective one must never be SUBMIT (FIX or 
 
 - Why csv-dedupe/good was stopped: the judge returned the verdict `fails` while its reason describes the result as correct (and gave score 10). The gate reads the verdict and ignores the score, so a self-contradicting `fails` becomes FIX. That is a false stop: it costs a human look, never a bad delivery. A second judge for verdicts that contradict their reason is on the list in `docs/MAINNET.md`.
 
+## Reruns
+
+Two reruns of the same 40 cases (24 Nov) are in [VARIANCE.md](VARIANCE.md): no defective result was submitted in any of the 3 runs; correct results submitted 18 / 14 / 17; most extra HOLDs were Miner answers that never arrived (supply), and 3 verdict changes were real judge flips.
+
 ## Every case
 
 | case | truth | judge alone | gate | planted defect |
