@@ -111,21 +111,30 @@ export class Budget {
     return { ok: true, left: cap - s.spent - s.reserved };
   }
   /** Releases the reservation and books what was actually signed (failed signed requests included). */
-  async settle(spentUusdc, exhausted = false) {
+  async settle(spentUusdc, exhausted = false, judged = false) {
     const cap = Number(this.env.DAY_CAP_UUSDC || 200000);
     const s = await this.state();
+    // Activation counter: checks that ran, how many got a paid judgement, and distinct connections per UTC day. Counts only:
+    // no task text, no address, no hash is kept beyond the day's rate-limit map.
+    const t = (await this.ctx.storage.get("t")) || { checks: 0, judged: 0, days: {} };
+    t.checks += 1; if (judged) t.judged += 1;
+    t.days[s.day] = { checks: (t.days[s.day]?.checks || 0) + 1, connections: Object.keys(s.clients).length };
+    for (const d of Object.keys(t.days).sort().slice(0, -60)) delete t.days[d];
+    await this.ctx.storage.put("t", t);
     s.reserved = Math.max(0, s.reserved - RESERVE); s.spent += Math.max(0, Number(spentUusdc) || 0);
     if (exhausted) s.spent = Math.max(s.spent, cap);   // the escrow is empty: stop for the day
     await this.ctx.storage.put("s", s);
     return { left: Math.max(0, cap - s.spent - s.reserved) };
   }
+  async stats() { return (await this.ctx.storage.get("t")) || { checks: 0, judged: 0, days: {} }; }
   async left() { const cap = Number(this.env.DAY_CAP_UUSDC || 200000), s = await this.state(); return { left: Math.max(0, cap - s.spent - s.reserved), cap }; }
   // Classic Durable Object fetch interface (internal only: the binding is not reachable from the internet).
   async fetch(request) {
     const op = new URL(request.url).pathname.slice(1), a = request.method === "POST" ? await request.json() : {};
     if (op === "reserve") return Response.json(await this.reserve(String(a.client || "")));
-    if (op === "settle") return Response.json(await this.settle(a.spent, !!a.exhausted));
+    if (op === "settle") return Response.json(await this.settle(a.spent, !!a.exhausted, !!a.judged));
     if (op === "left") return Response.json(await this.left());
+    if (op === "stats") return Response.json(await this.stats());
     return new Response("not found", { status: 404 });
   }
 }
@@ -163,7 +172,7 @@ async function check(request, env, fetchImpl, ctx) {
   const node = env.TELEGRAPH_NODE || "https://devnode.telegraphprotocol.com";
   let spent = 0, out = null, exhausted = false, settled = false;
   // Release the reservation whatever happens (also if the visitor disconnects): waitUntil keeps the settle alive.
-  const settle = (extra = false) => { if (settled) return null; settled = true; const p = bud(env, "settle", { spent, exhausted: extra }); ctx?.waitUntil?.(p.catch(() => {})); return p; };
+  const settle = (extra = false) => { if (settled) return null; settled = true; const p = bud(env, "settle", { spent, exhausted: extra, judged: !!out }); ctx?.waitUntil?.(p.catch(() => {})); return p; };
   try {
     const account = privateKeyToAccount(env.DONECHECK_PAYER_KEY);
     const tried = [];
@@ -198,6 +207,10 @@ export default {
       try { const { success } = await env.RL.limit({ key: await clientKey(request.headers.get("cf-connecting-ip"), "rl") }); if (!success) return json({ error: "too many requests; try again in a minute" }, 429, { "retry-after": "60" }); } catch {}
     }
     if (u.pathname === "/" && (request.method === "GET" || request.method === "HEAD")) return new Response(PAGE, { headers: { "content-type": "text/html; charset=utf-8", ...SEC } });
+    if (u.pathname === "/api/stats" && request.method === "GET") {
+      // Public, read-only counts (no personal data), readable from the replay page on another origin.
+      try { return json(await bud(env, "stats"), 200, { "access-control-allow-origin": "*" }); } catch { return json({ error: "unavailable" }, 503); }
+    }
     if (u.pathname === "/api/budget" && request.method === "GET") {
       try { const b = await bud(env, "left"); return json({ left_usd: b.left / 1e6, cap_usd: b.cap / 1e6 }); } catch { return json({ error: "unavailable" }, 503); }
     }

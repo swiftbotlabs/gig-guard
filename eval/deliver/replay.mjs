@@ -9,6 +9,14 @@ const { cases } = JSON.parse(fs.readFileSync(here("cases.json"), "utf8"));
 const L = fs.readFileSync(here("ledger.public.jsonl"), "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
 const ver = {}; try { for (const r of JSON.parse(fs.readFileSync(here("receipts-verify.json"), "utf8")).receipts) ver[r.receipt_hash] = r.status; } catch {}
 const S = JSON.parse(fs.readFileSync(here("RESULTS.md"), "utf8").match(/```\n(\{[\s\S]*?\})\n```/)[1]);
+// Rerun variance (eval/deliver/VARIANCE.md), shown as mean and range, never just the best run.
+let VAR = "";
+try {
+  const v = fs.readFileSync(here("VARIANCE.md"), "utf8");
+  const g = (re) => (v.match(re) || [])[1];
+  const runs = g(/\((\d+) runs/), good = g(/Correct results submitted per run: ([\d.]+ \(range [^)]+\))/), hold = g(/HOLD per run: ([\d.]+ \(range [^)]+\))/), bad = g(/Defective results submitted per run: ([\d.]+ \(range [^)]+\))/);
+  if (runs) VAR = `<p class="lead">Across ${runs} runs of the same 40 cases: defective results submitted per run ${bad}; correct results submitted ${good}; HOLD ${hold}. Details: <a href="https://github.com/swiftbotlabs/gig-guard/blob/main/eval/deliver/VARIANCE.md">VARIANCE.md</a>. The cards below show the first run.</p>`;
+} catch {}
 const NODE = process.env.TELEGRAPH_NODE || "https://devnode.telegraphprotocol.com";
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const dec = new Map(); for (const x of L) if (x.kind === "decision" && x.gate === "deliver") dec.set(x.input?.name, x);
@@ -53,6 +61,8 @@ code{font-size:.82rem}footer{color:var(--mut);font-size:.85rem;margin-top:16px}a
 <div class="tile"><b>$${Number(S.cost_per_decided_usd).toFixed(3)}</b><span>per decision ($${Number(S.cost_usd).toFixed(2)} total)</span></div>
 <div class="tile"><b>${S.latency_p50_s} s</b><span>median answer time</span></div>
 </div>
+${VAR}
+<p class="lead" id="hs">Hosted done-check (no wallet): <a href="https://donecheck.swiftbotlab.workers.dev">donecheck.swiftbotlab.workers.dev</a>.</p>
 <div class="bar"><button class="pri" id="vb" type="button">Check receipts live</button><span id="vs">Asks the Telegraph node whether each receipt is in its settled epoch block. No wallet, no key.</span></div>
 <div class="bar" role="group" aria-label="Filter"><button type="button" data-f="all" aria-pressed="true">All 40</button><button type="button" data-f="not_done" aria-pressed="false">Planted defects</button><button type="button" data-f="done" aria-pressed="false">Good outputs</button><button type="button" data-f="wrong" aria-pressed="false">Not the expected verdict</button></div>
 <main id="cases">${cards}</main>
@@ -61,6 +71,7 @@ code{font-size:.82rem}footer{color:var(--mut);font-size:.85rem;margin-top:16px}a
 const D=${data};
 document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{const f=b.dataset.f;document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",x===b));
 document.querySelectorAll(".case").forEach(c=>{c.hidden=!(f==="all"||c.dataset.truth===f||(f==="wrong"&&c.classList.contains("wrong")))})});
+fetch("https://donecheck.swiftbotlab.workers.dev/api/stats").then(r=>r.json()).then(s=>{if(typeof s.checks==="number")document.getElementById("hs").insertAdjacentText("beforeend"," Checks run there so far: "+s.checks+" ("+s.judged+" with a paid judgement), counts only, no personal data.")}).catch(()=>{});
 document.getElementById("vb").onclick=async()=>{const vs=document.getElementById("vs");const n={SETTLED:0,PENDING:0,MISMATCH:0,OTHER:0};vs.textContent="checking "+D.checks.length+" receipts…";
 for(const c of D.checks){let s="OTHER";try{const r=await fetch(D.node+"/v1/blocks/"+c.e+"/deliveries/"+c.h);const j=await r.json();
 if(r.ok){const d=j.delivery||{};s=(d.intent===c.i&&Number(d.usdc)===c.u)?"SETTLED":"MISMATCH"}else if(/no block recorded/.test(j.error||""))s="PENDING";}catch(e){}

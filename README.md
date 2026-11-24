@@ -73,7 +73,7 @@ Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow b
 
 ```bash
 npm install
-npm test                                   # 52 tests against a fake node: no network, no funds
+npm test                                   # 56 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
@@ -101,6 +101,14 @@ https://donecheck.swiftbotlab.workers.dev: paste a task and an agent's result, g
 - when the escrow deposit is used up, the check answers HOLD and stops for the day.
 
 Code: [`hosted/`](hosted/), a Cloudflare Worker with one Durable Object for the budget. It uses the same `deliverVerdict` as the CLI. Neither the Worker nor the CLI ever signs the node's payment text as given: the escrow message must match the known template exactly (one amount, the Telegraph Diamond as payee, Ethereum Sepolia) and is rebuilt locally (`src/escrowmsg.mjs`). Spend is booked from what was signed, never from the node's receipt. Tests: `test/hosted.test.mjs` (9, against a fake node), reviewed by an independent security pass.
+
+## Drop-in integrations (no wallet, hosted check)
+
+- [`integrations/donecheck-client.mjs`](integrations/donecheck-client.mjs): `await doneCheck({ task, result, mustInclude })` returns SUBMIT / FIX / HOLD with a receipt. A refusal or an unreachable check comes back as HOLD, never SUBMIT. CLI: `node integrations/donecheck-client.mjs "<task>" "<result>"` (exit 0 only on SUBMIT).
+- [`integrations/mcp-donecheck.mjs`](integrations/mcp-donecheck.mjs): an MCP server (stdio, no dependencies) with one tool, `done_check`. To use it from Claude Desktop, Claude Code or Cursor: `{"mcpServers":{"done-check":{"command":"node","args":["/path/to/gig-guard/integrations/mcp-donecheck.mjs"]}}}`.
+- [`integrations/tool-call-loop.mjs`](integrations/tool-call-loop.mjs): a `done_check` tool definition plus its handler for any tool-calling loop (Anthropic Messages tools as-is; OpenAI-style function tools with one rename). The handler tells the model to finish only on SUBMIT.
+- The hosted check is shared and capped (5 checks per connection per day). For volume, run the gate yourself on your own testnet escrow (`docs/TUTORIAL-done-check.md`). Tests: `test/integrations.test.mjs`.
+- Public activation counter: `GET https://donecheck.swiftbotlab.workers.dev/api/stats` returns checks run, paid judgements, and connections per UTC day. It holds counts only, no task text and no addresses.
 
 ## Named failure cases (run each one)
 
@@ -175,7 +183,7 @@ Written up as found, with the workaround in the code:
 
 ## Tests
 
-`npm test` runs 52 tests (25 policy, 8 escrow rail, 9 hosted done-check, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, a signed request that fails but may still be billed (issue #228: logged, counted by the cap and in the decision's cost), bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 56 tests (25 policy, 8 escrow rail, 10 hosted done-check, 3 integrations, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, a signed request that fails but may still be billed (issue #228: logged, counted by the cap and in the decision's cost), bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Known limitations
 

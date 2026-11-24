@@ -47,7 +47,7 @@ A correct result should be SUBMIT; a defective one must never be SUBMIT (FIX or 
 
 ## Reruns
 
-Two reruns of the same 40 cases (24 Nov) are in [VARIANCE.md](VARIANCE.md): no defective result was submitted in any of the 3 runs; correct results submitted 18 / 14 / 17; most extra HOLDs were Miner answers that never arrived (supply), and 3 verdict changes were real judge flips.
+Two reruns of the same 40 cases (24 Nov) are in [VARIANCE.md](VARIANCE.md): no defective result was submitted in any of the 3 runs (0 / 0 / 0); correct results submitted 18 / 14 / 17 (mean 16.3, range 14-18); HOLD 2 / 9 / 9 (mean 6.7); most extra HOLDs were Miner answers that never arrived (supply), and 3 verdict changes were real judge flips.
 
 ## Every case
 

@@ -117,3 +117,16 @@ test("review fixes: compressed and expanded IPv6 forms share one /64 bucket; ove
   const big = await worker.fetch(new Request("https://donecheck.example/api/check", { method: "POST", headers: { "content-type": "application/json", "content-length": "99999" }, body: "{}" }), makeEnv(), {});
   assert.equal(big.status, 413);
 });
+
+test("activation counter: /api/stats counts checks, paid judgements and connections per day (no personal data), readable cross-origin", async () => {
+  mode = "ok"; const env = makeEnv();
+  await call(env, { task: T, result: "s.length >= 12" }, { ip: "198.51.100.10" });
+  await call(env, { task: T, result: "s.length > 12" }, { ip: "198.51.100.11" });
+  mode = "empty"; await call(env, { task: T, result: "x" }, { ip: "198.51.100.12" }); mode = "ok";
+  const r = await worker.fetch(new Request("https://donecheck.example/api/stats"), env, {});
+  assert.equal(r.headers.get("access-control-allow-origin"), "*");
+  const st = await r.json();
+  assert.equal(st.checks, 3); assert.equal(st.judged, 2);
+  const day = Object.values(st.days)[0]; assert.equal(day.checks, 3); assert.equal(day.connections, 3);
+  assert.doesNotMatch(JSON.stringify(st), /198\.51|s\.length/);
+});
