@@ -30,7 +30,27 @@ t.cost_usd = +t.cost_usd.toFixed(4);
 const ms = fs.readFileSync(ledger, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)).filter((x) => x.kind === "purchase" && x.purpose === "deliver").map((x) => x.ms).filter(Number.isFinite).sort((a, b) => a - b);
 const pct = (f) => (ms.length ? +(ms[Math.floor(f * (ms.length - 1))] / 1000).toFixed(1) : null);
 Object.assign(t, { paid_answers: ms.length, latency_p50_s: pct(0.5), latency_p95_s: pct(0.95), cost_per_decided_usd: t.decided ? +(t.cost_usd / t.decided).toFixed(4) : null });
-const md = [`# Deliver gate, known-answer run`, "", "```", JSON.stringify(t, null, 1), "```", "",
-  "| case | truth | judge alone | gate | planted defect |", "|---|---|---|---|---|", ...rows].join("\n") + "\n";
+// Verdicts by kind: HOLD is not a decision on the work (a human decides), so it is reported apart from SUBMIT/FIX.
+const vc = { SUBMIT: 0, FIX: 0, HOLD: 0 };
+for (const c of cases) { const d = dec.get(c.id); if (d) vc[d.verdict] = (vc[d.verdict] || 0) + 1; }
+Object.assign(t, { verdict_submit: vc.SUBMIT, verdict_fix: vc.FIX, verdict_hold: vc.HOLD });
+// Receipts: each paid answer's settlement status from the last `cli.mjs verify` run (receipts-verify.json next to this file).
+let rv = null; try { const f = new URL("./receipts-verify.json", import.meta.url); rv = JSON.parse(fs.readFileSync(f, "utf8")); rv.checked_at ??= `on ${fs.statSync(f).mtime.toISOString().slice(0, 10)}`; } catch {}
+const caseOf = new Map(); for (const d of dec.values()) for (const h of d.receipts || []) caseOf.set(h, d.input?.name);
+const misses = cases.filter((c) => { const d = dec.get(c.id); return d && (c.truth === "done" ? d.verdict !== "SUBMIT" : d.verdict === "HOLD"); })
+  .map((c) => { const d = dec.get(c.id); return `- **${c.id}** (${c.truth === "done" ? "a correct result" : `planted defect: ${c.defect}`}) -> ${d.verdict}. The judge said: "${String((d.reasons || []).join(" ")).replace(/"/g, "'").slice(0, 300)}"`; });
+const md = [`# Deliver gate, known-answer run`, "",
+  `${t.cases} cases ran (20 tasks, each with a correct result and one with a planted defect). Gate verdicts: **${vc.SUBMIT} SUBMIT, ${vc.FIX} FIX, ${vc.HOLD} HOLD**. HOLD means the gate did not decide: the judgement was not a clear pass, so a human looks. It is counted apart from SUBMIT and FIX. (In the JSON, \`decided\` = cases that ran to a gate verdict, HOLD included.)`, "",
+  "```", JSON.stringify(t, null, 1), "```", "",
+  "## Where the gate did not give the expected verdict", "",
+  "A correct result should be SUBMIT; a defective one must never be SUBMIT (FIX or HOLD both stop it). No defective result was submitted. The cases below are the misses and the holds, with the judge's own words:", "",
+  ...misses, "",
+  "- Why csv-dedupe/good was stopped: the judge returned the verdict `fails` while its reason describes the result as correct (and gave score 10). The gate reads the verdict and ignores the score, so a self-contradicting `fails` becomes FIX. That is a false stop: it costs a human look, never a bad delivery. A second judge for verdicts that contradict their reason is on the list in `docs/MAINNET.md`.", "",
+  "## Every case", "",
+  "| case | truth | judge alone | gate | planted defect |", "|---|---|---|---|---|", ...rows, "",
+  ...(rv ? ["## Receipt settlement", "",
+    `Checked ${rv.checked_at || "with `node src/cli.mjs verify`"}: **${rv.settled} of ${rv.total} SETTLED**, ${rv.pending} pending, ${rv.mismatch} mismatched, ${rv.other} other. SETTLED means the receipt is listed in its epoch block on the Telegraph node with the same intent and amount. Re-check any receipt: \`GET https://devnode.telegraphprotocol.com/v1/blocks/{epoch}/deliveries/{receipt_hash}\`, or the \"Check receipts live\" button on the replay page.`, "",
+    "| case | intent | miner | epoch | receipt | status |", "|---|---|---|---|---|---|",
+    ...(rv.receipts || []).map((r) => `| ${caseOf.get(r.receipt_hash) || ""} | ${r.intent} | ${r.miner_id ?? ""} | ${r.epoch_id} | \`${r.receipt_hash}\` | ${r.status} |`)] : [])].join("\n") + "\n";
 fs.writeFileSync(new URL("./RESULTS.md", import.meta.url), md);
 console.log(JSON.stringify(t));
