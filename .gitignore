@@ -17,3 +17,5 @@ eval/deliver/ledger.deliver.jsonl
 eval/deliver/replay.html
 hosted/.dev.vars
 eval/deliver/rerun-*.jsonl
+!eval/deliver/rerun-*.public.jsonl
+!eval/deliver/rerun-*.receipts-verify.json
