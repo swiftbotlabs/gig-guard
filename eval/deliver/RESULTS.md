@@ -1,5 +1,10 @@
 # Deliver gate, known-answer run
 
+- **Network:** Telegraph devnode, **testnet**: Ethereum Sepolia escrow rail, Telegraph test USDC. No real money.
+- **Paid answers bought:** 2026-11-22 15:44 to 2026-11-23 17:17 UTC (logs: `run-1.log` to `run-4.log`). Results were committed in 5573077; the receipt re-check is in ff86f0b.
+- **Receipts:** 38 of 38 SETTLED, 0 pending, 0 mismatched, checked on 2026-11-24 (`receipts-verify.json`, table at the end).
+- **The set:** 20 tasks we wrote ourselves, one planted defect per task, truth set by construction. It is not a third-party benchmark.
+
 40 cases ran (20 tasks, each with a correct result and one with a planted defect). Gate verdicts: **18 SUBMIT, 20 FIX, 2 HOLD**. HOLD means the gate did not decide: the judgement was not a clear pass, so a human looks. It is counted apart from SUBMIT and FIX. (In the JSON, `decided` = cases that ran to a gate verdict, HOLD included.)
 
 ```

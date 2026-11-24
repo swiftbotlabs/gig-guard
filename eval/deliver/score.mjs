@@ -39,7 +39,13 @@ let rv = null; try { const f = new URL("./receipts-verify.json", import.meta.url
 const caseOf = new Map(); for (const d of dec.values()) for (const h of d.receipts || []) caseOf.set(h, d.input?.name);
 const misses = cases.filter((c) => { const d = dec.get(c.id); return d && (c.truth === "done" ? d.verdict !== "SUBMIT" : d.verdict === "HOLD"); })
   .map((c) => { const d = dec.get(c.id); return `- **${c.id}** (${c.truth === "done" ? "a correct result" : `planted defect: ${c.defect}`}) -> ${d.verdict}. The judge said: "${String((d.reasons || []).join(" ")).replace(/"/g, "'").slice(0, 300)}"`; });
+const allTs = fs.readFileSync(ledger, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)).filter((x) => x.kind === "purchase").map((x) => x.ts).sort();
+const span = allTs.length ? `${allTs[0].slice(0, 16).replace("T", " ")} to ${allTs.at(-1).slice(0, 16).replace("T", " ")} UTC` : "n/a";
 const md = [`# Deliver gate, known-answer run`, "",
+  `- **Network:** Telegraph devnode, **testnet**: Ethereum Sepolia escrow rail, Telegraph test USDC. No real money.`,
+  `- **Paid answers bought:** ${span} (logs: \`run-1.log\` to \`run-4.log\`). Results were committed in 5573077; the receipt re-check is in ff86f0b.`,
+  `- **Receipts:** ${rv ? `${rv.settled} of ${rv.total} SETTLED, ${rv.pending} pending, ${rv.mismatch} mismatched, checked ${rv.checked_at} (\`receipts-verify.json\`, table at the end)` : "not checked yet"}.`,
+  `- **The set:** 20 tasks we wrote ourselves, one planted defect per task, truth set by construction. It is not a third-party benchmark.`, "",
   `${t.cases} cases ran (20 tasks, each with a correct result and one with a planted defect). Gate verdicts: **${vc.SUBMIT} SUBMIT, ${vc.FIX} FIX, ${vc.HOLD} HOLD**. HOLD means the gate did not decide: the judgement was not a clear pass, so a human looks. It is counted apart from SUBMIT and FIX. (In the JSON, \`decided\` = cases that ran to a gate verdict, HOLD included.)`, "",
   "```", JSON.stringify(t, null, 1), "```", "",
   "## Where the gate did not give the expected verdict", "",
