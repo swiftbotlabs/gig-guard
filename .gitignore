@@ -16,3 +16,4 @@ eval/scale/ledger.audited-v7.jsonl
 eval/deliver/ledger.deliver.jsonl
 eval/deliver/replay.html
 hosted/.dev.vars
+eval/deliver/rerun-*.jsonl
