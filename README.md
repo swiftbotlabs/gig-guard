@@ -4,7 +4,7 @@
 
 **Testnet only.** Ethereum Sepolia escrow, Telegraph test USDC. No real money moves, and nothing here is production usage.
 
-Demo video (2 min 45 s, the 10:21 UTC run below, long waits sped up and labelled): https://apps.swiftbotlab.workers.dev/proof/gig-guard-demo.mp4. Public ledger: [`ledger.html`](ledger.html).
+Video of the current gates (captions only, testnet): https://apps.swiftbotlab.workers.dev/proof/gig-guard-donecheck.mp4. Public ledger: [`ledger.html`](ledger.html).
 
 | Gate | Mission | What it buys from Telegraph | Free cross-check | Decisions |
 |---|---|---|---|---|
