@@ -149,3 +149,34 @@ test("counter by integration: a fixed allow-list from x-donecheck-client (junk i
   const fresh = await (await worker.fetch(new Request("https://donecheck.example/api/stats"), makeEnv(), {})).json();
   assert.deepEqual(fresh.clients, {});
 });
+
+test("remote MCP (/mcp, Streamable HTTP, stateless): initialize, tools/list, tools/call runs the same capped check; foreign Origin and GET refused", async () => {
+  mode = "ok"; const env = makeEnv();
+  const rpc = (body, { origin, method = "POST", ip = "198.51.100.40" } = {}) => worker.fetch(new Request("https://donecheck.example/mcp", { method,
+    headers: { "content-type": "application/json", accept: "application/json, text/event-stream", "cf-connecting-ip": ip, ...(origin ? { origin } : {}) },
+    ...(method === "POST" ? { body: typeof body === "string" ? body : JSON.stringify(body) } : {}) }), env, {});
+  const init = await (await rpc({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "1" } } })).json();
+  assert.equal(init.result.serverInfo.name, "donecheck"); assert.equal(init.result.protocolVersion, "2025-06-18");
+  assert.equal((await rpc({ jsonrpc: "2.0", method: "notifications/initialized" })).status, 202);
+  const list = await (await rpc({ jsonrpc: "2.0", id: 2, method: "tools/list" })).json();
+  assert.equal(list.result.tools[0].name, "done_check");
+  const fix = await (await rpc({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "done_check", arguments: { task: T, result: "s.length > 12" } } })).json();
+  assert.equal(fix.result.structuredContent.verdict, "FIX"); assert.match(fix.result.content[0].text, /^FIX:[\s\S]*receipt 0x(ef){32}[\s\S]*Do not say done/);
+  const sub = await (await rpc({ jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "done_check", arguments: { task: T, result: "s.length >= 12" } } })).json();
+  assert.equal(sub.result.structuredContent.verdict, "SUBMIT");
+  const bad = await (await rpc({ jsonrpc: "2.0", id: 5, method: "tools/call", params: { name: "done_check", arguments: { task: "" } } })).json();
+  assert.equal(bad.result.isError, true); assert.match(bad.result.content[0].text, /^Input error/);
+  // the per-connection limit still applies through MCP: 5 per day (2 used above + 3 more), then HOLD with the reason
+  for (let i = 0; i < 3; i++) await rpc({ jsonrpc: "2.0", id: 10 + i, method: "tools/call", params: { name: "done_check", arguments: { task: T, result: "s.length >= 12" } } });
+  const capped = await (await rpc({ jsonrpc: "2.0", id: 20, method: "tools/call", params: { name: "done_check", arguments: { task: T, result: "s.length >= 12" } } })).json();
+  assert.equal(capped.result.structuredContent.verdict, "HOLD"); assert.match(capped.result.content[0].text, /5 checks/);
+  assert.equal((await (await rpc({ jsonrpc: "2.0", id: 6, method: "tools/call", params: { name: "nope" } })).json()).error.code, -32602);
+  assert.equal((await (await rpc({ jsonrpc: "2.0", id: 7, method: "resources/list" })).json()).error.code, -32601);
+  assert.equal((await rpc("{nope")).status, 400);
+  assert.equal((await rpc([{ jsonrpc: "2.0", id: 8, method: "ping" }])).status, 400);
+  const foreign = await rpc({ jsonrpc: "2.0", id: 9, method: "tools/list" }, { origin: "https://evil.example" });
+  assert.equal(foreign.status, 403); assert.equal(foreign.headers.get("access-control-allow-origin"), null);
+  assert.equal((await rpc(null, { method: "GET" })).status, 405);
+  const st = await (await worker.fetch(new Request("https://donecheck.example/api/stats"), env, {})).json();
+  assert.equal(st.clients["mcp-remote"], 5);
+});

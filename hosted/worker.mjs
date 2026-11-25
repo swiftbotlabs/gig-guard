@@ -58,7 +58,7 @@ export function parseInput(body) {
 
 /** Integration that sent a check, from the x-donecheck-client header ("donecheck-mcp/0.1.0" -> "mcp"). A fixed allow-list, so the
  *  public counter can't be filled with arbitrary keys. Same-origin calls without the header are the web page. */
-const VIA = ["js", "cli", "mcp", "ai-sdk", "loop", "py", "cli-py", "py-loop", "langchain", "openai-agents", "web", "other"];
+const VIA = ["js", "cli", "mcp", "ai-sdk", "loop", "py", "cli-py", "py-loop", "langchain", "openai-agents", "mcp-remote", "web", "other"];
 export function viaOf(header, sameOrigin = false) {
   const m = /^donecheck-([a-z-]+)\/\d+\.\d+\.\d+$/.exec(String(header || "").trim());
   if (m && VIA.includes(m[1])) return m[1];
@@ -215,11 +215,61 @@ async function check(request, env, fetchImpl, ctx) {
   }
 }
 
+// Remote MCP server (Streamable HTTP, stateless, JSON responses): POST /mcp with JSON-RPC 2.0. One tool, done_check, which runs the same
+// capped check as /api/check. No CORS headers, and a foreign Origin is refused, so a web page can't spend the budget through a visitor.
+const MCP_TOOL = {
+  name: "done_check",
+  description: "Call this BEFORE telling the user a task is finished. It checks the actual result against the task (a paid Telegraph Miner judges it on testnet; "
+    + "required strings are checked for free) and returns SUBMIT (finish), FIX (redo using the reason) or HOLD (ask the user), with a receipt.",
+  inputSchema: { type: "object", required: ["task", "result"], additionalProperties: false, properties: {
+    task: { type: "string", description: "What the user asked for." },
+    result: { type: "string", description: "What you produced. Task + result at most 2,000 characters." },
+    mustInclude: { type: "array", items: { type: "string" }, maxItems: 5, description: "Optional strings the result must contain." } } },
+};
+const MCP_NEXT = { SUBMIT: "You may tell the user it is done.", FIX: "Do not say done: fix the result using the reason, then call done_check again.",
+  HOLD: "Do not say done: tell the user the check was unclear and show your result." };
+async function mcp(request, env, fetchImpl, ctx) {
+  const u = new URL(request.url), origin = request.headers.get("origin");
+  if (origin && origin !== u.origin) return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "cross-origin requests are not accepted" } }, 403);
+  if (request.method !== "POST") return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "POST JSON-RPC to this endpoint (stateless; no SSE stream)" } }, 405, { allow: "POST" });
+  const raw = await readCapped(request, 8192);
+  if (raw === null) return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "request too large" } }, 413);
+  let m; try { m = JSON.parse(raw); } catch { return json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "parse error" } }, 400); }
+  if (Array.isArray(m) || !m || typeof m !== "object") return json({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "send one JSON-RPC message" } }, 400);
+  const id = m.id ?? null, ok = (result) => json({ jsonrpc: "2.0", id, result }), err = (code, message) => json({ jsonrpc: "2.0", id, error: { code, message } });
+  if (m.id === undefined) return new Response(null, { status: 202 });   // notifications
+  switch (m.method) {
+    case "initialize": return ok({ protocolVersion: typeof m.params?.protocolVersion === "string" ? m.params.protocolVersion : "2025-06-18",
+      capabilities: { tools: { listChanged: false } }, serverInfo: { name: "donecheck", version: "0.1.0" },
+      instructions: "Never tell the user a task is done without a SUBMIT from done_check. On FIX, redo it; on HOLD, show the result and ask." });
+    case "ping": return ok({});
+    case "tools/list": return ok({ tools: [MCP_TOOL] });
+    case "tools/call": {
+      if (m.params?.name !== "done_check") return err(-32602, "unknown tool");
+      const a = m.params.arguments || {};
+      const inner = new Request(`${u.origin}/api/check`, { method: "POST", headers: { "content-type": "application/json",
+        "cf-connecting-ip": request.headers.get("cf-connecting-ip") || "", "x-donecheck-client": "donecheck-mcp-remote/0.1.0" },
+        body: JSON.stringify({ task: a.task, result: a.result, mustInclude: a.mustInclude ?? [] }) });
+      const r = await check(inner, env, fetchImpl, ctx);
+      const v = await r.json();
+      if (!["SUBMIT", "FIX", "HOLD"].includes(v.verdict)) {
+        const bad = r.status === 400;
+        return ok({ content: [{ type: "text", text: bad ? `Input error: ${v.error}. Fix the arguments and call done_check again.` : `HOLD: no check could be made (${v.error || r.status}). Do not say done: show your result and ask the user.` }],
+          structuredContent: bad ? undefined : { verdict: "HOLD", error: v.error || `HTTP ${r.status}` }, isError: bad });
+      }
+      const rec = v.receipt?.receipt_hash ? ` (receipt ${v.receipt.receipt_hash}, epoch ${v.receipt.epoch_id})` : "";
+      const miss = v.missing?.length ? ` Missing: ${v.missing.join(", ")}.` : "";
+      return ok({ content: [{ type: "text", text: `${v.verdict}: ${(v.reasons || []).join(" | ")}${miss}${rec}\n${MCP_NEXT[v.verdict]}` }], structuredContent: v, isError: false });
+    }
+    default: return err(-32601, "method not found");
+  }
+}
+
 export default {
   async fetch(request, env, ctx, fetchImpl = fetch) {
     const u = new URL(request.url);
     // Short-window limit per connection on the API (Workers rate-limiting binding, if configured), before any Durable Object call.
-    if (u.pathname.startsWith("/api/") && env.RL) {
+    if ((u.pathname.startsWith("/api/") || u.pathname === "/mcp") && env.RL) {
       try { const { success } = await env.RL.limit({ key: await clientKey(request.headers.get("cf-connecting-ip"), "rl") }); if (!success) return json({ error: "too many requests; try again in a minute" }, 429, { "retry-after": "60" }); } catch {}
     }
     if (u.pathname === "/" && (request.method === "GET" || request.method === "HEAD")) return new Response(PAGE, { headers: { "content-type": "text/html; charset=utf-8", ...SEC } });
@@ -233,6 +283,7 @@ export default {
     if (u.pathname === "/api/budget" && request.method === "GET") {
       try { const b = await bud(env, "left"); return json({ left_usd: b.left / 1e6, cap_usd: b.cap / 1e6 }); } catch { return json({ error: "unavailable" }, 503); }
     }
+    if (u.pathname === "/mcp") return mcp(request, env, fetchImpl, ctx);
     if (u.pathname === "/api/check" && request.method === "POST") {
       // Same-origin only: a browser on another site can't spend our budget through a visitor.
       const origin = request.headers.get("origin");

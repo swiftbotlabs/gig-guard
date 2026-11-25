@@ -104,6 +104,8 @@ Code: [`hosted/`](hosted/), a Cloudflare Worker with one Durable Object for the 
 
 ## Drop-in integrations (no wallet, hosted check)
 
+**No install:** add `https://donecheck.swiftbotlab.workers.dev/mcp` as a remote MCP server (Streamable HTTP; `claude mcp add --transport http done-check https://donecheck.swiftbotlab.workers.dev/mcp`).
+
 **One-line install:** [swiftbotlabs/donecheck](https://github.com/swiftbotlabs/donecheck) packages the same check with no dependencies: `claude mcp add done-check -- npx -y github:swiftbotlabs/donecheck mcp` (MCP), a CLI gate, a Python client, and adapters for the Vercel AI SDK, LangChain and the OpenAI Agents SDK. Usage by integration: `/api/stats`; badge: `/api/badge`.
 
 - [`integrations/donecheck-client.mjs`](integrations/donecheck-client.mjs): `await doneCheck({ task, result, mustInclude })` returns SUBMIT / FIX / HOLD with a receipt. A refusal or an unreachable check comes back as HOLD, never SUBMIT. CLI: `node integrations/donecheck-client.mjs "<task>" "<result>"` (exit 0 only on SUBMIT).

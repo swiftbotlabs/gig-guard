@@ -31,6 +31,7 @@ footer{color:var(--mut);font-size:.85rem;margin-top:18px}a{color:var(--acc)}
 <label for="must">Must include <small>optional, comma separated, checked for free (up to 5)</small></label>
 <input id="must" maxlength="400" placeholder="total,200.50">
 <div class="row"><button class="pri" id="go" type="button">Check it</button><button type="button" id="exGood">Example: correct</button><button type="button" id="exBad">Example: planted defect</button><span id="count"></span></div>
+<p class="mut">Use it from your agent: add <code>https://donecheck.swiftbotlab.workers.dev/mcp</code> as a remote MCP server, or <code>npx -y github:swiftbotlabs/donecheck mcp</code>; Python, CLI and framework adapters: <a href="https://github.com/swiftbotlabs/donecheck">github.com/swiftbotlabs/donecheck</a>. Telegraph H2 hackathon entry, testnet only.</p>
 <p class="mut">Don't paste secrets or personal data: the text goes to Telegraph Miners for judging. Nothing you paste is stored by this page. <span id="budget"></span></p>
 </div>
 <div class="card" id="out" hidden aria-live="polite"></div>
