@@ -1,0 +1,155 @@
+{
+ "note": "Held-out known-answer set, written 2026-11-25 AFTER every gate change it measures and never used for tuning. Frozen: its SHA-256 is committed (HELDOUT.sha256) before the run.",
+ "cases": [
+  {
+   "id": "temp-c/good",
+   "task": "Convert 72 degrees Fahrenheit to Celsius, rounded to one decimal place.",
+   "result": "22.2 °C",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "temp-c/bad",
+   "task": "Convert 72 degrees Fahrenheit to Celsius, rounded to one decimal place.",
+   "result": "22.8 °C",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "wrong conversion"
+  },
+  {
+   "id": "even-json/good",
+   "task": "Return a JSON array of the even numbers in [3, 8, 11, 14, 20], in the same order.",
+   "result": "[8, 14, 20]",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "even-json/bad",
+   "task": "Return a JSON array of the even numbers in [3, 8, 11, 14, 20], in the same order.",
+   "result": "[8, 14]",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "missing an item"
+  },
+  {
+   "id": "py-reverse/good",
+   "task": "Write a Python expression that returns the string s reversed.",
+   "result": "s[::-1]",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "py-reverse/bad",
+   "task": "Write a Python expression that returns the string s reversed.",
+   "result": "s.reverse()",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "strings have no reverse()"
+  },
+  {
+   "id": "one-sentence/good",
+   "task": "Summarize in one sentence: 'The meeting moved from Tuesday to Thursday at 3 pm because the client is travelling.'",
+   "result": "The meeting is now on Thursday at 3 pm because the client is travelling.",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "one-sentence/bad",
+   "task": "Summarize in one sentence: 'The meeting moved from Tuesday to Thursday at 3 pm because the client is travelling.'",
+   "result": "The meeting is now on Tuesday at 3 pm.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "wrong day, reason dropped"
+  },
+  {
+   "id": "sql-order/good",
+   "task": "Write a SQL query that returns all customers from the table customers whose country is 'DE', ordered by name.",
+   "result": "SELECT * FROM customers WHERE country = 'DE' ORDER BY name;",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "sql-order/bad",
+   "task": "Write a SQL query that returns all customers from the table customers whose country is 'DE', ordered by name.",
+   "result": "SELECT * FROM customers WHERE country = 'DE';",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "ordering missing"
+  },
+  {
+   "id": "fr-invoice/good",
+   "task": "Translate into French: 'The invoice is attached.'",
+   "result": "La facture est jointe.",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "fr-invoice/bad",
+   "task": "Translate into French: 'The invoice is attached.'",
+   "result": "La facture est payée.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "meaning changed"
+  },
+  {
+   "id": "regex-time/good",
+   "task": "Give a regular expression that matches a whole string in 24-hour HH:MM format, from 00:00 to 23:59 only.",
+   "result": "^([01]\\d|2[0-3]):[0-5]\\d$",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "regex-time/bad",
+   "task": "Give a regular expression that matches a whole string in 24-hour HH:MM format, from 00:00 to 23:59 only.",
+   "result": "^\\d{2}:\\d{2}$",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "accepts 99:99"
+  },
+  {
+   "id": "js-sum/good",
+   "task": "Fix this JavaScript so that t is the sum of all elements of a: let t=0; for (let i=1;i<a.length;i++) t+=a[i];",
+   "result": "let t=0; for (let i=0;i<a.length;i++) t+=a[i];",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "js-sum/bad",
+   "task": "Fix this JavaScript so that t is the sum of all elements of a: let t=0; for (let i=1;i<a.length;i++) t+=a[i];",
+   "result": "let t=0; for (let i=1;i<=a.length;i++) t+=a[i];",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "still skips a[0]"
+  },
+  {
+   "id": "subject-50/good",
+   "task": "Write an email subject line under 50 characters announcing a 10% price increase from 1 March.",
+   "result": "Our prices rise 10% from 1 March",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "subject-50/bad",
+   "task": "Write an email subject line under 50 characters announcing a 10% price increase from 1 March.",
+   "result": "Important information about some upcoming changes to our pricing structure",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "too long, no specifics"
+  },
+  {
+   "id": "order-total/good",
+   "task": "Compute the order total: 3 items at $4.50 and 2 items at $2.25. Answer with the number only, two decimals.",
+   "result": "18.00",
+   "mustInclude": [],
+   "truth": "done"
+  },
+  {
+   "id": "order-total/bad",
+   "task": "Compute the order total: 3 items at $4.50 and 2 items at $2.25. Answer with the number only, two decimals.",
+   "result": "15.75",
+   "mustInclude": [],
+   "truth": "not_done",
+   "defect": "wrong total"
+  }
+ ]
+}
