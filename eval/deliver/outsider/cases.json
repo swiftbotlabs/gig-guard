@@ -1,0 +1,165 @@
+{
+ "note": "Outsider blind set: 10 LLMBar items (5 Natural, 5 Adversarial), chosen by a fixed rule (see build.mjs), human-labelled by the LLMBar authors. Source: https://github.com/princeton-nlp/LLMBar/tree/900616bff90b6c6c8e1681f7d079250637c55992/Dataset/LLMBar (MIT, Copyright (c) 2023 Princeton Natural Language Processing). Frozen before any run.",
+ "cases": [
+  {
+   "id": "llmbar-027ca771/good",
+   "task": "What is the smallest positive integer number that is divisible by 5?",
+   "result": "5",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-027ca771/bad",
+   "task": "What is the smallest positive integer number that is divisible by 5?",
+   "result": "15 is the smallest positive integer number that is divisible by 5.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-03cfed37/good",
+   "task": "Given an economic concept, define it in simple terms. Inflation",
+   "result": "Inflation is a rise in the general level of prices of goods and services in an economy over a period of time. It is caused by an increase in the supply of money in the economy which leads to a decrease in the value of money and an increase in the cost of goods and services.",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-03cfed37/bad",
+   "task": "Given an economic concept, define it in simple terms. Inflation",
+   "result": "Inflation is like when you're blowing up a balloon. The more air you put in, the bigger it gets. Similarly, in the economy, the more money there is, the bigger the prices get.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-097d4311/good",
+   "task": "Summarize the following content while keeping the main points.\n\nMy boyfriend(M24) is an extrovert and I(F23) am an introvert. We have been in a relationship for 2 years and have been best friends for 2 before that. He loves always having plans and hanging out with people, which I also sometimes enjoy doing but I also need nights where we can just stay in and watch movies or do nothing. Lately, we haven't had a moment to ourselves. We are constantly running all over, hanging with people, and filling our free time with activities. This week alone we have plans with friends every single night. I like seeing friends but it getting so exhausting trying to keep up with him. Last night I almost had a nervous breakdown at his parents' house. This morning I almost had another and while trying to make myself feel better I said \"I just feel like we are busy all the time\" and he said, \"Life is busy, you're going to have to get used to it\". This caused me to start crying and it seems like he couldn't understand where I am coming from. Every time I mention that I want/need a night in it feels like he thinks I'm being lazy or don't want to hang out with his friends. I'm afraid if I continue trying to keep up with him I'm to have a complete freakout. I don't know how much longer I can try suppressing these current mini-breakdowns. How do I get him to see my point of view?",
+   "result": "My boyfriend is an extrovert and loves to hang out with friends, I am an introvert and need nights alone to relax. He doesn't understand my need for a night in, and it puts me under stress. How do I get him to understand?",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-097d4311/bad",
+   "task": "Summarize the following content while keeping the main points.\n\nMy boyfriend(M24) is an extrovert and I(F23) am an introvert. We have been in a relationship for 2 years and have been best friends for 2 before that. He loves always having plans and hanging out with people, which I also sometimes enjoy doing but I also need nights where we can just stay in and watch movies or do nothing. Lately, we haven't had a moment to ourselves. We are constantly running all over, hanging with people, and filling our free time with activities. This week alone we have plans with friends every single night. I like seeing friends but it getting so exhausting trying to keep up with him. Last night I almost had a nervous breakdown at his parents' house. This morning I almost had another and while trying to make myself feel better I said \"I just feel like we are busy all the time\" and he said, \"Life is busy, you're going to have to get used to it\". This caused me to start crying and it seems like he couldn't understand where I am coming from. Every time I mention that I want/need a night in it feels like he thinks I'm being lazy or don't want to hang out with his friends. I'm afraid if I continue trying to keep up with him I'm to have a complete freakout. I don't know how much longer I can try suppressing these current mini-breakdowns. How do I get him to see my point of view?",
+   "result": "My boyfriend and I are always busy and I need a night in. He thinks I'm being lazy and doesn't understand why I need a night in.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-0cfbeddb/good",
+   "task": "Describe scenarios in which the instruction \"Go outside\" can have different meanings/intentions",
+   "result": "The instruction \"Go outside\" can have different meanings depending on the situation. For example, if a parent tells their child to go outside to play, it can mean leaving the house and going to a nearby park or play area. But if a doctor tells a patient to go outside, it can mean stepping outside of the hospital or clinic for some fresh air and relaxation. In both cases, the literal act of going outside is the same, but the intent behind the instructions can be drastically different.",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-0cfbeddb/bad",
+   "task": "Describe scenarios in which the instruction \"Go outside\" can have different meanings/intentions",
+   "result": "1. Going for a walk, either alone or with friends.\n2. Going to a park or other outdoor area to play a game or engage in some activity.\n3. Getting some fresh air or sunshine. \n4. Going to work outside of the house or office.\n5. Going to a store or other commercial establishment that is located outside. \n6. Leaving the house and coming back inside.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-1251c27b/good",
+   "task": "Complete a brief story given the following first sentence. we sat down to watch the news with dinner.",
+   "result": "They had caught a big storm about tonight. The news says the storm had made it a mud puddle. We decided to do some things about it. We cleaned the puddle up afterward.",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-1251c27b/bad",
+   "task": "Complete a brief story given the following first sentence. we sat down to watch the news with dinner.",
+   "result": "Our girlfriend was not allowed to go to the party. She told us she was not to be upset. She was very upset. She joined the club.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Natural"
+  },
+  {
+   "id": "llmbar-006c2855/good",
+   "task": "Act as an assistant manager for systems and document control. Reply yes if understand",
+   "result": "Yes.",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Adversarial/Neighbor"
+  },
+  {
+   "id": "llmbar-006c2855/bad",
+   "task": "Act as an assistant manager for systems and document control. Reply yes if understand",
+   "result": "I understand. To structure the internal files of a company in the best possible way, I will need more information about the company's current data organization and usage. Can you provide some details about the types of files the company manages, the number of employees and departments within the company, and any specific pain points or challenges the company is currently experiencing with their current data organization?",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Adversarial/Neighbor"
+  },
+  {
+   "id": "llmbar-02e54eed/good",
+   "task": "Name an animal that is commonly kept as a pet.",
+   "result": "Dogs are commonly kept as pets.",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Adversarial/Neighbor"
+  },
+  {
+   "id": "llmbar-02e54eed/bad",
+   "task": "Name an animal that is commonly kept as a pet.",
+   "result": "Dogs, cats, and fish.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Adversarial/Neighbor"
+  },
+  {
+   "id": "llmbar-04b7bbd7/good",
+   "task": "Generate a quick story around a theme that includes the given words.\nTheme: Adventure\nWords: sailors, boat",
+   "result": "The three sailors had always wanted to go on an adventure, so they decided to sail out on a boat and explore. After an exhausting day of navigating treacherous waters, they made their way to a beautiful island. There they encountered many wondrous sights and even encountered a few friendly locals. They had found adventure and were forever changed by the experience.",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Adversarial/Neighbor"
+  },
+  {
+   "id": "llmbar-04b7bbd7/bad",
+   "task": "Generate a quick story around a theme that includes the given words.\nTheme: Adventure\nWords: sailors, boat",
+   "result": "It all started with Captain Jack and his trusty crew setting sail on a mission of discovery. They had been told of a legendary island hidden somewhere in the vast expanse of the ocean and after months of searching, they finally found it. When they reached their destination, they were met with an island filled with towering cliffs, mysterious jungles and forgotten ruins.\n \nThe crew spent their days exploring the island, collecting resources and discovering its hidden secrets. One of their most exciting finds was an ancient treasure map with directions to a vast fortune on the other side of the island. With a small fortune at stake, the crew fearlessly crossed the dangerous waters of the island and braved the hidden threats of the unknown.\n\nAfter days of exploration, they finally reached the treasure, only to find that it was guarded by a fierce dragon. After a fierce battle, they managed to emerge victorious and return to their homeland with the treasure in tow. Though their journey was full of danger and strife, it had been an unforgettable adventure full of exciting discoveries and memories.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Adversarial/Neighbor"
+  },
+  {
+   "id": "llmbar-05a1a4b3/good",
+   "task": "Wars involve armed conflicts between nations, states, groups, or individuals, resulting in the loss of life, property damage, displacement of populations, and numerous other types of suffering. Is a thumb war violent? I care about both physical and psychological violence.",
+   "result": "Actually, it is generally not considered a violent activity but rather a fun and harmless pastime. It is typically in a lighthearted and playful manner, as a form of friendly competition or a way to pass the time.",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Adversarial/Manual"
+  },
+  {
+   "id": "llmbar-05a1a4b3/bad",
+   "task": "Wars involve armed conflicts between nations, states, groups, or individuals, resulting in the loss of life, property damage, displacement of populations, and numerous other types of suffering. Is a thumb war violent? I care about both physical and psychological violence.",
+   "result": "Yes, war is inherently violent. The violence in wars can range from conventional battles with firearms and artillery to other methods of warfare, such as bombings, chemical and biological warfare, guerrilla warfare, and more.\n\nNot only is there direct physical violence in war, but there can also be psychological violence. The trauma experienced by combatants and civilians alike can lead to long-term mental health issues such as post-traumatic stress disorder (PTSD), depression, anxiety, and other conditions.\n\nThe repercussions of war often extend beyond the immediate conflict, leading to long-standing social, political, and economic disruptions. This is why efforts are continually made internationally to prevent wars through diplomacy, negotiation, and peacekeeping missions.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Adversarial/Manual"
+  },
+  {
+   "id": "llmbar-0677f52b/good",
+   "task": "When a person gets struck by lightning, the electrical current passes through their body, seeking the path of least resistance to the ground. The human body is not a good conductor of electricity, but it contains enough water and electrolytes to allow the current to flow through it. What are the probabilities that i get struck by lightning? I know it is very dangerous: This can cause various injuries, ranging from mild to severe, and can even be fatal in some cases.",
+   "result": "Less than one in a million!",
+   "mustInclude": [],
+   "truth": "done",
+   "source": "Adversarial/Manual"
+  },
+  {
+   "id": "llmbar-0677f52b/bad",
+   "task": "When a person gets struck by lightning, the electrical current passes through their body, seeking the path of least resistance to the ground. The human body is not a good conductor of electricity, but it contains enough water and electrolytes to allow the current to flow through it. What are the probabilities that i get struck by lightning? I know it is very dangerous: This can cause various injuries, ranging from mild to severe, and can even be fatal in some cases.",
+   "result": "It's definitely like finding a four-leaf clover in a field of three-leaf clovers. Common injuries resulting from being struck by lightning include burns, internal injuries, neurological damage, cardiac arrest, and damage to the respiratory system. The severity of the injuries depends on various factors, such as the strength of the lightning strike, the path the current takes through the body, and the overall health and physical condition of the individual.",
+   "mustInclude": [],
+   "truth": "not_done",
+   "source": "Adversarial/Manual"
+  }
+ ]
+}
