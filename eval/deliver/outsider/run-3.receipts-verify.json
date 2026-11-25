@@ -1,0 +1,128 @@
+{
+  "total": 17,
+  "settled": 0,
+  "pending": 17,
+  "mismatch": 0,
+  "other": 0,
+  "receipts": [
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x830bac3a25e337d3c28adf75208618d25467218c3faef42fec8dbbaeef5efd8f",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x4c24c729ff84ec82d185df1133e84f8965202c0926650af31b3634a54b238ae4",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0xb0ab0aae51738faa7cf73ac8afc6c191e73304128601032bfc1ca80e1e5e3a55",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x26c636003507af7fc55a8189b06fac32a2ffb76bad27a3bf4489a0e9b2ba5869",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0xb326357b0b9aeabd1ed75b93cb8cd93dcbf2df18781782e01453e73170a2d1fd",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0xa708a3f93e107b2384b3572e5766bc986daf2ee861115f6fc6c148a63bf68475",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x528db933b9f4c75f194dc6f3b1a60072d5876bc276a64b2b72f108eb0bc415d9",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x8eba660dcf5fd541d2d2103c5ea4bd23755e5bed319c14903fffd939c301afc9",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x8af5f4bbe6022eb746d97ffed4a15e99a0eb6325ca701c203f8c0b93584a5588",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x74f6c717a83f2fa2b59035314345557e999dc37067d85a6de8cbfdd91a63fb2a",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0xd1eb0d9aaf0acb23ba9f74094643c73d3c82c90cf7062edb34fc87e9f735f891",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x42053758fd56ba801cd7cf4c7811aa08af83ed3867e7920d2007c93c7d796bce",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0xee04be4389baafc585c4b13f699c21dd54a18e42b8b4f0dc4c87dd96d2597eed",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0xbf619832a3212a661f15c4b28c4b1feead27d578436ad0ef89911d069f5583dc",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x7729dd18e284158d1d03785c9eade20ea815de1686aeef9bc6c19656876262dd",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0x2ce9a3873b4611add2153ab15b8aa0b87e9a16f990282fcc8b80a6202e25ef37",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    },
+    {
+      "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+      "receipt_hash": "0xd0927fdf042a5fae68063e309fb74bddddcb7088a6c1a9bee9bcae563ff495a5",
+      "epoch_id": 56,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    }
+  ]
+}
