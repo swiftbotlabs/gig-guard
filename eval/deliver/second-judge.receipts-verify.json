@@ -1,0 +1,16 @@
+{
+  "total": 1,
+  "settled": 0,
+  "pending": 1,
+  "mismatch": 0,
+  "other": 0,
+  "receipts": [
+    {
+      "intent": "LLM_OUTPUT_EVALUATION_GENERAL",
+      "receipt_hash": "0x92f8c30ae55e4c462762873f774ec6c2888e82a56bc3a571fb4ddc3dffa362dc",
+      "epoch_id": 54,
+      "status": "PENDING",
+      "note": "no block recorded for this epoch"
+    }
+  ]
+}
