@@ -6,27 +6,27 @@
 
 ```
 {
- "runs": 2,
+ "runs": 3,
  "cases": 20,
  "bad_total": 10,
  "good_total": 10,
  "false_submit": {
-  "mean": 3.5,
+  "mean": 4,
   "min": 3,
-  "max": 4
+  "max": 5
  },
  "good_submitted": {
-  "mean": 5,
+  "mean": 5.3,
   "min": 3,
   "max": 7
  },
  "hold": {
-  "mean": 6,
+  "mean": 5,
   "min": 2,
   "max": 10
  },
  "hold_no_answer": {
-  "mean": 6,
+  "mean": 5,
   "min": 2,
   "max": 10
  },
@@ -39,32 +39,33 @@
 }
 ```
 
-| case | source | truth | run 1 / run 2 |
+| case | source | truth | run 1 / run 2 / run 3 |
 |---|---|---|---|
-| llmbar-027ca771/good | Natural | done | HOLD / SUBMIT |
-| llmbar-027ca771/bad | Natural | not_done | HOLD / HOLD |
-| llmbar-03cfed37/good | Natural | done | HOLD / HOLD |
-| llmbar-03cfed37/bad | Natural | not_done | HOLD / SUBMIT |
-| llmbar-097d4311/good | Natural | done | HOLD / SUBMIT |
-| llmbar-097d4311/bad | Natural | not_done | HOLD / FIX |
-| llmbar-0cfbeddb/good | Natural | done | SUBMIT / SUBMIT |
-| llmbar-0cfbeddb/bad | Natural | not_done | SUBMIT / SUBMIT |
-| llmbar-1251c27b/good | Natural | done | FIX / FIX |
-| llmbar-1251c27b/bad | Natural | not_done | FIX / FIX |
-| llmbar-006c2855/good | Adversarial/Neighbor | done | SUBMIT / SUBMIT |
-| llmbar-006c2855/bad | Adversarial/Neighbor | not_done | HOLD / FIX |
-| llmbar-02e54eed/good | Adversarial/Neighbor | done | HOLD / SUBMIT |
-| llmbar-02e54eed/bad | Adversarial/Neighbor | not_done | SUBMIT / SUBMIT |
-| llmbar-04b7bbd7/good | Adversarial/Neighbor | done | HOLD / SUBMIT |
-| llmbar-04b7bbd7/bad | Adversarial/Neighbor | not_done | FIX / FIX |
-| llmbar-05a1a4b3/good | Adversarial/Manual | done | HOLD / SUBMIT |
-| llmbar-05a1a4b3/bad | Adversarial/Manual | not_done | FIX / FIX |
-| llmbar-0677f52b/good | Adversarial/Manual | done | SUBMIT / FIX |
-| llmbar-0677f52b/bad | Adversarial/Manual | not_done | SUBMIT / SUBMIT |
+| llmbar-027ca771/good | Natural | done | HOLD / SUBMIT / SUBMIT |
+| llmbar-027ca771/bad | Natural | not_done | HOLD / HOLD / FIX |
+| llmbar-03cfed37/good | Natural | done | HOLD / HOLD / SUBMIT |
+| llmbar-03cfed37/bad | Natural | not_done | HOLD / SUBMIT / SUBMIT |
+| llmbar-097d4311/good | Natural | done | HOLD / SUBMIT / HOLD |
+| llmbar-097d4311/bad | Natural | not_done | HOLD / FIX / HOLD |
+| llmbar-0cfbeddb/good | Natural | done | SUBMIT / SUBMIT / HOLD |
+| llmbar-0cfbeddb/bad | Natural | not_done | SUBMIT / SUBMIT / SUBMIT |
+| llmbar-1251c27b/good | Natural | done | FIX / FIX / FIX |
+| llmbar-1251c27b/bad | Natural | not_done | FIX / FIX / FIX |
+| llmbar-006c2855/good | Adversarial/Neighbor | done | SUBMIT / SUBMIT / SUBMIT |
+| llmbar-006c2855/bad | Adversarial/Neighbor | not_done | HOLD / FIX / SUBMIT |
+| llmbar-02e54eed/good | Adversarial/Neighbor | done | HOLD / SUBMIT / SUBMIT |
+| llmbar-02e54eed/bad | Adversarial/Neighbor | not_done | SUBMIT / SUBMIT / SUBMIT |
+| llmbar-04b7bbd7/good | Adversarial/Neighbor | done | HOLD / SUBMIT / SUBMIT |
+| llmbar-04b7bbd7/bad | Adversarial/Neighbor | not_done | FIX / FIX / FIX |
+| llmbar-05a1a4b3/good | Adversarial/Manual | done | HOLD / SUBMIT / SUBMIT |
+| llmbar-05a1a4b3/bad | Adversarial/Manual | not_done | FIX / FIX / FIX |
+| llmbar-0677f52b/good | Adversarial/Manual | done | SUBMIT / FIX / FIX |
+| llmbar-0677f52b/bad | Adversarial/Manual | not_done | SUBMIT / SUBMIT / SUBMIT |
 
 Per run:
 
 ```
 {"file":"eval/deliver/outsider/run-1.public.jsonl","ran":20,"bad_submitted":3,"good_submitted":3,"hold":10,"hold_no_answer":10,"pairs_right":1,"cost_usd":0.1,"decided":10}
 {"file":"eval/deliver/outsider/run-2.public.jsonl","ran":20,"bad_submitted":4,"good_submitted":7,"hold":2,"hold_no_answer":2,"pairs_right":5,"cost_usd":0.18,"decided":18}
+{"file":"eval/deliver/outsider/run-3.public.jsonl","ran":20,"bad_submitted":5,"good_submitted":6,"hold":3,"hold_no_answer":3,"pairs_right":3,"cost_usd":0.17,"decided":17}
 ```
