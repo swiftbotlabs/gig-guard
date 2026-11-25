@@ -12,7 +12,7 @@ It fails closed: no answer means HOLD, never SUBMIT.
 - Price we would charge on mainnet: $0.03 per check pay-as-you-go, or $19 a month for 1,000 checks.
   At $0.03 against a $0.01 Miner price, the margin pays for the hosted service and a second opinion on unclear cases.
 - Break-even for the buyer, as an illustration with an assumed number: if one wrong "done" costs a $50 refund, one prevented bad delivery pays for about 1,600 checks at $0.03.
-  On our 40-case set, the judge stopped 17 of 20 defective results that the agent would otherwise have delivered. On an outside set (LLMBar) it was too lenient: 3 of 10 weaker outputs passed in run 1.
+  On our 40-case set, the judge stopped 17 of 20 defective results that the agent would otherwise have delivered. On an outside set (LLMBar) it was too lenient: 3 to 4 of 10 weaker outputs passed per run (runs 1-2).
 
 **Status, honestly.**
 - No paying customer.
