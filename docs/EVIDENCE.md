@@ -16,6 +16,10 @@ Testnet only: Telegraph devnode, Ethereum Sepolia escrow, test USDC. No real mon
 | Live fix loop (FIX, redo, SUBMIT) | [docs/FIX-LOOP.md](https://github.com/swiftbotlabs/gig-guard/blob/9d5499c81d9d1ead45e34f8749036f26d561b54f/docs/FIX-LOOP.md) |
 | Mission 09 failure tests | [docs/M09-DEMOS.md](https://github.com/swiftbotlabs/gig-guard/blob/9d5499c81d9d1ead45e34f8749036f26d561b54f/docs/M09-DEMOS.md) |
 | Mainnet blocker and switch steps | [docs/MAINNET.md](https://github.com/swiftbotlabs/gig-guard/blob/9d5499c81d9d1ead45e34f8749036f26d561b54f/docs/MAINNET.md) |
+| Gate-to-mission map (M09 deliver, M14 ship) | [docs/MISSIONS.md](MISSIONS.md) |
+| M14 Route 3 simulated reward logic on the 129 contracts | [eval/scale/REWARDS.md](../eval/scale/REWARDS.md), [rewards.json](../eval/scale/rewards.json) |
+| Held-out set (frozen before run) and outsider LLMBar set | [eval/deliver/heldout/RESULTS.md](../eval/deliver/heldout/RESULTS.md), [eval/deliver/outsider/](../eval/deliver/outsider/) |
+| Buyer, price, unit economics, status | [docs/COMMERCIAL.md](COMMERCIAL.md) |
 | Tests: policy (incl. v7 "no SHIP without a security answer"), escrow, #228, hosted check | [test/](https://github.com/swiftbotlabs/gig-guard/tree/9d5499c81d9d1ead45e34f8749036f26d561b54f/test) |
 
 ## Reproduce every headline number (files pinned to commit 9d5499c)

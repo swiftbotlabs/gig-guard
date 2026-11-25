@@ -17,7 +17,7 @@ It fails closed: no answer means HOLD, never SUBMIT.
 **Status, honestly.**
 - No paying customer.
 - No pilot or letter of intent yet.
-- Our own agent has used the gates on its own bounty work (scout, claim and ship decisions since 18 Nov), so it is our first user, not a customer.
+- Our own agent has used the gates on its own bounty work (scout, claim and ship decisions on 18 Nov), so it is our first user, not a customer.
 - Independent use is counted publicly by integration at https://donecheck.swiftbotlab.workers.dev/api/stats. The count includes our own smoke runs.
 
 **Path to revenue.** Mainnet switch (docs/MAINNET.md), then metered keys on the hosted check, then the MCP and npm channels where agent builders already look.
