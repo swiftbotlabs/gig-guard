@@ -19,3 +19,5 @@ hosted/.dev.vars
 eval/deliver/rerun-*.jsonl
 !eval/deliver/rerun-*.public.jsonl
 !eval/deliver/rerun-*.receipts-verify.json
+eval/deliver/heldout/ledger.jsonl
+eval/deliver/second-judge.jsonl

@@ -72,7 +72,8 @@ function escrowFetch(maxPerCall, ctx = {}) {
 }
 
 /** Buy one answer for `intent`. Returns { result, receipt, cost_usd, miner_id, ms }. Throws on failure. */
-export async function ask(intent, params, { budget = config.maxPerCall, purpose = "" } = {}) {
+export async function ask(intent, params, { budget = config.maxPerCall, purpose = "", minerId } = {}) {
+  if (minerId !== undefined && !/^\d{1,12}$/.test(String(minerId))) throw new Error("minerId must be a numeric Miner id");
   if (budget > config.maxPerCall) throw new BudgetError(`budget ${budget} exceeds per-call cap ${config.maxPerCall}`);
   if (spentToday() + budget > config.maxPerDay) throw new BudgetError(`daily cap ${config.maxPerDay} uUSDC reached`);
   // Telegraph issue #228: a signed request that fails (non-200, or no response) can still be charged. Every such failure is
@@ -85,7 +86,7 @@ export async function ask(intent, params, { budget = config.maxPerCall, purpose 
   const ctrl = AbortSignal.timeout(config.timeoutMs);
   let res;
   try {
-    res = await f(`${config.node}/engine/v1/ask`, {
+    res = await f(`${config.node}/engine/v1/ask${minerId !== undefined ? `/${minerId}` : ""}`, {
       method: "POST", signal: ctrl,
       headers: { "Content-Type": "application/json" },
       // A multi-miner budget needs a refundable rail (Sepolia escrow/diamond); on Base Sepolia the node

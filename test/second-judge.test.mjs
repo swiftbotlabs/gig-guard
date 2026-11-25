@@ -1,0 +1,47 @@
+// Second opinion for the done-check: other Miners by id, majority vote, HOLD on no majority. Fake node; answers depend on the Miner id.
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import http from "node:http";
+import os from "node:os";
+import path from "node:path";
+import { challengeMessage } from "../src/escrowmsg.mjs";
+
+let plan = {}; const asked = [];
+const srv = http.createServer((req, res) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
+  const { intent, max_budget_usdc } = JSON.parse(b); const price = Number(max_budget_usdc);
+  res.setHeader("content-type", "application/json");
+  if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a70e949362670bf8bcead24efc5b8f950aa08b", amount: String(price), extra: { message: challengeMessage(price) } }] })); }
+  const miner = (req.url.match(/\/ask\/(\d+)$/) || [])[1] || "302";   // the routed (generic) ask is answered by miner 302
+  asked.push(miner);
+  const v = plan[miner];
+  if (v === "down") { res.writeHead(504); return res.end('{"error":"timeout"}'); }
+  res.writeHead(200, { "X-TELEGRAPH-RECEIPT": Buffer.from(JSON.stringify({ receipt_hash: "0x" + miner.padStart(64, "0"), amount_uusdc: 10000, intent, epoch_id: 9 })).toString("base64") });
+  res.end(JSON.stringify({ miner_id: miner, cost_usd: 0.01, result: { verdict: v === "unclear" ? null : v, reason: `miner ${miner} says ${v}` } }));
+}); });
+await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+Object.assign(process.env, { TELEGRAPH_NODE: `http://127.0.0.1:${srv.address().port}`, TELEGRAPH_PAYER_KEY: "0x" + "11".repeat(32),
+  GG_LEDGER: path.join(os.tmpdir(), `gg-2nd-${process.pid}.jsonl`), GG_RAIL: "escrow", GG_REUSE: "0", GG_SECOND_JUDGES: "302,20260828,7442,76441" });
+const g = await import("../src/guards.mjs");
+test.after(() => srv.close());
+const run = async (p, o = {}) => { plan = p; asked.length = 0; return g.deliverCheck({ task: "Dedupe this CSV", result: "id,name\n1,Ann\n2,Bo", secondJudge: true, ...o }); };
+
+test("a false 'fails' is overturned only by a majority: 302 fails, 20260828 and 7442 pass -> SUBMIT, with the split shown", async () => {
+  const d = await run({ 302: "fails", 20260828: "satisfies", 7442: "satisfies" });
+  assert.equal(d.verdict, "SUBMIT"); assert.deepEqual(asked, ["302", "20260828", "7442"]);
+  assert.match(d.reasons.join(" "), /judge panel \(3 Miners\): fail, pass, pass: majority pass/); assert.ok(d.uncertainty.includes("judges disagreed; decided by majority"));
+  assert.equal(+d.cost_usd.toFixed(2), 0.03);
+});
+test("two judges agree on fails -> FIX, no third purchase", async () => {
+  const d = await run({ 302: "fails", 20260828: "fails" });
+  assert.equal(d.verdict, "FIX"); assert.deepEqual(asked, ["302", "20260828"]);
+});
+test("no majority (fails / satisfies / unclear) -> HOLD; no second Miner answering -> HOLD", async () => {
+  assert.equal((await run({ 302: "fails", 20260828: "satisfies", 7442: "unclear" })).verdict, "HOLD");
+  const d = await run({ 302: "unclear", 20260828: "down", 7442: "down", 76441: "down" });
+  assert.equal(d.verdict, "HOLD"); assert.match(d.reasons.join(" "), /no second Miner answered/);
+});
+test("not used when the first judge passes, when a required item is missing, or when the option is off", async () => {
+  assert.equal((await run({ 302: "satisfies" })).verdict, "SUBMIT"); assert.deepEqual(asked, ["302"]);
+  assert.equal((await run({ 302: "fails", 20260828: "satisfies", 7442: "satisfies" }, { mustInclude: ["3,Cy"] })).verdict, "FIX"); assert.deepEqual(asked, ["302"]);
+  assert.equal((await run({ 302: "fails", 20260828: "satisfies" }, { secondJudge: false })).verdict, "FIX"); assert.deepEqual(asked, ["302"]);
+});

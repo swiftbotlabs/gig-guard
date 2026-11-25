@@ -7,7 +7,10 @@ import fs from "node:fs";
 import { deliverCheck, JUDGE_BUDGET } from "../../src/guards.mjs";
 import { readLedger } from "../../src/ledger.mjs";
 
-const { cases } = JSON.parse(fs.readFileSync(new URL("./cases.json", import.meta.url), "utf8"));
+// GG_CASES_FILE: another case file (e.g. the held-out set); GG_DELIVER_CASES: comma-separated ids to run only those.
+const casesFile = process.env.GG_CASES_FILE ? new URL(process.env.GG_CASES_FILE, `file://${process.cwd()}/`) : new URL("./cases.json", import.meta.url);
+const only = (process.env.GG_DELIVER_CASES || "").split(",").map((x) => x.trim()).filter(Boolean);
+const cases = JSON.parse(fs.readFileSync(casesFile, "utf8")).cases.filter((c) => !only.length || only.includes(c.id));
 const cap = Number(process.env.GG_DELIVER_MAX_USD || 0.6);
 const spent = () => readLedger().filter((x) => x.kind === "purchase").reduce((s, x) => s + Number(x.cost_usd || 0), 0);
 const left = (id) => cases.length - cases.findIndex((x) => x.id === id); // cases from this one to the end (worst case)

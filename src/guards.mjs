@@ -247,7 +247,7 @@ export const DELIVER_LIMIT = Number(process.env.GG_DELIVER_LIMIT || 2000); // ch
 export const JUDGE_BUDGET = Math.min(Number(process.env.GG_JUDGE_BUDGET || 10000), config.maxPerCall);
 
 /** Mission 09 (Personal Agent): may the agent report this task as done? */
-export async function deliverCheck({ task, result, patch, mustInclude = [], name = "deliverable" } = {}) {
+export async function deliverCheck({ task, result, patch, mustInclude = [], name = "deliverable", secondJudge } = {}) {
   if (!task || !String(task).trim() || !result || !String(result).trim()) throw new Error("task and result are both required");
   const input = { name, task_chars: String(task).length, result_chars: String(result).length, patch: patch ? String(patch).slice(0, 200) : undefined };
   const missing = mustInclude.filter((m) => !String(result).includes(m));
@@ -257,8 +257,55 @@ export async function deliverCheck({ task, result, patch, mustInclude = [], name
   }
   const ev = [await buy([["TASK_EXECUTION_QUALITY_GENERAL", { task, result }], ["LLM_OUTPUT_EVALUATION_GENERAL", { task, output: result }]], {}, "deliver", undefined, JUDGE_BUDGET)];
   if (patch) ev.push(await buy([["CODE_PATCH_VERIFY_GENERAL", { patch }]], {}, "deliver", "conclusion"));
-  const { verdict, reasons, uncertainty } = deliverVerdict(ev[0], patch ? ev[1] : null, missing);
+  let { verdict, reasons, uncertainty } = deliverVerdict(ev[0], patch ? ev[1] : null, missing);
+  // Second opinion (opt-in): when the first judge says "fails" or is unclear but the free check passed, ask other Miners by id and
+  // decide by majority of the judges that answered (2 of 2, or 2 of 3). No majority -> HOLD. Never used to overturn a free-check FIX.
+  const wantSecond = secondJudge ?? process.env.GG_SECOND_JUDGE === "1";
+  if (wantSecond && !patch && !missing.length && ev[0].ok && ["fail", "unclear"].includes(judgeClass(ev[0]))) {
+    const panel = await secondOpinion(task, result, ev[0]);
+    ev.push(...panel.extra);
+    ({ verdict, reasons, uncertainty } = panel.decide(reasons, uncertainty));
+  }
   return decide("deliver", input, verdict, reasons, ev, { uncertainty, local_missing: missing });
+}
+
+/** "pass" | "fail" | "unclear" for one bought judgement, by the same rule as deliverVerdict. */
+export function judgeClass(j) {
+  if (!j?.ok) return "none";
+  const v = deliverVerdict(j, null, []).verdict;
+  return v === "SUBMIT" ? "pass" : v === "FIX" ? "fail" : "unclear";
+}
+export const SECOND_JUDGES = (process.env.GG_SECOND_JUDGES || "302,20260828,7442,76441").split(",").map((x) => x.trim()).filter((x) => /^\d{1,12}$/.test(x));
+
+/** Buys up to two more judgements from OTHER Miners (by id) and returns a majority decision; HOLD when there is no majority. */
+async function secondOpinion(task, result, first) {
+  const used = new Set([String(first.miner_id)]), votes = [judgeClass(first)], extra = [];
+  const askOne = async () => {
+    for (const id of SECOND_JUDGES) {
+      if (used.has(id)) continue; used.add(id);
+      try {
+        const r = await ask("TASK_EXECUTION_QUALITY_GENERAL", { task, result }, { purpose: "deliver-second", budget: JUDGE_BUDGET, minerId: id });
+        const e = { ok: true, intent: "TASK_EXECUTION_QUALITY_GENERAL", ...r, second: true };
+        extra.push(e); return e;
+      } catch (err) {
+        if (err.name === "BudgetError" || err.name === "EscrowFundsError") throw err;
+        extra.push({ ok: false, intent: "TASK_EXECUTION_QUALITY_GENERAL", miner_id: id, error: String(err.message || err).slice(0, 160), second: true,
+          ...(err.charged_uusdc ? { tried: [{ cost_usd: err.charged_uusdc / 1e6 }] } : {}) });
+      }
+    }
+    return null;
+  };
+  const second = await askOne(); if (second) votes.push(judgeClass(second));
+  if (votes.length === 2 && votes[0] !== votes[1]) { const third = await askOne(); if (third) votes.push(judgeClass(third)); }
+  const count = (c) => votes.filter((v) => v === c).length, need = votes.length === 3 ? 2 : votes.length;
+  const winner = votes.length >= 2 && (count("pass") >= need ? "pass" : count("fail") >= need ? "fail" : null);
+  const line = `judge panel (${votes.length} Miners): ${votes.join(", ")}`;
+  return { extra, decide: (reasons, uncertainty) => {
+    if (votes.length < 2) return { verdict: "HOLD", reasons: [...reasons, `${line}: no second Miner answered; HOLD (fail closed)`], uncertainty: [...uncertainty, "first judge not confirmed"] };
+    if (winner === "pass") return { verdict: "SUBMIT", reasons: [...reasons, `${line}: majority pass`], uncertainty: [...uncertainty, "judges disagreed; decided by majority"] };
+    if (winner === "fail") return { verdict: "FIX", reasons: [...reasons, `${line}: majority fails`], uncertainty };
+    return { verdict: "HOLD", reasons: [...reasons, `${line}: no majority; HOLD`], uncertainty: [...uncertainty, "judges split"] };
+  } };
 }
 
 
