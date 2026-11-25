@@ -46,3 +46,14 @@ test("not used when the first judge passes, when a required item is missing, or 
   assert.equal((await run({ 302: "fails", 20260828: "satisfies", 7442: "satisfies" }, { mustInclude: ["3,Cy"] })).verdict, "FIX"); assert.deepEqual(asked, ["302"]);
   assert.equal((await run({ 302: "fails", 20260828: "satisfies" }, { secondJudge: false })).verdict, "FIX"); assert.deepEqual(asked, ["302"]);
 });
+
+test("confirm mode: a single 'satisfies' is not enough; 2 passes SUBMIT, pass/fail/fail FIX, no second answer HOLD; off by default", async () => {
+  let d = await run({ 302: "satisfies", 20260828: "satisfies" }, { secondJudge: false, confirmSubmit: true });
+  assert.equal(d.verdict, "SUBMIT"); assert.deepEqual(asked, ["302", "20260828"]);
+  d = await run({ 302: "satisfies", 20260828: "fails", 7442: "fails" }, { secondJudge: false, confirmSubmit: true });
+  assert.equal(d.verdict, "FIX"); assert.deepEqual(asked, ["302", "20260828", "7442"]);
+  d = await run({ 302: "satisfies", 20260828: "down", 7442: "down", 76441: "down" }, { secondJudge: false, confirmSubmit: true });
+  assert.equal(d.verdict, "HOLD"); assert.match(d.reasons.join(" "), /no second Miner answered/);
+  d = await run({ 302: "satisfies" }, { secondJudge: false });
+  assert.equal(d.verdict, "SUBMIT"); assert.deepEqual(asked, ["302"]);
+});
