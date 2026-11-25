@@ -1,0 +1,22 @@
+2026-11-25T09:08:20.486Z temp-c/good SUBMIT $0.01
+2026-11-25T09:08:50.698Z temp-c/bad FIX $0.01
+2026-11-25T09:08:53.841Z even-json/good HOLD $0.01
+2026-11-25T09:09:00.229Z even-json/bad HOLD $0.01
+2026-11-25T09:09:10.225Z py-reverse/good SUBMIT $0.01
+2026-11-25T09:09:19.683Z py-reverse/bad FIX $0.01
+2026-11-25T09:09:30.110Z one-sentence/good SUBMIT $0.01
+2026-11-25T09:09:39.857Z one-sentence/bad FIX $0.01
+2026-11-25T09:09:41.638Z sql-order/good HOLD $0.01
+2026-11-25T09:09:46.518Z sql-order/bad HOLD $0.02
+2026-11-25T09:09:50.835Z fr-invoice/good HOLD $0.02
+2026-11-25T09:09:59.965Z fr-invoice/bad FIX $0.01
+2026-11-25T09:10:09.563Z regex-time/good SUBMIT $0.01
+2026-11-25T09:10:11.773Z regex-time/bad HOLD $0.01
+2026-11-25T09:10:17.135Z js-sum/good HOLD $0.02
+2026-11-25T09:10:19.590Z js-sum/bad HOLD $0.02
+2026-11-25T09:10:21.871Z subject-50/good HOLD $0.02
+2026-11-25T09:10:24.688Z subject-50/bad HOLD $0.02
+2026-11-25T09:10:28.396Z order-total/good HOLD $0.02
+2026-11-25T09:10:38.154Z order-total/bad FIX $0.01
+{"spent_usd":0.1}
+exit=0

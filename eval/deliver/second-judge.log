@@ -1,0 +1,3 @@
+json-keys/bad ERROR escrow challenge message does not match the known template: not signing
+{"spent_usd":0.01}
+exit=0
