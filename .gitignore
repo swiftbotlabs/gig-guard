@@ -21,3 +21,5 @@ eval/deliver/rerun-*.jsonl
 !eval/deliver/rerun-*.receipts-verify.json
 eval/deliver/heldout/ledger.jsonl
 eval/deliver/second-judge.jsonl
+eval/deliver/outsider/run-*.jsonl
+!eval/deliver/outsider/run-*.public.jsonl
