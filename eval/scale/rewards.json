@@ -1,0 +1,992 @@
+{
+ "policy": {
+  "SEVERITY": {
+   "SWC-106": "high",
+   "SWC-112": "high",
+   "SWC-115": "high",
+   "SWC-104": "medium",
+   "SWC-120": "medium"
+  },
+  "PAYOUT": {
+   "high": 500,
+   "medium": 200
+  },
+  "pool": 10000
+ },
+ "totals": {
+  "reports": 129,
+  "auto_approved": 23,
+  "auto_on_vulnerable": 23,
+  "wrongful_payouts": 0,
+  "pending_reproduction": 76,
+  "human": 22,
+  "closed": 8,
+  "closed_on_vulnerable": 0,
+  "usd_paid": 7600,
+  "pool_left": 2400,
+  "by_status": {
+   "auto-approved (rule-confirmed)": 23,
+   "pending reproduction: Miner-only finding": 76,
+   "human review: evidence unclear": 22,
+   "closed: no vulnerability": 8
+  }
+ },
+ "rows": [
+  {
+   "name": "SB_access_control_arbitrary_location_write_simple.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-106"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0xe17b95bcee135ba663ef5a68fac0c965ae5dec9ed773114af577840c18c47bee",
+    "0x16654776268014eeb2475904f56720568d8e4cedad82c62d48572e6c40fd361a"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_FibonacciBalance.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-112"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0x306c146366d907843a780d58bb84e3b1a9e819fc74c06a1a0161660d26deff77",
+    "0x3d8fa191414b2e2d94dd2ceb1648b43916c7ff047e33192554cc721281f2d9e7"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_incorrect_constructor_name1.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_incorrect_constructor_name2.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_incorrect_constructor_name3.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_mapping_write.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_multiowned_vulnerable.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_mycontract.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-115"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0x37bee18b20d6ae2ccc2cca9a313584a214be4085f296c573b26a7d4f3a7d6a4b",
+    "0x1e0c839a269b72786a983e8371ab31caecec24b62b810295fc93bab0f48c10e1"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_phishable.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-115"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0xcc94302adbf56d1dbe8ad670cc696ded8f60bd8fe86afe77a75265515cc4a106",
+    "0x4be16f55246cbd8ac3ba5eae8bc18761e2ab92dfd70a673ba765610ea3ebc4c4"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_proxy.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-112"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0x1d829f5f5b0068b95a8c8f4b26dd0a4092d89f9c96016f780b884976971c2ffe",
+    "0xbc24df634c76d765e127aad72174d1c7ea9c3e3d2b5b7ebdd11f81f1a2ea5559"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_rubixi.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_simple_suicide.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-106"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0x6bb731ac4152e005d61f5cbb402cda50df896ce2efd3c2b10dc91e2d64660f93",
+    "0x530d1c7ee51e6cae3fdc43231d104cbd4c9b59dfbfe398eda6e11b1f23b76ab2"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_unprotected0.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_wallet_02_refund_nosub.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_wallet_03_wrong_constructor.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_access_control_wallet_04_confused_sign.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_BECToken.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_insecure_transfer.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_integer_overflow_1.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_integer_overflow_add.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_integer_overflow_benign_1.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_integer_overflow_mapping_sym_1.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_integer_overflow_minimal.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_integer_overflow_mul.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_integer_overflow_multitx_multifunc_feasible.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_integer_overflow_multitx_onefunc_feasible.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_overflow_simple_add.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_overflow_single_tx.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_timelock.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_token.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_arithmetic_tokensalechallenge.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_bad_randomness_blackjack.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_bad_randomness_etheraffle.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_bad_randomness_guess_the_random_number.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-120"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x620b38f586476622939068c63da5b0883c7229ab2d5a8dda3e3e662c17616d81",
+    "0xaa1d0f3034ba54ca2c3ba7c88887d7e7eeb530201458b861bc78efba474e37de"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_bad_randomness_lottery.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-106"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0x243661ab2e3271075b30ae3003ec6a350e1550023a141218bf990985cced5a48"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_bad_randomness_lucky_doubler.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_bad_randomness_old_blockhash.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-120"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x7f1e5f44f994d3845b0dd19c9007c6fbc60dae0ee8270b363cb305fa1f6c425b",
+    "0x5a343fbabaca2e00955417766c87ae2af56e35562747abd357f924dd151f5775"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_bad_randomness_random_number_generator.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-120"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x0cb1036929224e4dc8e86464fc974cfdf33efc403cae13d4b0bfc788d63c6db2",
+    "0x102ca074bbdb856e2f14bb97a370a9e9cdbada858e7d908a49c5faf4bfdcbeea"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_denial_of_service_auction.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_denial_of_service_dos_address.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_denial_of_service_dos_number.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_denial_of_service_dos_simple.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_denial_of_service_list_dos.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_denial_of_service_send_loop.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_front_running_ERC20.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_front_running_eth_tx_order_dependence_minimal.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_front_running_FindThisHash.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_front_running_odds_and_evens.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_other_crypto_roulette.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-106",
+    "SWC-120"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0x89993688f2bb2bb9945e514892f5cd06b1075515e326055773c5b8305282cb5e",
+    "0x0f579fc29622031cd47b71ba4abc13ee91bdf287d31a4687e2c41f3371909ba8"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_other_name_registrar.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_other_open_address_lottery.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x01f8…1d3f.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x23a9…deb4.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x4320…a5a1.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x4e73…c106.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x561e…bf31.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x627f…7839.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x93b9bf3abc0c3326771bb0f01942bb3f7a78749c7cdd8cd4eef97e9bf8678ea3",
+    "0x902dfda0151ef7603eb5a3f393cfd5ec288bb7679cc3f76d5561daf1799bd0f8"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x7541…f615.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x7a87…9782.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-115"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0xf5b8f0a61ab2fa45b1dfc0c4180b70ae5642fed905c69305d85eafc692d3534a",
+    "0xbed0251fe149e62620f7f259ddcb3cffc664a7c2472928f66676c928dcafde74"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x7b36…2cf3.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x8c77…0344.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x93c3…2ab5.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x941d…5e9e.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0x96ed…b78b.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0xaae1…b0b8.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0xb5e1…bd12.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0xb934…d89e.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0xbaf5…8a4f.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0xbe40…3888.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0xcead…6b6e.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_0xf015…ad68.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_etherbank.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_etherstore.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_modifier_reentrancy.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_reentrance.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_reentrancy_bonus.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_reentrancy_cross_function.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_reentrancy_dao.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_reentrancy_insecure.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_reentrancy_simple.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_reentrancy_simple_dao.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_short_addresses_short_address_example.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 500,
+   "swc": [
+    "SWC-115"
+   ],
+   "severity": "high",
+   "receipts": [
+    "0x8d01c1fd53ec60b57efcbed3ce6955b3cf502a5fab669937af4935124f9b5f2f",
+    "0x575c178b693f4002932f2ef6e16a56e25c68af551e147ca65affd61eec46f22c"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_time_manipulation_ether_lotto.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_time_manipulation_governmental_survey.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_time_manipulation_lottopollo.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_time_manipulation_roulette.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_time_manipulation_timed_crowdsale.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x07f7…0f2e.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x0cbe…acc9.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x325131a3ba970c5d6e9e4a5527f8dec53054673d2f7f7a2eebfb3b1e15ee4e79",
+    "0x6c260f7aa816209d64f81408eeb74b9a62939306a050a3e99f3cfb3eed10d0c1"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x2972…3fd2.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0xe13992971c93a037197c859d0861388440909c04dd4e89f9ee8d1e9226a1004c",
+    "0x33c24cf8983f3ceadaff0d33dd3b26e8c07ebfb65cfb812c57b05843dc512e04"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x39cf…abfa.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x459e4b14d08cf69c7326ee44e77c98663e56992ee18c23559cf523f4e54487e7",
+    "0xdf49fca11797784a20f34fc1a8b6bcf341b7dc85bced1fda105eecd98c5bdd33"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x3a0e…2b01.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0xd618335bc15ddf1b10259caa3576984b6b8cd135463e692329826e51a826f633"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x3e01…c859.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x3f2e…1de2.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x4051…6ef3.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0xe964162c9164ad2ea8a87d101a4103687dc4c4b77652d30e458ce154fef2eede",
+    "0x50c382e8cf553a4d4b58c3f53378df9f791c551942271b35c844cc2967b968c3"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x4a66…504c.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x0e0add25590bee1e670fb2b5fc7abedc8e65cb7b454b4cd53569e41786a74013",
+    "0xc76701b7fa341e89dadbde27218b9073e1c4c248684545d39aa6cf17785ce421"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x4b71…b152.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x946df992b752dc902908d1f171f54e0c10a4314c07f477a818ef2c82f3bb99e6"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x5249…d7b1.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0xacb52ce20e0f95323c25a2f2fbf8e87af6040b048b93c4a82621813dd915671f",
+    "0xbfe2f192e15b90ae9fa7f6929f61d424ace7692b025d850ab04eaf36b627ec57"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x52d2…d984.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x5aa8…e739.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x6104…4fd6.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x627f…7839.sol",
+   "status": "auto-approved (rule-confirmed)",
+   "usd": 200,
+   "swc": [
+    "SWC-104"
+   ],
+   "severity": "medium",
+   "receipts": [
+    "0x2f05588378e5d9b1b2cab2348ec2f3f1457672159aabe45c533fa06532ce9ec9",
+    "0xdd8a336a745618feb14107cc51ba9a9d9ed4439cd670a4c93fe7143e770c6dea"
+   ],
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x70f9…2db4.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x78c2…1c37.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x7a43…5489.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x7d09…06b4.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "SB_unchecked_low_level_calls_0x806a…a707.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "vulnerable"
+  },
+  {
+   "name": "OZ_access_Ownable.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_access_Ownable2Step.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_access_AccessControl.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_ReentrancyGuard.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_Pausable.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_Nonces.sol",
+   "status": "closed: no vulnerability",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_Address.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_Context.sol",
+   "status": "closed: no vulnerability",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_Multicall.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_cryptography_ECDSA.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_cryptography_MessageHashUtils.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_finance_VestingWallet.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_token_ERC20_ERC20.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_token_ERC20_utils_SafeERC20.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_token_ERC20_extensions_ERC20Burnable.sol",
+   "status": "closed: no vulnerability",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_token_ERC20_extensions_ERC20Capped.sol",
+   "status": "closed: no vulnerability",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_token_ERC20_extensions_ERC20Pausable.sol",
+   "status": "closed: no vulnerability",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_token_ERC20_extensions_ERC20Wrapper.sol",
+   "status": "pending reproduction: Miner-only finding",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_token_ERC721_utils_ERC721Holder.sol",
+   "status": "closed: no vulnerability",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_token_ERC1155_utils_ERC1155Holder.sol",
+   "status": "closed: no vulnerability",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_utils_types_Time.sol",
+   "status": "human review: evidence unclear",
+   "usd": 0,
+   "label": "audited"
+  },
+  {
+   "name": "OZ_access_manager_AuthorityUtils.sol",
+   "status": "closed: no vulnerability",
+   "usd": 0,
+   "label": "audited"
+  }
+ ]
+}
