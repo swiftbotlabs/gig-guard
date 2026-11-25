@@ -22,7 +22,7 @@ const srv = http.createServer((req, res) => { let b = ""; req.on("data", (c) => 
 await new Promise((r) => srv.listen(0, "127.0.0.1", r));
 const NODE = `http://127.0.0.1:${srv.address().port}`;
 const worker = (await import("../hosted/worker.mjs")).default;
-const { Budget, clientKey, parseInput } = await import("../hosted/worker.mjs");
+const { Budget, clientKey, parseInput, viaOf, badge } = await import("../hosted/worker.mjs");
 test.after(() => srv.close());
 
 function makeEnv(vars = {}) {
@@ -34,8 +34,8 @@ function makeEnv(vars = {}) {
   return env;
 }
 const T = "Write a one-line JavaScript expression that is true when the string s has at least 12 characters.";
-const call = (env, body, { ip = "203.0.113.7", origin } = {}) => worker.fetch(new Request("https://donecheck.example/api/check", { method: "POST",
-  headers: { "content-type": "application/json", "cf-connecting-ip": ip, ...(origin ? { origin } : {}) }, body: JSON.stringify(body) }), env, {});
+const call = (env, body, { ip = "203.0.113.7", origin, via } = {}) => worker.fetch(new Request("https://donecheck.example/api/check", { method: "POST",
+  headers: { "content-type": "application/json", "cf-connecting-ip": ip, ...(origin ? { origin } : {}), ...(via ? { "x-donecheck-client": via } : {}) }, body: JSON.stringify(body) }), env, {});
 
 test("a correct result is SUBMIT, a planted defect FIX, each with a receipt; the budget goes down by what was spent", async () => {
   mode = "ok"; const env = makeEnv();
@@ -129,4 +129,23 @@ test("activation counter: /api/stats counts checks, paid judgements and connecti
   assert.equal(st.checks, 3); assert.equal(st.judged, 2);
   const day = Object.values(st.days)[0]; assert.equal(day.checks, 3); assert.equal(day.connections, 3);
   assert.doesNotMatch(JSON.stringify(st), /198\.51|s\.length/);
+});
+
+test("counter by integration: a fixed allow-list from x-donecheck-client (junk is 'other'), same-origin page is 'web'; shields badge endpoint", async () => {
+  assert.equal(viaOf("donecheck-mcp/0.1.0"), "mcp"); assert.equal(viaOf("donecheck-langchain/1.2.3"), "langchain");
+  assert.equal(viaOf("donecheck-evil<script>/0.1.0"), "other"); assert.equal(viaOf("donecheck-made-up/0.1.0"), "other");
+  assert.equal(viaOf(undefined, true), "web"); assert.equal(viaOf(undefined, false), "other"); assert.equal(viaOf("x".repeat(5000)), "other");
+  mode = "ok"; const env = makeEnv();
+  await call(env, { task: T, result: "s.length >= 12" }, { ip: "198.51.100.20", via: "donecheck-mcp/0.1.0" });
+  await call(env, { task: T, result: "s.length >= 12" }, { ip: "198.51.100.21", via: "donecheck-py/0.1.0" });
+  await call(env, { task: T, result: "s.length >= 12" }, { ip: "198.51.100.22", origin: "https://donecheck.example" });
+  await call(env, { task: T, result: "s.length >= 12" }, { ip: "198.51.100.23", via: "garbage" });
+  const st = await (await worker.fetch(new Request("https://donecheck.example/api/stats"), env, {})).json();
+  assert.deepEqual(st.clients, { mcp: 1, py: 1, web: 1, other: 1 }); assert.equal(st.checks, 4);
+  const b = await worker.fetch(new Request("https://donecheck.example/api/badge"), env, {});
+  assert.equal(b.status, 200); assert.equal(b.headers.get("access-control-allow-origin"), "*"); assert.match(b.headers.get("cache-control"), /max-age=300/);
+  assert.deepEqual(await b.json(), { schemaVersion: 1, label: "done-checks run", message: "4 (4 paid judgements)", color: "2ea44f", cacheSeconds: 300 });
+  assert.equal(badge({}).message, "0 (0 paid judgements)"); assert.equal(badge({}).color, "lightgrey");
+  const fresh = await (await worker.fetch(new Request("https://donecheck.example/api/stats"), makeEnv(), {})).json();
+  assert.deepEqual(fresh.clients, {});
 });

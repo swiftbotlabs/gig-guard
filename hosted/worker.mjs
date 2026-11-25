@@ -56,6 +56,20 @@ export function parseInput(body) {
   return { task, result, mustInclude: mi.map((x) => x.trim()) };
 }
 
+/** Integration that sent a check, from the x-donecheck-client header ("donecheck-mcp/0.1.0" -> "mcp"). A fixed allow-list, so the
+ *  public counter can't be filled with arbitrary keys. Same-origin calls without the header are the web page. */
+const VIA = ["js", "cli", "mcp", "ai-sdk", "loop", "py", "cli-py", "py-loop", "langchain", "openai-agents", "web", "other"];
+export function viaOf(header, sameOrigin = false) {
+  const m = /^donecheck-([a-z-]+)\/\d+\.\d+\.\d+$/.exec(String(header || "").trim());
+  if (m && VIA.includes(m[1])) return m[1];
+  return !header && sameOrigin ? "web" : VIA.includes(header) ? header : "other";
+}
+/** shields.io endpoint badge for the public counter (https://shields.io/badges/endpoint-badge). */
+export function badge(t) {
+  const n = Number(t?.checks) || 0, j = Number(t?.judged) || 0;
+  return { schemaVersion: 1, label: "done-checks run", message: `${n} (${j} paid judgements)`, color: n ? "2ea44f" : "lightgrey", cacheSeconds: 300 };
+}
+
 /** One paid ask on the escrow rail. Returns { ok, intent, result, receipt, cost_usd, miner_id, ms, signed, error, fundsOut }. */
 export async function askEscrow(node, account, intent, params, fetchImpl = fetch) {
   const url = `${node}/engine/v1/ask`, body = JSON.stringify({ intent, params, max_budget_usdc: PRICE });
@@ -111,13 +125,14 @@ export class Budget {
     return { ok: true, left: cap - s.spent - s.reserved };
   }
   /** Releases the reservation and books what was actually signed (failed signed requests included). */
-  async settle(spentUusdc, exhausted = false, judged = false) {
+  async settle(spentUusdc, exhausted = false, judged = false, via = "other") {
     const cap = Number(this.env.DAY_CAP_UUSDC || 200000);
     const s = await this.state();
     // Activation counter: checks that ran, how many got a paid judgement, and distinct connections per UTC day. Counts only:
     // no task text, no address, no hash is kept beyond the day's rate-limit map.
     const t = (await this.ctx.storage.get("t")) || { checks: 0, judged: 0, days: {} };
     t.checks += 1; if (judged) t.judged += 1;
+    t.clients = t.clients || {}; t.clients[via] = (t.clients[via] || 0) + 1;   // which integration ran it (fixed allow-list, see viaOf)
     t.days[s.day] = { checks: (t.days[s.day]?.checks || 0) + 1, connections: Object.keys(s.clients).length };
     for (const d of Object.keys(t.days).sort().slice(0, -60)) delete t.days[d];
     await this.ctx.storage.put("t", t);
@@ -126,13 +141,13 @@ export class Budget {
     await this.ctx.storage.put("s", s);
     return { left: Math.max(0, cap - s.spent - s.reserved) };
   }
-  async stats() { return (await this.ctx.storage.get("t")) || { checks: 0, judged: 0, days: {} }; }
+  async stats() { const t = (await this.ctx.storage.get("t")) || { checks: 0, judged: 0, days: {} }; return { clients: {}, ...t }; }
   async left() { const cap = Number(this.env.DAY_CAP_UUSDC || 200000), s = await this.state(); return { left: Math.max(0, cap - s.spent - s.reserved), cap }; }
   // Classic Durable Object fetch interface (internal only: the binding is not reachable from the internet).
   async fetch(request) {
     const op = new URL(request.url).pathname.slice(1), a = request.method === "POST" ? await request.json() : {};
     if (op === "reserve") return Response.json(await this.reserve(String(a.client || "")));
-    if (op === "settle") return Response.json(await this.settle(a.spent, !!a.exhausted, !!a.judged));
+    if (op === "settle") return Response.json(await this.settle(a.spent, !!a.exhausted, !!a.judged, viaOf(a.via)));
     if (op === "left") return Response.json(await this.left());
     if (op === "stats") return Response.json(await this.stats());
     return new Response("not found", { status: 404 });
@@ -172,7 +187,8 @@ async function check(request, env, fetchImpl, ctx) {
   const node = env.TELEGRAPH_NODE || "https://devnode.telegraphprotocol.com";
   let spent = 0, out = null, exhausted = false, settled = false;
   // Release the reservation whatever happens (also if the visitor disconnects): waitUntil keeps the settle alive.
-  const settle = (extra = false) => { if (settled) return null; settled = true; const p = bud(env, "settle", { spent, exhausted: extra, judged: !!out }); ctx?.waitUntil?.(p.catch(() => {})); return p; };
+  const origin = request.headers.get("origin"), via = viaOf(request.headers.get("x-donecheck-client"), !!origin && origin === new URL(request.url).origin);
+  const settle = (extra = false) => { if (settled) return null; settled = true; const p = bud(env, "settle", { spent, exhausted: extra, judged: !!out, via }); ctx?.waitUntil?.(p.catch(() => {})); return p; };
   try {
     const account = privateKeyToAccount(env.DONECHECK_PAYER_KEY);
     const tried = [];
@@ -210,6 +226,9 @@ export default {
     if (u.pathname === "/api/stats" && request.method === "GET") {
       // Public, read-only counts (no personal data), readable from the replay page on another origin.
       try { return json(await bud(env, "stats"), 200, { "access-control-allow-origin": "*" }); } catch { return json({ error: "unavailable" }, 503); }
+    }
+    if (u.pathname === "/api/badge" && request.method === "GET") {
+      try { return json(badge(await bud(env, "stats")), 200, { "access-control-allow-origin": "*", "cache-control": "public, max-age=300" }); } catch { return json({ error: "unavailable" }, 503); }
     }
     if (u.pathname === "/api/budget" && request.method === "GET") {
       try { const b = await bud(env, "left"); return json({ left_usd: b.left / 1e6, cap_usd: b.cap / 1e6 }); } catch { return json({ error: "unavailable" }, 503); }

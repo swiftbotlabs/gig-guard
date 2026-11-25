@@ -12,7 +12,7 @@ export async function doneCheck({ task, result, mustInclude = [] }, { url = DONE
   if (typeof task !== "string" || typeof result !== "string" || !task.trim() || !result.trim()) throw new Error("task and result must be non-empty strings");
   let r;
   try {
-    r = await fetchImpl(`${url}/api/check`, { method: "POST", headers: { "content-type": "application/json" },
+    r = await fetchImpl(`${url}/api/check`, { method: "POST", headers: { "content-type": "application/json", "x-donecheck-client": "donecheck-js/0.1.0" },
       body: JSON.stringify({ task, result, mustInclude }), signal: AbortSignal.timeout(timeoutMs) });
   } catch (e) { return { verdict: "HOLD", error: `done-check unreachable: ${e.message || e}`, reasons: ["no check could be made: fail closed"] }; }
   let body; try { body = await r.json(); } catch { body = {}; }
