@@ -104,6 +104,8 @@ Code: [`hosted/`](hosted/), a Cloudflare Worker with one Durable Object for the 
 
 ## Drop-in integrations (no wallet, hosted check)
 
+**One-line install:** [swiftbotlabs/donecheck](https://github.com/swiftbotlabs/donecheck) packages the same check with no dependencies: `claude mcp add done-check -- npx -y github:swiftbotlabs/donecheck mcp` (MCP), a CLI gate, a Python client, and adapters for the Vercel AI SDK, LangChain and the OpenAI Agents SDK. Usage by integration: `/api/stats`; badge: `/api/badge`.
+
 - [`integrations/donecheck-client.mjs`](integrations/donecheck-client.mjs): `await doneCheck({ task, result, mustInclude })` returns SUBMIT / FIX / HOLD with a receipt. A refusal or an unreachable check comes back as HOLD, never SUBMIT. CLI: `node integrations/donecheck-client.mjs "<task>" "<result>"` (exit 0 only on SUBMIT).
 - [`integrations/mcp-donecheck.mjs`](integrations/mcp-donecheck.mjs): an MCP server (stdio, no dependencies) with one tool, `done_check`. To use it from Claude Desktop, Claude Code or Cursor: `{"mcpServers":{"done-check":{"command":"node","args":["/path/to/gig-guard/integrations/mcp-donecheck.mjs"]}}}`.
 - [`integrations/tool-call-loop.mjs`](integrations/tool-call-loop.mjs): a `done_check` tool definition plus its handler for any tool-calling loop (Anthropic Messages tools as-is; OpenAI-style function tools with one rename). The handler tells the model to finish only on SUBMIT.
