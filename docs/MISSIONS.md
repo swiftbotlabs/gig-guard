@@ -12,7 +12,7 @@ Testnet only (Ethereum Sepolia escrow, test USDC).
 | Decision | SUBMIT / FIX / HOLD | SHIP / FIX / HOLD, then simulated reward (below) |
 | Known-answer set | 40 cases (20 correct, 20 defective) | 129 contracts (107 SmartBugs vulnerable, 22 OpenZeppelin audited) + 12 planted |
 | New-input tests | held-out set of 20 written after the gate froze (sha256 committed first); outsider set of 20 from LLMBar, authored and labelled by others (eval/deliver/outsider) | 22 audited contracts run fresh on policy v7 (eval/scale/RESULTS-audited-v7.md) |
-| Headline | 0/20 defective submitted, 18/20 correct submitted; 3 runs: 0 defective submitted in any run | 92 caught, 0 missed, 7 false alarms, 8 passed, 22 held |
+| Headline | our 40-case set: 0/20 defective submitted, 18/20 correct submitted; 3 runs: 0 defective submitted in any run. Outside LLMBar set, run 1: 3/10 weaker outputs submitted (too lenient) | 92 caught, 0 missed, 7 false alarms, 8 passed, 22 held |
 | Cost and time | $0.009 per decision, median 13.2 s | $0.020 per right decision |
 | Receipts | 38/38 settled | 201/202 settled |
 | Failure case shown | no Miner answer, so HOLD (never SUBMIT); a self-contradicting 'fails' gives FIX on a correct result (csv-dedupe); budget or escrow empty, so the run stops (exit 3) | a contract over the Intents' 2,000-character limit gets HOLD at $0, never SHIP; Miner says Secure but a local rule fires, so FIX |

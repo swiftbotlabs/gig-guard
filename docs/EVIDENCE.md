@@ -27,7 +27,7 @@ Every command reads the files exactly as they were at commit 9d5499c. You need b
 ```
 R=https://raw.githubusercontent.com/swiftbotlabs/gig-guard/9d5499c81d9d1ead45e34f8749036f26d561b54f
 ```
-- **0/20 defective results submitted, 18/20 good ones submitted.** It prints `{"bad_submitted":0,"good_submitted":18}`.
+- **Our own 40-case set: 0/20 defective results submitted, 18/20 good ones submitted.** (On an outside set we did not write, the judge was too lenient: 3 of 10 weaker outputs submitted in run 1, [eval/deliver/outsider/RESULTS.md](../eval/deliver/outsider/RESULTS.md).) It prints `{"bad_submitted":0,"good_submitted":18}`.
 ```
 jq -n --slurpfile c <(curl -s $R/eval/deliver/cases.json) --slurpfile l <(curl -s $R/eval/deliver/ledger.public.jsonl) -c '($l|map(select(.kind=="decision"))|map({key:.input.name,value:.verdict})|from_entries) as $v | $c[0].cases | {bad_submitted: map(select(.truth=="not_done" and $v[.id]=="SUBMIT"))|length, good_submitted: map(select(.truth=="done" and $v[.id]=="SUBMIT"))|length}'
 ```

@@ -1,5 +1,7 @@
 # Deliver gate, known-answer run
 
+> Scope: this is our own 40-case set. On an outside set we did not write (LLMBar), the judge was too lenient: see [outsider/RESULTS.md](outsider/RESULTS.md).
+
 - **Network:** Telegraph devnode, **testnet**: Ethereum Sepolia escrow rail, Telegraph test USDC. No real money.
 - **Paid answers bought:** 2026-11-22 15:44 to 2026-11-23 17:17 UTC (logs: `run-1.log` to `run-4.log`). Results were committed in 5573077; the receipt re-check is in ff86f0b.
 - **Receipts:** 38 of 38 SETTLED, 0 pending, 0 mismatched, checked on 2026-11-24 (`receipts-verify.json`, table at the end).

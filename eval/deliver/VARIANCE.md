@@ -1,5 +1,7 @@
 # Deliver gate: rerun variance (3 runs of the same 40 cases, Telegraph testnet)
 
+> Scope: this is our own 40-case set. On an outside set we did not write (LLMBar), the judge was too lenient: see [outsider/RESULTS.md](outsider/RESULTS.md).
+
 | run | decided | defective submitted (of 20) | correct submitted (of 20) | HOLD (no Miner answer / unclear verdict) | cost (test USDC) | median answer s |
 |---|---|---|---|---|---|---|
 | ledger.deliver.jsonl | 40 | 0 | 18 | 2 (0 / 2) | $0.38 | 13.2 |

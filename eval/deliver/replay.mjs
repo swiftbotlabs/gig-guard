@@ -56,7 +56,7 @@ code{font-size:.82rem}footer{color:var(--mut);font-size:.85rem;margin-top:16px}a
 <h1>Done-check replay</h1>
 <p class="lead">Before an agent tells a client "done", Gig Guard buys an independent judgement of the actual output from Telegraph Miners (TASK_EXECUTION_QUALITY_GENERAL), checks the client's required items for free, and returns SUBMIT, FIX or HOLD. These are the 40 known-answer cases of the testnet run: 20 tasks, each with an output that does it and one with a planted defect. Testnet only (Ethereum Sepolia escrow, test USDC).</p>
 <div class="tiles">
-<div class="tile"><b>${S.not_done_submitted} / ${S.not_done_total}</b><span>defective outputs submitted</span></div>
+<div class="tile"><b>${S.not_done_submitted} / ${S.not_done_total}</b><span>defective outputs submitted (our 40-case set; on an outside set the judge was too lenient: <a href="https://github.com/swiftbotlabs/gig-guard/blob/main/eval/deliver/outsider/RESULTS.md">outsider results</a>)</span></div>
 <div class="tile"><b>${S.done_submitted} / ${S.done_total}</b><span>good outputs submitted</span></div>
 <div class="tile"><b>$${Number(S.cost_per_decided_usd).toFixed(3)}</b><span>per decision ($${Number(S.cost_usd).toFixed(2)} total)</span></div>
 <div class="tile"><b>${S.latency_p50_s} s</b><span>median answer time</span></div>

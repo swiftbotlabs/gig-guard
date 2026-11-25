@@ -41,7 +41,7 @@ const misses = cases.filter((c) => { const d = dec.get(c.id); return d && (c.tru
   .map((c) => { const d = dec.get(c.id); return `- **${c.id}** (${c.truth === "done" ? "a correct result" : `planted defect: ${c.defect}`}) -> ${d.verdict}. The judge said: "${String((d.reasons || []).join(" ")).replace(/"/g, "'").slice(0, 300)}"`; });
 const allTs = fs.readFileSync(ledger, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)).filter((x) => x.kind === "purchase").map((x) => x.ts).sort();
 const span = allTs.length ? `${allTs[0].slice(0, 16).replace("T", " ")} to ${allTs.at(-1).slice(0, 16).replace("T", " ")} UTC` : "n/a";
-const md = [`# Deliver gate, known-answer run`, "",
+const md = [`# Deliver gate, known-answer run`, "", "> Scope: this is our own 40-case set. On an outside set we did not write (LLMBar), the judge was too lenient: see [outsider/RESULTS.md](outsider/RESULTS.md).", "",
   `- **Network:** Telegraph devnode, **testnet**: Ethereum Sepolia escrow rail, Telegraph test USDC. No real money.`,
   `- **Paid answers bought:** ${span} (logs: \`run-1.log\` to \`run-4.log\`). Results were committed in 5573077; the receipt re-check is in ff86f0b.`,
   `- **Receipts:** ${rv ? `${rv.settled} of ${rv.total} SETTLED, ${rv.pending} pending, ${rv.mismatch} mismatched, checked ${rv.checked_at} (\`receipts-verify.json\`, table at the end)` : "not checked yet"}.`,
