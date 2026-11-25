@@ -77,3 +77,17 @@ test("the CLI escrow client never signs a node message that is not the known tem
   assert.throws(() => parseEscrowOption({ ...ok, extra: { message: challengeMessage(30001) } }, 30000), /outside/);
   assert.throws(() => parseEscrowOption({ ...ok, extra: { message: challengeMessage(10000) + "\nextra" } }, 10000), /template/);
 });
+
+// Per-Miner route (second opinion asks /engine/v1/ask/{id}): the node's escrow text says "Resource: /v1/ask/{id}" (live 25 Nov, Miner 302).
+import { parseEscrowOption, escrowMessage, DIAMOND as D2, ESCROW_NETWORK as N2 } from "../src/escrowmsg.mjs";
+const optFor = (minerId, amount = 10000) => ({ scheme: "escrow", network: N2, payTo: D2, extra: { message: challengeMessage(amount, D2, N2, minerId) } });
+test("escrow: per-Miner resource is signed only for the Miner we asked", () => {
+  assert.deepEqual(parseEscrowOption(optFor(302), 30000, "302"), { amount: 10000, payTo: D2 });
+  assert.throws(() => parseEscrowOption(optFor(303), 30000, "302"), /not the route we asked/);
+  assert.throws(() => parseEscrowOption(optFor(302), 30000, undefined), /not the route we asked/);
+  assert.throws(() => parseEscrowOption(optFor(undefined), 30000, "302"), /not the route we asked/);
+  assert.deepEqual(parseEscrowOption(optFor(undefined), 30000, undefined), { amount: 10000, payTo: D2 });
+  const msg = escrowMessage({ from: "0xabc", amount: 10000, nonce: "n", validAfter: "1", validBefore: "2", minerId: "302" });
+  assert.match(msg, /\nResource: \/v1\/ask\/302\n/);
+  assert.doesNotMatch(escrowMessage({ from: "0xabc", amount: 10000, nonce: "n", validAfter: "1", validBefore: "2" }), /ask\//);
+});

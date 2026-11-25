@@ -58,11 +58,11 @@ function escrowFetch(maxPerCall, ctx = {}) {
     const opt = (ch.accepts || []).find((a) => a.scheme === "escrow" && a.network === "eip155:11155111");
     if (!opt) throw new Error("node offered no escrow option");
     let amount;
-    try { ({ amount } = parseEscrowOption(opt, maxPerCall)); } catch (e) { throw new BudgetError(e.message); }   // never sign an unknown text
+    try { ({ amount } = parseEscrowOption(opt, maxPerCall, ctx.minerId)); } catch (e) { throw new BudgetError(e.message); }   // never sign an unknown text
     const now = Math.floor(Date.now() / 1000);
     const authorization = { from: escrowAccount.address.toLowerCase(), to: opt.payTo.toLowerCase(), value: String(amount),
       validAfter: String(now - 5), validBefore: String(now + 90), nonce: `gg-${now}-${Math.random().toString(36).slice(2, 10)}` };
-    const message = escrowMessage({ from: authorization.from, amount, nonce: authorization.nonce, validAfter: authorization.validAfter, validBefore: authorization.validBefore });
+    const message = escrowMessage({ from: authorization.from, amount, nonce: authorization.nonce, validAfter: authorization.validAfter, validBefore: authorization.validBefore, minerId: ctx.minerId });
     const signature = await escrowAccount.signMessage({ message });
     const xp = Buffer.from(JSON.stringify({ x402Version: 2, scheme: "escrow", network: opt.network, payload: { signature, authorization } })).toString("base64");
     ctx.signedUusdc = Number(amount);   // from here on the node may bill this request, whatever it answers (issue #228)
@@ -79,7 +79,7 @@ export async function ask(intent, params, { budget = config.maxPerCall, purpose 
   // Telegraph issue #228: a signed request that fails (non-200, or no response) can still be charged. Every such failure is
   // logged with signed: true and charged_uusdc = the signed amount (worst case), counted by the daily cap and by the decision's
   // cost. An "insufficient escrow" 402 is the exception: the node refused it before delivery, so nothing is charged.
-  const ctx = { signedUusdc: 0 };
+  const ctx = { signedUusdc: 0, minerId: minerId === undefined ? undefined : String(minerId) };
   const f = config.rail === "escrow" ? escrowFetch(budget, ctx) : client();
   const charged = () => (ctx.signedUusdc ? { signed: true, charged_uusdc: ctx.signedUusdc } : {});
   const t0 = Date.now();

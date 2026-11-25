@@ -10,7 +10,8 @@ let plan = {}; const asked = [];
 const srv = http.createServer((req, res) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
   const { intent, max_budget_usdc } = JSON.parse(b); const price = Number(max_budget_usdc);
   res.setHeader("content-type", "application/json");
-  if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a70e949362670bf8bcead24efc5b8f950aa08b", amount: String(price), extra: { message: challengeMessage(price) } }] })); }
+  const routed = (req.url.match(/\/ask\/(\d+)$/) || [])[1];   // like the live node: the per-Miner route says "Resource: /v1/ask/{id}"
+  if (!req.headers["x-payment"]) { res.writeHead(402); return res.end(JSON.stringify({ accepts: [{ scheme: "escrow", network: "eip155:11155111", payTo: "0x72a70e949362670bf8bcead24efc5b8f950aa08b", amount: String(price), extra: { message: challengeMessage(price, undefined, undefined, routed) } }] })); }
   const miner = (req.url.match(/\/ask\/(\d+)$/) || [])[1] || "302";   // the routed (generic) ask is answered by miner 302
   asked.push(miner);
   const v = plan[miner];
