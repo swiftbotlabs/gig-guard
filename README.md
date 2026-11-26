@@ -15,8 +15,9 @@ Video of the current gates (captions only, testnet): https://apps.swiftbotlab.wo
 
 ## Results, honestly
 
-- **Our own 40-case set** (we wrote it): 0 of 20 defective results submitted, 18 of 20 correct ones; 3 runs, 0 defective submitted in any run ([eval/deliver/RESULTS.md](eval/deliver/RESULTS.md)).
-- **An outside set we did not write** (20 LLMBar cases, Princeton NLP, frozen before the run): the judge was too lenient. Over 3 runs (25 Nov) it submitted 4 of 10 weaker outputs on average (range 3-5); correct ones 5.3 of 10 on average, the gap mostly cases with no Miner answer ([eval/deliver/outsider/RESULTS.md](eval/deliver/outsider/RESULTS.md), 3 runs). So "0 defective submitted" holds on our own cases, not in general. A stricter mode that needs a second Miner to agree is being tested; it will be reported as a separate, labelled result.
+- **An outside set we did not write** (20 LLMBar cases, Princeton NLP, frozen before the run): the default judge is too lenient. Over 3 blind runs (25 Nov) it let through 4 of 10 weaker outputs on average (range 3-5) and passed 5.3 of 10 correct ones; most of the gap is cases where no Miner answered ([eval/deliver/outsider/RESULTS.md](eval/deliver/outsider/RESULTS.md)).
+- **Confirm mode** (`GG_CONFIRM_SUBMIT=1`, now in `main`): a SUBMIT needs a second Miner to agree; a split goes to a third, no answer is HOLD. One labelled run on the same frozen outside set, made after we had seen the blind results (so not blind): 2 of 10 weaker outputs let through, 4 of 10 correct ones passed, 5 HOLD, $0.35 ([FIX-CONFIRM-RESULTS.md](eval/deliver/outsider/FIX-CONFIRM-RESULTS.md); receipts 35/35 settled). Stricter, slower, and still not perfect.
+- **Our own 40-case set** (we wrote it, so it is the easy test): the planted defects were held back in each of 3 runs; 18 of 20 correct results went through ([eval/deliver/RESULTS.md](eval/deliver/RESULTS.md)). Useful as a regression check, not as proof.
 
 ## What a run looks like
 
