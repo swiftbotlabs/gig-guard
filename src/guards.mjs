@@ -266,9 +266,9 @@ export async function deliverCheck({ task, result, patch, mustInclude = [], name
     ev.push(...panel.extra);
     ({ verdict, reasons, uncertainty } = panel.decide(reasons, uncertainty));
   }
-  // Confirm a pass (opt-in, strict): a SUBMIT needs a second Miner to agree. Added 25 Nov after the outsider (LLMBar) run, where a single
+  // Confirm a pass (DEFAULT since 26 Nov, strict): a SUBMIT needs a second Miner to agree. Added 25 Nov after the outsider (LLMBar) run, where a single
   // lenient "satisfies" let worse outputs through. 2 passes -> SUBMIT; a split goes to a third Miner (majority); nobody else answers -> HOLD.
-  const wantConfirm = confirmSubmit ?? process.env.GG_CONFIRM_SUBMIT === "1";
+  const wantConfirm = confirmSubmit ?? process.env.GG_CONFIRM_SUBMIT !== "0"; // default ON since 26 Nov; GG_CONFIRM_SUBMIT=0 turns it off
   if (wantConfirm && !patch && !missing.length && ev[0].ok && judgeClass(ev[0]) === "pass") {
     const panel = await secondOpinion(task, result, ev[0]);
     ev.push(...panel.extra);

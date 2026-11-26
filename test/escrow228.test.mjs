@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
 import { challengeMessage } from "../src/escrowmsg.mjs";
+process.env.GG_CONFIRM_SUBMIT = "0"; // these tests pin single-judge behaviour; confirm mode is the default since 26 Nov (tested in second-judge.test.mjs)
 
 let failSigned = new Set(), failUnsigned = new Set();
 const srv = http.createServer((req, res) => {

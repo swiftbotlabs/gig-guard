@@ -80,6 +80,7 @@ test("the CLI escrow client never signs a node message that is not the known tem
 
 // Per-Miner route (second opinion asks /engine/v1/ask/{id}): the node's escrow text says "Resource: /v1/ask/{id}" (live 25 Nov, Miner 302).
 import { parseEscrowOption, escrowMessage, DIAMOND as D2, ESCROW_NETWORK as N2 } from "../src/escrowmsg.mjs";
+process.env.GG_CONFIRM_SUBMIT = "0"; // these tests pin single-judge behaviour; confirm mode is the default since 26 Nov (tested in second-judge.test.mjs)
 const optFor = (minerId, amount = 10000) => ({ scheme: "escrow", network: N2, payTo: D2, extra: { message: challengeMessage(amount, D2, N2, minerId) } });
 test("escrow: per-Miner resource is signed only for the Miner we asked", () => {
   assert.deepEqual(parseEscrowOption(optFor(302), 30000, "302"), { amount: 10000, payTo: D2 });

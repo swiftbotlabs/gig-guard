@@ -5,6 +5,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { challengeMessage } from "../src/escrowmsg.mjs";
+process.env.GG_CONFIRM_SUBMIT = "0"; // these tests pin single-judge behaviour; confirm mode is the default since 26 Nov (tested in second-judge.test.mjs)
 
 let plan = {}; const asked = [];
 const srv = http.createServer((req, res) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
@@ -47,13 +48,20 @@ test("not used when the first judge passes, when a required item is missing, or 
   assert.equal((await run({ 302: "fails", 20260828: "satisfies" }, { secondJudge: false })).verdict, "FIX"); assert.deepEqual(asked, ["302"]);
 });
 
-test("confirm mode: a single 'satisfies' is not enough; 2 passes SUBMIT, pass/fail/fail FIX, no second answer HOLD; off by default", async () => {
+test("confirm mode: a single 'satisfies' is not enough; 2 passes SUBMIT, pass/fail/fail FIX, no second answer HOLD; ON by default (GG_CONFIRM_SUBMIT=0 turns it off)", async () => {
   let d = await run({ 302: "satisfies", 20260828: "satisfies" }, { secondJudge: false, confirmSubmit: true });
   assert.equal(d.verdict, "SUBMIT"); assert.deepEqual(asked, ["302", "20260828"]);
   d = await run({ 302: "satisfies", 20260828: "fails", 7442: "fails" }, { secondJudge: false, confirmSubmit: true });
   assert.equal(d.verdict, "FIX"); assert.deepEqual(asked, ["302", "20260828", "7442"]);
   d = await run({ 302: "satisfies", 20260828: "down", 7442: "down", 76441: "down" }, { secondJudge: false, confirmSubmit: true });
   assert.equal(d.verdict, "HOLD"); assert.match(d.reasons.join(" "), /no second Miner answered/);
-  d = await run({ 302: "satisfies" }, { secondJudge: false });
+  d = await run({ 302: "satisfies" }, { secondJudge: false });                 // GG_CONFIRM_SUBMIT=0: single judge
   assert.equal(d.verdict, "SUBMIT"); assert.deepEqual(asked, ["302"]);
+  delete process.env.GG_CONFIRM_SUBMIT;                                           // unset = the default: confirm ON
+  try {
+    d = await run({ 302: "satisfies" }, { secondJudge: false });
+    assert.equal(d.verdict, "HOLD"); assert.ok(asked.length > 1, "a lone pass asks other Miners by default");
+    d = await run({ 302: "satisfies", 20260828: "satisfies" }, { secondJudge: false });
+    assert.equal(d.verdict, "SUBMIT"); assert.deepEqual(asked, ["302", "20260828"]);
+  } finally { process.env.GG_CONFIRM_SUBMIT = "0"; }
 });
