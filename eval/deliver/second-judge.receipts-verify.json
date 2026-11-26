@@ -1,7 +1,7 @@
 {
   "total": 1,
-  "settled": 0,
-  "pending": 1,
+  "settled": 1,
+  "pending": 0,
   "mismatch": 0,
   "other": 0,
   "receipts": [
@@ -9,8 +9,13 @@
       "intent": "LLM_OUTPUT_EVALUATION_GENERAL",
       "receipt_hash": "0x92f8c30ae55e4c462762873f774ec6c2888e82a56bc3a571fb4ddc3dffa362dc",
       "epoch_id": 54,
-      "status": "PENDING",
-      "note": "no block recorded for this epoch"
+      "status": "SETTLED",
+      "mismatch": [],
+      "miner_id": "4880",
+      "usdc": 10000,
+      "deliveries_root": "0x4e735927b006b6572b709905bb5989a6d0b5d310f3d7f30095c278e833029b72",
+      "block_data_root": "0x250cd0a435d15fb09ea37808177b166edce9fe90750c69818dd6c3101279911f",
+      "proof_len": 9
     }
   ]
 }

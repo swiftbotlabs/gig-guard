@@ -1,7 +1,7 @@
 # Held-out set: one live run (Telegraph testnet)
 
 - 10 new tasks (a correct and a defective result each), written after the gate changes and never used for tuning. Frozen before the run: sha256 `e05470e5e2e6ac163b2626cab35d45f88f271514b8558d561fbb34559b81bebc` (HELDOUT.sha256, committed first).
-- Network: testnet (Ethereum Sepolia escrow, test USDC). Receipts: not checked yet.
+- Network: testnet (Ethereum Sepolia escrow, test USDC). Receipts: 10 of 10 SETTLED, 0 pending, 0 mismatched.
 
 ```
 {
