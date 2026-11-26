@@ -32,4 +32,4 @@ const md = ["# Outsider blind set (LLMBar): live runs on Telegraph testnet", "",
   "- Scoring: the human-preferred output should get SUBMIT; the other should not. LLMBar labels are pairwise preferences, so a 'not_done' output may be partly acceptable: a SUBMIT on it is counted as a false SUBMIT anyway.", "",
   "```", JSON.stringify(sum, null, 1), "```", "", `| case | source | truth | ${runs.map((_, i) => `run ${i + 1}`).join(" / ")} |`, "|---|---|---|---|", ...rows, "",
   "Per run:", "", "```", ...runs.map((r) => JSON.stringify({ ...r, verdicts: undefined })), "```", ""].join("\n");
-fs.writeFileSync(here("RESULTS.md"), md); console.log(JSON.stringify(sum));
+fs.writeFileSync(here(process.env.GG_SCORE_OUT || "RESULTS.md"), md); console.log(JSON.stringify(sum)); // GG_SCORE_OUT: e.g. CONFIRM-RESULTS.md, so blind results are never overwritten
