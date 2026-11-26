@@ -30,3 +30,21 @@ Cases whose verdict changed between runs:
 - csv-dedupe/bad (planted defect): FIX / FIX / HOLD (no Miner answer in a run)
 - percent/good (correct result): SUBMIT / SUBMIT / HOLD (no Miner answer in a run)
 - percent/bad (planted defect): FIX / FIX / HOLD (judge changed its verdict)
+
+## Outside set (LLMBar): the hard test, where the judge is too lenient
+
+20 cases we did not write (10 LLMBar items, Princeton NLP, MIT licence; frozen sha256 `6099606d...` before any run). Full per-case
+tables: [outsider/RESULTS.md](outsider/RESULTS.md) (blind runs) and [outsider/FIX-CONFIRM-RESULTS.md](outsider/FIX-CONFIRM-RESULTS.md) (confirm mode).
+
+| run | mode | weaker outputs submitted (of 10) | preferred outputs submitted (of 10) | HOLD | receipts settled |
+|---|---|---|---|---|---|
+| run-1 | blind, one judge | 3 | 3 | 10 | 10 of 10 |
+| run-2 | blind, one judge | 4 | 7 | 2 | 18 of 18 |
+| run-3 | blind, one judge | 5 | 6 | 3 | 17 of 17 |
+| 3 blind runs | one judge | **mean 4 (range 3-5)** | mean 5.3 (range 3-7) | mean 5 (range 2-10) | 45 of 45, 0 mismatched |
+| fix-confirm-1 | confirm mode (`GG_CONFIRM_SUBMIT=1`), labelled, not blind | **2** | 4 | 5 | 35 of 35, 0 mismatched ([FIX-CONFIRM-RECEIPTS.txt](outsider/FIX-CONFIRM-RECEIPTS.txt)) |
+
+Confirm mode: a SUBMIT needs a second Miner to agree; a split goes to a third; no answer is HOLD. Its one run was made after we had seen
+the blind results, so it is labelled, not blind. Example it caught: `llmbar-0677f52b/bad` (lightning odds, the answer never gives the odds)
+was SUBMIT in all 3 blind runs; in confirm mode the Miners said pass / unclear / fail, so it was held (receipts 0x032ed352..., 0x67e8d895...,
+0x2de42591..., epoch 58, settled).
