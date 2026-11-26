@@ -65,3 +65,12 @@ test("confirm mode: a single 'satisfies' is not enough; 2 passes SUBMIT, pass/fa
     assert.equal(d.verdict, "SUBMIT"); assert.deepEqual(asked, ["302", "20260828"]);
   } finally { process.env.GG_CONFIRM_SUBMIT = "0"; }
 });
+
+test("GG_FIRST_MINER pins the first judgement to that Miner (routed ask); unset = the generic route", async () => {
+  process.env.GG_FIRST_MINER = "7442";
+  try {
+    const d = await run({ 7442: "fails" }, { secondJudge: false });
+    assert.equal(d.verdict, "FIX"); assert.deepEqual(asked, ["7442"]);
+  } finally { delete process.env.GG_FIRST_MINER; }
+  await run({ 302: "fails" }, { secondJudge: false }); assert.deepEqual(asked, ["302"]);
+});

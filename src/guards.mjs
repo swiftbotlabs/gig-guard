@@ -43,7 +43,9 @@ async function buy(intents, params, purpose, need, budget) {
       return { ok: true, intent, result: hit.result, receipt: hit.receipt, miner_id: hit.miner_id, cost_usd: 0, ms: 0, reused: hit.receipt?.receipt_hash, tried };
     }
     try {
-      const r = await ask(intent, p, budget ? { purpose, budget } : { purpose });
+      // GG_FIRST_MINER pins the first done-check judgement to one Miner id (fair reruns against a past run's Miner); fallbacks stay open.
+      const pin = purpose === "deliver" && intent === "TASK_EXECUTION_QUALITY_GENERAL" && /^\d{1,12}$/.test(process.env.GG_FIRST_MINER || "") ? { minerId: process.env.GG_FIRST_MINER } : {};
+      const r = await ask(intent, p, budget ? { purpose, budget, ...pin } : { purpose, ...pin });
       // A paid answer whose fields are all empty is no answer: note it and try the next supplier.
       const vals = Object.entries(r.result || {}).filter(([k]) => !Object.values(p).includes(r.result[k])).map(([, v]) => v);
       const filled = (v) => v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && !v.length);
