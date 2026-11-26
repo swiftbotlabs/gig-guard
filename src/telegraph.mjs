@@ -40,6 +40,19 @@ export function parseEscrowShortfall(reason) {
   return { unbilled, price, balance, shortfall: Math.max(0, unbilled + price - balance) };
 }
 
+/** The unsigned first leg of a paid ask (the request that gets the 402 challenge). Nothing is signed yet, so a connection-level
+ *  failure ("fetch failed": reset, DNS, TLS) is retried once after a short pause. The signed retry is NEVER repeated: it may be billed. */
+export async function unsignedLeg(url, init, { fetchImpl = fetch, pauseMs = 1500 } = {}) {
+  try { return await fetchImpl(url, init); }
+  catch (e) {
+    if (init?.signal?.aborted || !(e instanceof TypeError)) throw e;
+    await new Promise((r) => setTimeout(r, pauseMs));
+    return fetchImpl(url, init);
+  }
+}
+/** "fetch failed" hides the real cause; keep its code for the ledger (e.g. "fetch failed (ECONNRESET)"). */
+export const errText = (e) => { const c = e?.cause; const code = c?.code || c?.name; return String(e?.message || e) + (code ? ` (${code}${c?.message && c.message !== code ? `: ${String(c.message).slice(0, 80)}` : ""})` : ""); };
+
 // Escrow rail (Ethereum Sepolia): prepaid balance on the Telegraph Diamond, one EIP-191 signature
 // per request, no facilitator in the path. Enabled with GG_RAIL=escrow.
 let escrowAccount;
@@ -51,7 +64,7 @@ function escrowFetch(maxPerCall, ctx = {}) {
     payer = escrowAccount.address;
   }
   return async (url, init) => {
-    const first = await fetch(url, init);
+    const first = await unsignedLeg(url, init);
     if (first.status !== 402) return first;
     const h = first.headers.get("payment-required");
     const ch = h ? JSON.parse(Buffer.from(h, "base64").toString("utf8")) : await first.json();
@@ -94,7 +107,7 @@ export async function ask(intent, params, { budget = config.maxPerCall, purpose 
       body: JSON.stringify(config.rail === "escrow" || config.network === "eip155:11155111" ? { intent, params, max_budget_usdc: budget } : { intent, params }),
     });
   } catch (e) {
-    append({ kind: "error", intent, params, purpose, error: String(e.message || e), ...charged() });
+    append({ kind: "error", intent, params, purpose, error: errText(e), ...charged() });
     if (ctx.signedUusdc) e.charged_uusdc = ctx.signedUusdc;
     throw e;
   }

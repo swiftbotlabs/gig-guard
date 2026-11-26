@@ -1,0 +1,1 @@
+2026-11-26T07:28Z GG_LEDGER=eval/deliver/outsider/fix-confirm-1.public.jsonl node src/cli.mjs verify eval/deliver/out -> {"total":35,"settled":35,"pending":0,"mismatch":0,"other":0}

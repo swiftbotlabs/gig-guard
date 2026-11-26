@@ -247,7 +247,7 @@ export const DELIVER_LIMIT = Number(process.env.GG_DELIVER_LIMIT || 2000); // ch
 export const JUDGE_BUDGET = Math.min(Number(process.env.GG_JUDGE_BUDGET || 10000), config.maxPerCall);
 
 /** Mission 09 (Personal Agent): may the agent report this task as done? */
-export async function deliverCheck({ task, result, patch, mustInclude = [], name = "deliverable", secondJudge } = {}) {
+export async function deliverCheck({ task, result, patch, mustInclude = [], name = "deliverable", secondJudge, confirmSubmit } = {}) {
   if (!task || !String(task).trim() || !result || !String(result).trim()) throw new Error("task and result are both required");
   const input = { name, task_chars: String(task).length, result_chars: String(result).length, patch: patch ? String(patch).slice(0, 200) : undefined };
   const missing = mustInclude.filter((m) => !String(result).includes(m));
@@ -262,6 +262,14 @@ export async function deliverCheck({ task, result, patch, mustInclude = [], name
   // decide by majority of the judges that answered (2 of 2, or 2 of 3). No majority -> HOLD. Never used to overturn a free-check FIX.
   const wantSecond = secondJudge ?? process.env.GG_SECOND_JUDGE === "1";
   if (wantSecond && !patch && !missing.length && ev[0].ok && ["fail", "unclear"].includes(judgeClass(ev[0]))) {
+    const panel = await secondOpinion(task, result, ev[0]);
+    ev.push(...panel.extra);
+    ({ verdict, reasons, uncertainty } = panel.decide(reasons, uncertainty));
+  }
+  // Confirm a pass (opt-in, strict): a SUBMIT needs a second Miner to agree. Added 25 Nov after the outsider (LLMBar) run, where a single
+  // lenient "satisfies" let worse outputs through. 2 passes -> SUBMIT; a split goes to a third Miner (majority); nobody else answers -> HOLD.
+  const wantConfirm = confirmSubmit ?? process.env.GG_CONFIRM_SUBMIT === "1";
+  if (wantConfirm && !patch && !missing.length && ev[0].ok && judgeClass(ev[0]) === "pass") {
     const panel = await secondOpinion(task, result, ev[0]);
     ev.push(...panel.extra);
     ({ verdict, reasons, uncertainty } = panel.decide(reasons, uncertainty));
