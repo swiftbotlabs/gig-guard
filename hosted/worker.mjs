@@ -105,6 +105,35 @@ export async function askEscrow(node, account, intent, params, fetchImpl = fetch
   } catch (e) { return { ok: false, intent, error: "no answer (timeout or network)", signed }; }
 }
 
+// Public ledger: one row per judged check, receipt fields only (never the task, the result, an address or the connection).
+const LEDGER_MAX = 500;
+export function ledgerRow(rec, via) {
+  if (!rec || typeof rec !== "object") return null;
+  const h = String(rec.receipt_hash || ""), e = Number(rec.epoch_id), i = String(rec.intent || ""), m = String(rec.miner_id ?? ""), v = String(rec.verdict || "");
+  if (!/^0x[0-9a-f]{64}$/i.test(h) || !Number.isInteger(e) || e < 0 || e > 1e9 || !/^[A-Z_]{3,64}$/.test(i) || !["SUBMIT", "FIX", "HOLD"].includes(v)) return null;
+  return { ts: new Date().toISOString(), verdict: v, intent: i, miner_id: /^\d{1,12}$/.test(m) ? m : null, epoch_id: e, receipt_hash: h.toLowerCase(), via };
+}
+const esc = (x) => String(x).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+export function ledgerPage(rows, node) {
+  const tr = rows.map((r) => `<tr><td>${esc(r.ts.slice(0, 16).replace("T", " "))}Z</td><td class="v ${esc(r.verdict)}">${esc(r.verdict)}</td><td>${esc(r.via)}</td><td>${esc(r.miner_id ?? "")}</td><td>${esc(r.epoch_id)}</td>`
+    + `<td><a class="h" href="${esc(node)}/v1/blocks/${esc(r.epoch_id)}/deliveries/${esc(r.receipt_hash)}" data-u="${esc(node)}/v1/blocks/${esc(r.epoch_id)}/deliveries/${esc(r.receipt_hash)}">${esc(r.receipt_hash.slice(0, 10))}…${esc(r.receipt_hash.slice(-6))}</a></td><td class="s">not checked</td></tr>`).join("");
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>done-check ledger</title><style>
+:root{color-scheme:light dark;--fg:#16181c;--mut:#5b616b;--bg:#fff;--ln:#e2e5ea;--ok:#13795b;--bad:#b42318;--hold:#9a6700}
+@media (prefers-color-scheme:dark){:root{--fg:#eef0f3;--mut:#a3a9b3;--bg:#111317;--ln:#2a2e35;--ok:#4cc38a;--bad:#ff8a80;--hold:#f5c451}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}main{max-width:980px;margin:0 auto;padding:24px 16px}
+h1{font-size:22px;margin:0 0 6px}p{color:var(--mut);margin:0 0 14px}.wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--ln);white-space:nowrap}th{color:var(--mut);font-weight:600}a{color:inherit}
+.SUBMIT{color:var(--ok)}.FIX{color:var(--bad)}.HOLD{color:var(--hold)}.v{font-weight:700}.s{color:var(--mut)}button{font:inherit;padding:6px 12px;margin:0 0 12px}</style></head><body><main>
+<h1>done-check ledger</h1>
+<p>Every judged check made through this hosted service since the ledger was added (27 Nov 2026): verdict, the Telegraph receipt and where to verify it on the node. Testnet only (Ethereum Sepolia escrow, test USDC). No task text, result, address or connection is stored. Checks made before 27 Nov are listed in the project's evidence files. The node answers 200 for a receipt once its epoch block is recorded.</p>
+<button id="c">Check every receipt on the node</button>
+<div class="wrap"><table><thead><tr><th>time (UTC)</th><th>verdict</th><th>client</th><th>miner</th><th>epoch</th><th>receipt</th><th>on the node</th></tr></thead><tbody>${tr || '<tr><td colspan="7">No judged checks recorded yet.</td></tr>'}</tbody></table></div>
+<p>Raw JSON: <a href="/api/ledger">/api/ledger</a>. Try a check: <a href="/">the done-check page</a>.</p>
+<script>document.getElementById("c").onclick=async()=>{for(const a of document.querySelectorAll("a.h")){const s=a.closest("tr").querySelector(".s");s.textContent="checking…";
+try{const r=await fetch(a.dataset.u);if(r.ok){const j=await r.json();s.textContent=(j.delivery&&j.delivery.receipt_hash===a.dataset.u.split("/").pop())?"settled, miner "+(j.delivery.miner_id||"?"):"answer did not match";}else s.textContent=r.status===404?"not yet in a block":"HTTP "+r.status;}catch{s.textContent="node unreachable";}}};</script>
+</main></body></html>`;
+}
+
 /** Budget keeper: one instance for the whole service. Storage: day, spent and reserved μUSDC, checks per client. */
 export class Budget {
   constructor(ctx, env) { this.ctx = ctx; this.env = env; }
@@ -125,7 +154,7 @@ export class Budget {
     return { ok: true, left: cap - s.spent - s.reserved };
   }
   /** Releases the reservation and books what was actually signed (failed signed requests included). */
-  async settle(spentUusdc, exhausted = false, judged = false, via = "other") {
+  async settle(spentUusdc, exhausted = false, judged = false, via = "other", rec = null) {
     const cap = Number(this.env.DAY_CAP_UUSDC || 200000);
     const s = await this.state();
     // Activation counter: checks that ran, how many got a paid judgement, and distinct connections per UTC day. Counts only:
@@ -136,18 +165,22 @@ export class Budget {
     t.days[s.day] = { checks: (t.days[s.day]?.checks || 0) + 1, connections: Object.keys(s.clients).length };
     for (const d of Object.keys(t.days).sort().slice(0, -60)) delete t.days[d];
     await this.ctx.storage.put("t", t);
+    const row = ledgerRow(rec, via);
+    if (row) { const L = (await this.ctx.storage.get("L")) || []; L.push(row); await this.ctx.storage.put("L", L.slice(-LEDGER_MAX)); }
     s.reserved = Math.max(0, s.reserved - RESERVE); s.spent += Math.max(0, Number(spentUusdc) || 0);
     if (exhausted) s.spent = Math.max(s.spent, cap);   // the escrow is empty: stop for the day
     await this.ctx.storage.put("s", s);
     return { left: Math.max(0, cap - s.spent - s.reserved) };
   }
+  async ledger() { const L = (await this.ctx.storage.get("L")) || []; return { rows: L.slice().reverse(), kept: LEDGER_MAX }; }
   async stats() { const t = (await this.ctx.storage.get("t")) || { checks: 0, judged: 0, days: {} }; return { clients: {}, ...t }; }
   async left() { const cap = Number(this.env.DAY_CAP_UUSDC || 200000), s = await this.state(); return { left: Math.max(0, cap - s.spent - s.reserved), cap }; }
   // Classic Durable Object fetch interface (internal only: the binding is not reachable from the internet).
   async fetch(request) {
     const op = new URL(request.url).pathname.slice(1), a = request.method === "POST" ? await request.json() : {};
     if (op === "reserve") return Response.json(await this.reserve(String(a.client || "")));
-    if (op === "settle") return Response.json(await this.settle(a.spent, !!a.exhausted, !!a.judged, viaOf(a.via)));
+    if (op === "settle") return Response.json(await this.settle(a.spent, !!a.exhausted, !!a.judged, viaOf(a.via), a.rec || null));
+    if (op === "ledger") return Response.json(await this.ledger());
     if (op === "left") return Response.json(await this.left());
     if (op === "stats") return Response.json(await this.stats());
     return new Response("not found", { status: 404 });
@@ -188,7 +221,7 @@ async function check(request, env, fetchImpl, ctx) {
   let spent = 0, out = null, exhausted = false, settled = false;
   // Release the reservation whatever happens (also if the visitor disconnects): waitUntil keeps the settle alive.
   const origin = request.headers.get("origin"), via = viaOf(request.headers.get("x-donecheck-client"), !!origin && origin === new URL(request.url).origin);
-  const settle = (extra = false) => { if (settled) return null; settled = true; const p = bud(env, "settle", { spent, exhausted: extra, judged: !!out, via }); ctx?.waitUntil?.(p.catch(() => {})); return p; };
+  const settle = (extra = false, rec = null) => { if (settled) return null; settled = true; const p = bud(env, "settle", { spent, exhausted: extra, judged: !!out, via, rec }); ctx?.waitUntil?.(p.catch(() => {})); return p; };
   try {
     const account = privateKeyToAccount(env.DONECHECK_PAYER_KEY);
     const tried = [];
@@ -204,7 +237,8 @@ async function check(request, env, fetchImpl, ctx) {
     const v = deliverVerdict(judge, null, missing);
     if (exhausted) v.reasons.push("today's testnet budget is used up: no judgement could be bought (fail closed)");
     if (exhausted) markSpent(env);
-    const left = (await settle(exhausted)).left;
+    const rec = out ? { receipt_hash: out.receipt.receipt_hash, epoch_id: out.receipt.epoch_id, intent: out.intent, miner_id: out.miner_id, verdict: v.verdict } : null;
+    const left = (await settle(exhausted, rec)).left;
     return json({ verdict: v.verdict, reasons: v.reasons, uncertainty: v.uncertainty, missing,
       receipt: out ? { receipt_hash: out.receipt.receipt_hash, epoch_id: out.receipt.epoch_id, intent: out.intent, amount_uusdc: Number(out.receipt.amount_uusdc || 0), miner_id: out.miner_id } : null,
       judge: out ? { intent: out.intent, verdict: out.result.verdict ?? out.result.rating ?? null, reason: String(out.result.reason || (out.result.errors || []).join("; ") || "").slice(0, 400) } : null,
@@ -279,6 +313,13 @@ export default {
     }
     if (u.pathname === "/api/badge" && request.method === "GET") {
       try { return json(badge(await bud(env, "stats")), 200, { "access-control-allow-origin": "*", "cache-control": "public, max-age=300" }); } catch { return json({ error: "unavailable" }, 503); }
+    }
+    if (u.pathname === "/api/ledger" && request.method === "GET") {
+      try { return json(await bud(env, "ledger"), 200, { "access-control-allow-origin": "*", "cache-control": "no-store" }); } catch { return json({ error: "unavailable" }, 503); }
+    }
+    if (u.pathname === "/ledger" && (request.method === "GET" || request.method === "HEAD")) {
+      try { const l = await bud(env, "ledger"); return new Response(ledgerPage(l.rows, env.TELEGRAPH_NODE || "https://devnode.telegraphprotocol.com"), { headers: { "content-type": "text/html; charset=utf-8", ...SEC } }); }
+      catch { return json({ error: "unavailable" }, 503); }
     }
     if (u.pathname === "/api/budget" && request.method === "GET") {
       try { const b = await bud(env, "left"); return json({ left_usd: b.left / 1e6, cap_usd: b.cap / 1e6 }); } catch { return json({ error: "unavailable" }, 503); }

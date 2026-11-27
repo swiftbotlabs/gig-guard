@@ -180,3 +180,33 @@ test("remote MCP (/mcp, Streamable HTTP, stateless): initialize, tools/list, too
   const st = await (await worker.fetch(new Request("https://donecheck.example/api/stats"), env, {})).json();
   assert.equal(st.clients["mcp-remote"], 5);
 });
+
+test("ledger: each judged check adds one receipt row (no task or result text), shown on /ledger with a node link; junk receipts are dropped", async () => {
+  mode = "ok";
+  const env = makeEnv();
+  const { ledgerRow } = await import("../hosted/worker.mjs");
+  const r1 = await (await call(env, { task: T, result: "s.length >= 12" })).json();
+  const r2 = await (await call(env, { task: T, result: "s.length > 12" }, { ip: "203.0.113.8" })).json();
+  assert.equal(r1.verdict, "SUBMIT"); assert.equal(r2.verdict, "FIX");
+  const l = await (await worker.fetch(new Request("https://donecheck.example/api/ledger"), env, {})).json();
+  assert.equal(l.rows.length, 2);
+  assert.deepEqual(l.rows.map((r) => r.verdict), ["FIX", "SUBMIT"]);   // newest first
+  for (const r of l.rows) {
+    assert.equal(r.receipt_hash, "0x" + "ef".repeat(32)); assert.equal(r.epoch_id, 41); assert.equal(r.miner_id, "302");
+    assert.ok(!JSON.stringify(r).includes("length"), "no task/result text in the ledger");
+    assert.deepEqual(Object.keys(r).sort(), ["epoch_id", "intent", "miner_id", "receipt_hash", "ts", "verdict", "via"]);
+  }
+  const page = await (await worker.fetch(new Request("https://donecheck.example/ledger"), env, {})).text();
+  assert.match(page, /\/v1\/blocks\/41\/deliveries\/0x(ef){32}/);
+  assert.ok(!page.includes("s.length"));
+  // planted junk: never stored
+  assert.equal(ledgerRow({ receipt_hash: "<script>", epoch_id: 1, intent: "X_Y_Z", verdict: "SUBMIT" }, "web"), null);
+  assert.equal(ledgerRow({ receipt_hash: "0x" + "ab".repeat(32), epoch_id: 1, intent: "bad intent", verdict: "SUBMIT" }, "web"), null);
+  assert.equal(ledgerRow({ receipt_hash: "0x" + "ab".repeat(32), epoch_id: 1, intent: "X_Y_Z", verdict: "MAYBE" }, "web"), null);
+  // a check that bought no judgement adds no row
+  mode = "fail";
+  await call(env, { task: T, result: "s.length >= 12" }, { ip: "203.0.113.9" });
+  const l2 = await (await worker.fetch(new Request("https://donecheck.example/api/ledger"), env, {})).json();
+  assert.equal(l2.rows.length, 2);
+  mode = "ok";
+});
