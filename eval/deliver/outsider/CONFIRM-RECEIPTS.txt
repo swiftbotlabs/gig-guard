@@ -1,2 +1,4 @@
 confirm-run-1 (excluded from the comparison, see CONFIRM-NOTES.md) checked 2026-11-26T20:15Z: {"total":21,"settled":21,"pending":0,"mismatch":0,"other":0}
 confirm-run-2 checked 2026-11-26T20:15Z: {"total":27,"settled":27,"pending":0,"mismatch":0,"other":0}
+confirm-run-3 checked 2026-11-27T02:14Z: {"total":27,"settled":27,"pending":0,"mismatch":0,"other":0}
+confirm-run-4 checked 2026-11-27T02:14Z: {"total":28,"settled":28,"pending":0,"mismatch":0,"other":0}
