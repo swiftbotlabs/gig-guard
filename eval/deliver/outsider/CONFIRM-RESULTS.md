@@ -39,6 +39,9 @@
 }
 ```
 
+Where the correct outputs went (10 per run, 30 over the 3 reruns): 9 SUBMIT (recall 3 of 10 in every run), 14 HOLD (left for a person),
+7 FIX (wrongly sent back). Weaker outputs (30): 4 SUBMIT, 6 HOLD, 20 FIX. Counted from the table below.
+
 | case | source | truth | run 1 / run 2 / run 3 |
 |---|---|---|---|
 | llmbar-027ca771/good | Natural | done | SUBMIT / SUBMIT / SUBMIT |

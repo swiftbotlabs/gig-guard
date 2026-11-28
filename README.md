@@ -16,7 +16,7 @@ Video of the current gates (captions only, testnet): https://apps.swiftbotlab.wo
 ## Results, honestly
 
 - **An outside set we did not write** (20 LLMBar cases, Princeton NLP, frozen before the run): the default judge is too lenient. Over 3 blind runs (25 Nov) it let through 4 of 10 weaker outputs on average (range 3-5) and passed 5.3 of 10 correct ones; most of the gap is cases where no Miner answered ([eval/deliver/outsider/RESULTS.md](eval/deliver/outsider/RESULTS.md)).
-- **Confirm mode** (the DEFAULT since 26 Nov; `GG_CONFIRM_SUBMIT=0` turns it off): a SUBMIT needs a second Miner to agree; a split goes to a third, no answer is HOLD. On the same frozen outside set, 3 reruns on 26 Nov (first judgement pinned to Miner 302, the Miner of the blind runs): weaker outputs let through mean 1.3 of 10 (range 1-2), correct ones passed 3 of 10 every run, HOLD mean 6.7 of 20, $0.0205 per decision ([CONFIRM-RESULTS.md](eval/deliver/outsider/CONFIRM-RESULTS.md); receipts of all 4 reruns, 103/103, settled: [CONFIRM-RECEIPTS.txt](eval/deliver/outsider/CONFIRM-RECEIPTS.txt)). A first rerun is excluded and the reason is written down: its first judge, Miner 9002, also failed every correct output ([CONFIRM-NOTES.md](eval/deliver/outsider/CONFIRM-NOTES.md)). Blind single-judge runs for comparison: weaker ~4 of 10, correct ~5.3 of 10. Stricter and more careful, and it holds many good results for a human: that is the trade.
+- **Confirm mode** (the DEFAULT since 26 Nov; `GG_CONFIRM_SUBMIT=0` turns it off): a SUBMIT needs a second Miner to agree; a split goes to a third, no answer is HOLD. On the same frozen outside set, 3 reruns on 26 Nov (first judgement pinned to Miner 302, the Miner of the blind runs): weaker outputs let through mean 1.3 of 10 (range 1-2), correct ones passed 3 of 10 every run, HOLD mean 6.7 of 20, $0.0205 per decision ([CONFIRM-RESULTS.md](eval/deliver/outsider/CONFIRM-RESULTS.md); receipts of all 4 reruns, 103/103, settled: [CONFIRM-RECEIPTS.txt](eval/deliver/outsider/CONFIRM-RECEIPTS.txt)). A first rerun is excluded and the reason is written down: its first judge, Miner 9002, also failed every correct output ([CONFIRM-NOTES.md](eval/deliver/outsider/CONFIRM-NOTES.md)). Blind single-judge runs for comparison: weaker ~4 of 10, correct ~5.3 of 10. Stricter and more careful, and it holds many good results for a human: that is the trade. Where the 10 correct outputs went, per run (mean of the 3 reruns): 3 SUBMIT, 4.7 HOLD for a human, 2.3 FIX; so recall is 3 of 10, and most of the rest waits for a person rather than being rejected ([CONFIRM-RESULTS.md](eval/deliver/outsider/CONFIRM-RESULTS.md)).
 - **Our own 40-case set** (we wrote it, so it is the easy test): the planted defects were held back in each of 3 runs; 18 of 20 correct results went through ([eval/deliver/RESULTS.md](eval/deliver/RESULTS.md)). Useful as a regression check, not as proof.
 
 ## What a run looks like
@@ -79,7 +79,7 @@ Prerequisites: Node.js 20+, and a **testnet-only** key with a Telegraph escrow b
 
 ```bash
 npm install
-npm test                                   # 61 tests against a fake node: no network, no funds
+npm test                                   # 71 tests against a fake node: no network, no funds
 cp .env.example .env && $EDITOR .env       # TELEGRAPH_PAYER_KEY=0x... (testnet only)
 set -a; . ./.env; set +a
 
@@ -193,7 +193,7 @@ Written up as found, with the workaround in the code:
 
 ## Tests
 
-`npm test` runs 61 tests (25 policy, 4 second-judge, 8 escrow rail, 10 hosted done-check, 3 integrations, 3 report, 4 review parser, 3 contract-fitting) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, a signed request that fails but may still be billed (issue #228: logged, counted by the cap and in the decision's cost), bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
+`npm test` runs 71 tests (25 policy, 6 second-judge, 12 escrow rail, 13 hosted done-check, 3 integrations, 3 report, 4 review parser, 3 contract-fitting, 2 reward) against a fake Telegraph node that speaks the real 402 challenge, signed retry and receipt headers, plus a fake RPC and fake epoch blocks. Covered: each verdict of each gate, supplier fallback, empty and stale answers, a miner contradicted by the chain, consent given/declined/absent, reuse without a second charge, local-rule corroboration, receipt SETTLED/PENDING/MISMATCH, an exhausted escrow balance that stops a run without logging false HOLDs, a signed request that fails but may still be billed (issue #228: logged, counted by the cap and in the decision's cost), bad input refused before payment, and that public output never leaks sponsor names, wallets, links or claim text.
 
 ## Known limitations
 

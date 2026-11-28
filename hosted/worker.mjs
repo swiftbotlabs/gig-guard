@@ -126,11 +126,12 @@ th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--ln);white-sp
 .SUBMIT{color:var(--ok)}.FIX{color:var(--bad)}.HOLD{color:var(--hold)}.v{font-weight:700}.s{color:var(--mut)}button{font:inherit;padding:6px 12px;margin:0 0 12px}</style></head><body><main>
 <h1>done-check ledger</h1>
 <p>Every judged check made through this hosted service since the ledger was added (27 Nov 2026): verdict, the Telegraph receipt and where to verify it on the node. Testnet only (Ethereum Sepolia escrow, test USDC). No task text, result, address or connection is stored. Checks made before 27 Nov are listed in the project's evidence files. The node answers 200 for a receipt once its epoch block is recorded.</p>
-<button id="c">Check every receipt on the node</button>
+<p>Each receipt is checked on the node when this page opens (your browser asks the node directly).</p><button id="c">Check again</button>
 <div class="wrap"><table><thead><tr><th>time (UTC)</th><th>verdict</th><th>client</th><th>miner</th><th>epoch</th><th>receipt</th><th>on the node</th></tr></thead><tbody>${tr || '<tr><td colspan="7">No judged checks recorded yet.</td></tr>'}</tbody></table></div>
 <p>Raw JSON: <a href="/api/ledger">/api/ledger</a>. Try a check: <a href="/">the done-check page</a>.</p>
-<script>document.getElementById("c").onclick=async()=>{for(const a of document.querySelectorAll("a.h")){const s=a.closest("tr").querySelector(".s");s.textContent="checking…";
-try{const r=await fetch(a.dataset.u);if(r.ok){const j=await r.json();s.textContent=(j.delivery&&j.delivery.receipt_hash===a.dataset.u.split("/").pop())?"settled, miner "+(j.delivery.miner_id||"?"):"answer did not match";}else s.textContent=r.status===404?"not yet in a block":"HTTP "+r.status;}catch{s.textContent="node unreachable";}}};</script>
+<script>const ck=async()=>{for(const a of document.querySelectorAll("a.h")){const s=a.closest("tr").querySelector(".s");s.textContent="checking…";
+try{const r=await fetch(a.dataset.u);if(r.ok){const j=await r.json();s.textContent=(j.delivery&&j.delivery.receipt_hash===a.dataset.u.split("/").pop())?"settled, miner "+(j.delivery.miner_id||"?"):"answer did not match";}else s.textContent=r.status===404?"not yet in a block":"HTTP "+r.status;}catch{s.textContent="node unreachable";}}};
+document.getElementById("c").onclick=ck;ck();</script>
 </main></body></html>`;
 }
 
